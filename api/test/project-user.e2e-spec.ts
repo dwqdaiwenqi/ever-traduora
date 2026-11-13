@@ -2,7 +2,7 @@ import { Connection } from 'typeorm';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import './util';
-import { createAndMigrateApp, createTestProject, signupTestUser, TestingProject, TestingUser } from './util';
+import { addTestProjectUser, createAndMigrateApp, createTestProject, signupTestUser, TestingProject, TestingUser } from './util';
 
 describe('ProjectUserController (e2e)', () => {
   let app: INestApplication;
@@ -41,21 +41,7 @@ describe('ProjectUserController (e2e)', () => {
   });
 
   it('/api/v1/projects/:projectId/users/:userId (PATCH) should be able to edit project users if allowed', async () => {
-    await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/invites`)
-      .set('Authorization', `Bearer ${testingUser1.accessToken}`)
-      .send({
-        email: testingUser2.email,
-        role: 'editor',
-      })
-      .expect(201)
-      .expect(res => {
-        expect(res.body.data).toHaveExactProperties(['userId', 'email', 'name', 'role']);
-        expect(res.body.data.userId).toEqual(testingUser2.id);
-        expect(res.body.data.name).toEqual(testingUser2.name);
-        expect(res.body.data.email).toEqual(testingUser2.email);
-        expect(res.body.data.role).toEqual('editor');
-      });
+    await addTestProjectUser(app, testProject1, testingUser2, 'editor');
 
     await request(app.getHttpServer())
       .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser2.id}`)
@@ -91,14 +77,7 @@ describe('ProjectUserController (e2e)', () => {
   });
 
   it('/api/v1/projects/:projectId/users/:userId (PATCH) should not affect the other projects from that user', async () => {
-    await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/invites`)
-      .set('Authorization', `Bearer ${testingUser1.accessToken}`)
-      .send({
-        email: testingUser2.email,
-        role: 'admin',
-      })
-      .expect(201);
+    await addTestProjectUser(app, testProject1, testingUser2, 'admin');
 
     await request(app.getHttpServer())
       .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser1.id}`)
@@ -143,14 +122,7 @@ describe('ProjectUserController (e2e)', () => {
         expect(rolesByProject[testProject1c.id]).toEqual('admin');
       });
 
-    await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1c.id}/invites`)
-      .set('Authorization', `Bearer ${testingUser1.accessToken}`)
-      .send({
-        email: testingUser2.email,
-        role: 'admin',
-      })
-      .expect(201);
+    await addTestProjectUser(app, testProject1c, testingUser2, 'admin');
 
     await request(app.getHttpServer())
       .patch(`/api/v1/projects/${testProject1c.id}/users/${testingUser1.id}`)
@@ -189,14 +161,7 @@ describe('ProjectUserController (e2e)', () => {
   });
 
   it('/api/v1/projects/:projectId/users/:userId (DELETE) should remove project users if allowed', async () => {
-    await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/invites`)
-      .set('Authorization', `Bearer ${testingUser1.accessToken}`)
-      .send({
-        email: testingUser2.email,
-        role: 'editor',
-      })
-      .expect(201);
+    await addTestProjectUser(app, testProject1, testingUser2, 'editor');
 
     await request(app.getHttpServer())
       .delete(`/api/v1/projects/${testProject1.id}/users/${testingUser2.id}`)

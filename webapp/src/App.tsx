@@ -12,7 +12,6 @@ import ForgotPassword from './components/auth/ForgotPassword';
 import ResetPassword from './components/auth/ResetPassword';
 import Callback from './components/auth/Callback';
 import EverIdConfirm from './components/auth/EverIdConfirm';
-import AcceptInvite from './components/auth/AcceptInvite';
 import VerifyEmail from './components/auth/VerifyEmail';
 import UserSettings from './components/auth/UserSettings';
 
@@ -22,8 +21,6 @@ import ProjectContainer from './components/projects/ProjectContainer';
 import ProjectLocales from './components/projects/ProjectLocales';
 import TranslationsList from './components/projects/TranslationsList';
 import TermsList from './components/projects/TermsList';
-import LabelsList from './components/projects/LabelsList';
-import TeamOverview from './components/projects/TeamOverview';
 import ApiClientsOverview from './components/projects/ApiClientsOverview';
 import ImportContainer from './components/projects/ImportContainer';
 import ExportContainer from './components/projects/ExportContainer';
@@ -68,7 +65,6 @@ export default function App() {
         <Route path="/auth/everid/confirm" element={<NoAuthGuard><EverIdConfirm /></NoAuthGuard>} />
 
         {/* Protected auth routes */}
-        <Route path="/accept-invite" element={<AuthGuard><AcceptInvite /></AuthGuard>} />
         <Route path="/verify-email" element={<AuthGuard><VerifyEmail /></AuthGuard>} />
         <Route path="/user-settings" element={<AuthGuard><UserSettings /></AuthGuard>} />
 
@@ -79,8 +75,6 @@ export default function App() {
           <Route path="translations" element={<ProjectLocales />} />
           <Route path="translations/:localeCode" element={<TranslationsList />} />
           <Route path="terms" element={<TermsList />} />
-          <Route path="labels" element={<LabelsList />} />
-          <Route path="team" element={<TeamOverview />} />
           <Route path="api" element={<ApiClientsOverview />} />
           <Route path="import" element={<ImportContainer />} />
           <Route path="export" element={<ExportContainer />} />

@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Select, Space, Popconfirm, Alert, Modal, Form, Input, Tag, Typography } from 'antd';
+import { Table, Button, Space, Popconfirm, Alert, Modal, Form, Input, Tag, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useProjectClientsStore } from '../../stores/project-clients.store';
-import { ProjectRole } from '../../models';
 import type { ProjectClient } from '../../models';
 
 const { Text } = Typography;
 
-const roleOptions = Object.values(ProjectRole).map(r => ({ value: r, label: r }));
-
 export default function ApiClientsOverview() {
   const { currentProject } = useProjectsStore();
-  const { clients, isLoading, errorMessage, getProjectClients, addProjectClient, updateProjectClient, removeProjectClient, clearMessages } = useProjectClientsStore();
+  const { clients, isLoading, errorMessage, getProjectClients, addProjectClient, removeProjectClient, clearMessages } = useProjectClientsStore();
   const [addModal, setAddModal] = useState(false);
   const [newClientSecret, setNewClientSecret] = useState<{ id: string; secret: string } | null>(null);
   const [form] = Form.useForm();
@@ -22,10 +19,10 @@ export default function ApiClientsOverview() {
     return () => clearMessages();
   }, [currentProject?.id]);
 
-  const handleAdd = async (values: { name: string; role: ProjectRole }) => {
+  const handleAdd = async (values: { name: string }) => {
     if (!currentProject) return;
     try {
-      const client = await addProjectClient(currentProject.id, values.name, values.role);
+      const client = await addProjectClient(currentProject.id, values.name);
       if (client.secret) {
         setNewClientSecret({ id: client.id, secret: client.secret });
         setAddModal(false);
@@ -45,20 +42,6 @@ export default function ApiClientsOverview() {
 
   const columns = [
     { title: '名称', dataIndex: 'name', key: 'name' },
-    {
-      title: '角色',
-      dataIndex: 'role',
-      key: 'role',
-      render: (role: ProjectRole, record: ProjectClient) => (
-        <Select
-          value={role}
-          options={roleOptions}
-          onChange={newRole => currentProject && updateProjectClient(currentProject.id, record.id, newRole)}
-          style={{ width: 100 }}
-          size="small"
-        />
-      ),
-    },
     {
       title: '客户端 ID',
       dataIndex: 'id',
@@ -105,9 +88,6 @@ export default function ApiClientsOverview() {
         <Form form={form} layout="vertical" onFinish={handleAdd}>
           <Form.Item label="名称" name="name" rules={[{ required: true }]}>
             <Input placeholder="用于标识此 API 客户端的名称..." />
-          </Form.Item>
-          <Form.Item label="项目角色" name="role" initialValue={ProjectRole.Viewer} rules={[{ required: true }]}>
-            <Select options={roleOptions} />
           </Form.Item>
         </Form>
       </Modal>

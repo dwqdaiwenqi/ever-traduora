@@ -109,16 +109,6 @@ export const EnumColumnType = {
     }
     return { type: 'enum', enum: enumObj, nullable: false, default: defaultValue };
   },
-
-  /**
-   * Type for invite status columns
-   */
-  inviteStatus: <T extends string | number>(enumObj: Record<string, T>, defaultValue: T): ColumnOptions => {
-    if (isDbType(DbType.BETTER_SQLITE3)) {
-      return { type: 'varchar', nullable: false, default: defaultValue };
-    }
-    return { type: 'enum', enum: enumObj, nullable: false, default: defaultValue };
-  },
 };
 
 /**

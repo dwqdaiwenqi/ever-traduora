@@ -28,8 +28,7 @@ describe('TermController (e2e)', () => {
       })
       .expect(201)
       .expect(res => {
-        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'labels', 'date']);
-        expect(res.body.data.labels).toEqual([]);
+        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'date']);
       });
   });
 
@@ -43,9 +42,8 @@ describe('TermController (e2e)', () => {
       })
       .expect(201)
       .expect(res => {
-        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'labels', 'date']);
+        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'date']);
         expect(res.body.data.context).toEqual('Context one');
-        expect(res.body.data.labels).toEqual([]);
       });
   });
 
@@ -64,7 +62,7 @@ describe('TermController (e2e)', () => {
       .expect(200)
       .expect(res => {
         expect(res.body.data).toHaveLength(1);
-        expect(res.body.data[0]).toHaveExactProperties(['id', 'value', 'context', 'labels', 'date']);
+        expect(res.body.data[0]).toHaveExactProperties(['id', 'value', 'context', 'date']);
       });
   });
 
@@ -116,7 +114,7 @@ describe('TermController (e2e)', () => {
       })
       .expect(200)
       .expect(res => {
-        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'labels', 'date']);
+        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'date']);
         expect(res.body.data.id).toEqual(termId);
         expect(res.body.data.value).toEqual('term.two');
         expect(res.body.data.context).toEqual('Context two');
@@ -146,7 +144,7 @@ describe('TermController (e2e)', () => {
       })
       .expect(200)
       .expect(res => {
-        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'labels', 'date']);
+        expect(res.body.data).toHaveExactProperties(['id', 'value', 'context', 'date']);
         expect(res.body.data.id).toEqual(termId);
         expect(res.body.data.value).toEqual('term.two őúüöá 😀👍🍉你好');
         expect(res.body.data.context).toEqual('Context őúüöá 😀👍🍉你好');

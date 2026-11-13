@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import * as request from 'supertest';
 import { Connection } from 'typeorm';
 import { addPipesAndFilters, AppModule } from '../src/app.module';
-import { ProjectRole } from '../src/entity/project-user.entity';
+import { ProjectRole, ProjectUser } from '../src/entity/project-user.entity';
 import { User } from '../src/entity/user.entity';
 import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 
@@ -30,7 +30,7 @@ export interface TestingProjectClient {
 
 /**
  * Signs up a user. Their email counts as verified unless `verifyEmail` is false, as if they had opened the link from
- * the welcome email, so that invites add them to projects directly.
+ * the welcome email.
  */
 export async function signupTestUser(app: INestApplication, email: string = 'e2e@test.com', verifyEmail = true): Promise<TestingUser> {
   const res = await request(app.getHttpServer())
@@ -59,6 +59,14 @@ export async function createTestProject(app: INestApplication, user: TestingUser
     throw new Error('Malformed create project response! Maybe fields need updating?');
   }
   return result;
+}
+
+/**
+ * Adds a user to a project with the given role, straight in the database: there is no invite endpoint any more.
+ */
+export async function addTestProjectUser(app: INestApplication, project: TestingProject, user: TestingUser, role: ProjectRole | string): Promise<void> {
+  const repo = app.get(Connection).getRepository(ProjectUser);
+  await repo.save(repo.create({ project: { id: project.id }, user: { id: user.id }, role: role as ProjectRole }));
 }
 
 export async function createTestProjectClient(

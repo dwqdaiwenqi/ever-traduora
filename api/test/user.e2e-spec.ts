@@ -6,7 +6,7 @@ import { ProjectLocale } from '../src/entity/project-locale.entity';
 import { Project } from '../src/entity/project.entity';
 import { Term } from '../src/entity/term.entity';
 import './util';
-import { createAndMigrateApp, createTestProject, signupTestUser, TestingProject, TestingUser } from './util';
+import { addTestProjectUser, createAndMigrateApp, createTestProject, signupTestUser, TestingProject, TestingUser } from './util';
 
 describe('UserController (e2e)', () => {
   let app: INestApplication;
@@ -166,14 +166,7 @@ describe('UserController (e2e)', () => {
 
   it('/api/v1/users/me (DELETE) should not delete a users account if he is last project user and project has a team', async () => {
     // Add project user (non-admin)
-    await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/invites`)
-      .set('Authorization', `Bearer ${testingUser3.accessToken}`)
-      .send({
-        email: testingUser2.email,
-        role: 'editor',
-      })
-      .expect(201);
+    await addTestProjectUser(app, testProject, testingUser2, 'editor');
 
     // Try to delete account
     await request(app.getHttpServer()).delete('/api/v1/users/me').set('Authorization', `Bearer ${testingUser3.accessToken}`).expect(422);

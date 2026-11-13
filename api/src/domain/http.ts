@@ -15,20 +15,14 @@ import {
   Validate,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { InviteStatus } from '../entity/invite.entity';
 import { ProjectRole } from '../entity/project-user.entity';
 import { IsNotOnlyWhitespace } from '../validators/IsNotOnlyWhitespace';
-import { IsValidLabel } from '../validators/IsValidLabel';
 
 export interface JwtPayload {
   sub: string;
   type: string;
   // Session version of the user when the token was issued; tokens from before versions existed have none (0)
   sv?: number;
-  // Only on tokens of a sign-in with an OpenID Connect provider (e.g. Ever ID): the provider's session, which a
-  // back-channel logout ends, and the token's own id. Tokens of other sign-ins have neither.
-  sid?: string;
-  jti?: string;
 }
 
 export enum GrantType {
@@ -150,33 +144,6 @@ export class ProjectUserDTO {
   role: ProjectRole;
 }
 
-export class ProjectInviteDto {
-  @ApiProperty()
-  id: string;
-  @ApiProperty({ enum: InviteStatus })
-  status: InviteStatus;
-  @ApiProperty()
-  email: string;
-  @ApiProperty({ enum: ProjectRole })
-  role: ProjectRole;
-}
-
-export class ProjectInviteCreatedDto extends ProjectInviteDto {
-  @ApiProperty({ description: 'Sign-up link for the invitee, also sent by email. Share it only with the invited person.' })
-  inviteUrl: string;
-}
-
-export class ProjectInviteAddedUserDto {
-  @ApiProperty()
-  userId: string;
-  @ApiProperty()
-  name: string;
-  @ApiProperty()
-  email: string;
-  @ApiProperty({ enum: ProjectRole })
-  role: ProjectRole;
-}
-
 export class ProjectTermDTO {
   @ApiProperty()
   id: string;
@@ -187,18 +154,7 @@ export class ProjectTermDTO {
   })
   context: string | null;
   @ApiProperty()
-  labels: ProjectLabelDTO[];
-  @ApiProperty()
   date: AccessDatesDTO;
-}
-
-export class ProjectLabelDTO {
-  @ApiProperty()
-  id: string;
-  @ApiProperty()
-  value: string;
-  @ApiProperty()
-  color: string;
 }
 
 export class ProjectStatsDTO {
@@ -245,8 +201,6 @@ export class TermTranslationDTO {
   @ApiProperty()
   value: string;
   @ApiProperty()
-  labels: ProjectLabelDTO[];
-  @ApiProperty()
   date: AccessDatesDTO;
 }
 
@@ -268,10 +222,6 @@ export class AuthProviderDTO {
   url: string;
   @ApiProperty()
   redirectUrl: string;
-  @ApiPropertyOptional({ description: 'Scopes to request (OpenID Connect providers only)' })
-  scope?: string;
-  @ApiPropertyOptional({ description: 'Whether the authorization request must use PKCE, state and nonce (OpenID Connect providers only)' })
-  pkce?: boolean;
 }
 
 export class ProjectClientWithSecretDTO {
@@ -369,16 +319,6 @@ export class ProjectTermResponse extends ServiceApiResponse<ProjectTermDTO> {
   data: ProjectTermDTO;
 }
 
-export class ListProjectLabelsResponse extends ServiceApiResponse<ProjectLabelDTO[]> {
-  @ApiProperty({ type: ProjectLabelDTO, isArray: true })
-  data: ProjectLabelDTO[];
-}
-
-export class ProjectLabelResponse extends ServiceApiResponse<ProjectLabelDTO> {
-  @ApiProperty()
-  data: ProjectLabelDTO;
-}
-
 export class ListProjectTermsResponse extends ServiceApiResponse<ProjectTermDTO[]> {
   @ApiProperty({ type: ProjectTermDTO, isArray: true })
   data: ProjectTermDTO[];
@@ -399,21 +339,6 @@ export class ProjectUserResponse extends ServiceApiResponse<ProjectUserDTO> {
   data: ProjectUserDTO;
 }
 
-export class ListInviteUsersResponse extends ServiceApiResponse<ProjectInviteDto[]> {
-  @ApiProperty({ type: ProjectInviteDto, isArray: true })
-  data: ProjectInviteDto[];
-}
-
-export class ProjectInviteResponse extends ServiceApiResponse<ProjectInviteDto> {
-  @ApiProperty()
-  data: ProjectInviteDto;
-}
-
-export class ProjectInviteCreatedResponse extends ServiceApiResponse<ProjectInviteCreatedDto | ProjectInviteAddedUserDto> {
-  @ApiProperty()
-  data: ProjectInviteCreatedDto | ProjectInviteAddedUserDto;
-}
-
 export class SignupRequest {
   @ApiProperty({ minLength: 8, maxLength: 255 })
   @Length(2, 255)
@@ -427,19 +352,6 @@ export class SignupRequest {
   @ApiProperty({ minLength: 8, maxLength: 255 })
   @Length(8, 255)
   password: string;
-
-  @ApiPropertyOptional({ description: 'Token from the invitation link, required when the email has a pending invitation' })
-  @IsOptional()
-  @IsString()
-  @Length(1, 255)
-  inviteToken?: string;
-}
-
-export class AcceptInviteRequest {
-  @ApiProperty({ description: 'Token from the invitation link' })
-  @IsString()
-  @Length(1, 255)
-  inviteToken: string;
 }
 
 export class VerifyEmailRequest {
@@ -461,19 +373,7 @@ export class VerifyEmailResponse extends ServiceApiResponse<VerifiedEmailDto> {
   data: VerifiedEmailDto;
 }
 
-export class AcceptedInviteDto {
-  @ApiProperty()
-  projectId: string;
-  @ApiProperty({ enum: ProjectRole })
-  role: ProjectRole;
-}
-
-export class AcceptInviteResponse extends ServiceApiResponse<AcceptedInviteDto> {
-  @ApiProperty()
-  data: AcceptedInviteDto;
-}
-
-// A provider slug, e.g. 'google' or 'everid'
+// A provider slug, e.g. 'google'
 const PROVIDER_SLUG = /^[a-z0-9-]{1,32}$/;
 
 export class AuthenticateRequest {
@@ -512,37 +412,10 @@ export class AuthenticateRequest {
   @Matches(PROVIDER_SLUG)
   @IsOptional()
   provider?: string;
-
-  @IsString()
-  @MaxLength(2048)
-  @IsOptional()
-  state?: string;
-
-  @IsString()
-  @MaxLength(512)
-  @IsOptional()
-  nonce?: string;
-
-  @Length(43, 128)
-  @IsOptional()
-  code_verifier?: string;
-}
-
-export class InviteUserRequest {
-  @IsEmail()
-  email: string;
-
-  @IsEnum(ProjectRole)
-  role: ProjectRole;
 }
 
 export class UpdateProjectUserRequest {
   @ApiProperty({ enum: ProjectRole })
-  @IsEnum(ProjectRole)
-  role: ProjectRole;
-}
-
-export class UpdateProjectInviteRequest {
   @IsEnum(ProjectRole)
   role: ProjectRole;
 }
@@ -630,30 +503,6 @@ export class UpdateProjectRequest {
   @IsOptional()
   @Length(0, 255)
   description: string | undefined;
-}
-
-export class AddLabelRequest {
-  @ApiProperty({ minLength: 1, maxLength: 255 })
-  @Length(1, 255)
-  @Validate(IsValidLabel)
-  value: string;
-
-  @ApiProperty({ minLength: 7, maxLength: 7 })
-  @Length(7, 7)
-  @Validate(IsHexColor)
-  color: string;
-}
-
-export class UpdateLabelRequest {
-  @ApiProperty({ minLength: 1, maxLength: 255 })
-  @Length(1, 255)
-  @Validate(IsValidLabel)
-  value: string;
-
-  @ApiProperty({ minLength: 7, maxLength: 7 })
-  @Length(7, 7)
-  @Validate(IsHexColor)
-  color: string;
 }
 
 export class AddTermRequest {
@@ -758,120 +607,4 @@ export class ProviderSignInRequest {
   @Matches(PROVIDER_SLUG)
   @IsOptional()
   provider?: string;
-
-  @ApiPropertyOptional({ description: 'The state of the authorization request (OpenID Connect providers)' })
-  @IsString()
-  @MaxLength(2048)
-  @IsOptional()
-  state?: string;
-
-  @ApiPropertyOptional({ description: 'The nonce of the authorization request (OpenID Connect providers)' })
-  @IsString()
-  @MaxLength(512)
-  @IsOptional()
-  nonce?: string;
-
-  @ApiPropertyOptional({ description: 'The PKCE code verifier of the authorization request (OpenID Connect providers)' })
-  @Length(43, 128)
-  @IsOptional()
-  code_verifier?: string;
-}
-
-export class ProviderSignupConfirmRequest {
-  @ApiProperty({ description: 'The sealed record from the signup_confirmation_required answer' })
-  @IsString()
-  @MaxLength(8192)
-  pending: string;
-
-  @ApiPropertyOptional({ description: 'Ids of the pending invitations to accept; none when absent', isArray: true, type: String })
-  @IsArray()
-  @ArrayMaxSize(100)
-  @IsString({ each: true })
-  @IsOptional()
-  acceptInvites?: string[];
-}
-
-export class ConnectIdentityRequest {
-  @ApiProperty({ description: 'The authorization code from the provider callback' })
-  @IsString()
-  @MaxLength(4096)
-  code: string;
-
-  @ApiPropertyOptional({ description: 'The sign-in provider; everid when absent' })
-  @Matches(PROVIDER_SLUG)
-  @IsOptional()
-  provider?: string;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @MaxLength(2048)
-  @IsOptional()
-  state?: string;
-
-  @ApiProperty()
-  @IsString()
-  @MaxLength(512)
-  nonce: string;
-
-  @ApiProperty()
-  @Length(43, 128)
-  code_verifier: string;
-}
-
-export class ConnectIdentityConfirmRequest {
-  @ApiProperty({ description: 'The sealed record from the connect answer' })
-  @IsString()
-  @MaxLength(8192)
-  pending: string;
-}
-
-export class BackchannelLogoutRequest {
-  @ApiProperty({ description: 'The logout token posted by the OpenID Connect issuer' })
-  @IsString()
-  @MaxLength(16384)
-  logout_token: string;
-}
-
-export class IdentityDTO {
-  @ApiProperty()
-  id: string;
-  @ApiProperty({ description: 'The provider slug, e.g. everid' })
-  provider: string;
-  @ApiProperty({ description: "The provider's email when the identity was connected" })
-  email: string;
-  @ApiProperty({ enum: ['explicit', 'jit', 'provisioned'] })
-  linkMethod: string;
-  @ApiProperty()
-  linkedAt: Date;
-  @ApiPropertyOptional()
-  lastLoginAt: Date | null;
-}
-
-export class ListIdentitiesResponse extends ServiceApiResponse<IdentityDTO[]> {
-  @ApiProperty({ type: IdentityDTO, isArray: true })
-  data: IdentityDTO[];
-}
-
-export class IdentityResponse extends ServiceApiResponse<IdentityDTO> {
-  @ApiProperty()
-  data: IdentityDTO;
-}
-
-export class ConnectEmailsDTO {
-  @ApiProperty({ description: 'The email of the signed-in account' })
-  account: string;
-  @ApiProperty({ description: 'The email the provider reports' })
-  everId: string;
-}
-
-export class ConnectIdentityDTO {
-  @ApiProperty({ description: 'Sealed record to confirm the connection with' })
-  pending: string;
-  @ApiProperty()
-  emails: ConnectEmailsDTO;
-}
-
-export class ConnectIdentityResponse extends ServiceApiResponse<ConnectIdentityDTO> {
-  @ApiProperty()
-  data: ConnectIdentityDTO;
 }

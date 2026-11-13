@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Input, Modal, Form, Space, Popconfirm, Alert, Tag } from 'antd';
+import { Table, Button, Input, Modal, Form, Space, Popconfirm, Alert } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useTermsStore } from '../../stores/terms.store';
-import { useProjectLabelsStore } from '../../stores/project-labels.store';
-import LabelTag from '../shared/LabelTag';
-import type { Term, Label } from '../../models';
+import type { Term } from '../../models';
 
 export default function TermsList() {
   const { currentProject } = useProjectsStore();
   const { terms, isLoading, errorMessage, getTerms, createTerm, updateTerm, deleteTerm, clearMessages } = useTermsStore();
-  const { labels, getProjectLabels } = useProjectLabelsStore();
   const [search, setSearch] = useState('');
   const [newTermModal, setNewTermModal] = useState(false);
   const [form] = Form.useForm();
@@ -18,7 +15,6 @@ export default function TermsList() {
   useEffect(() => {
     if (currentProject) {
       getTerms(currentProject.id);
-      getProjectLabels(currentProject.id);
     }
     return () => clearMessages();
   }, [currentProject?.id]);
@@ -81,12 +77,6 @@ export default function TermsList() {
           }}
         />
       ),
-    },
-    {
-      title: '标签',
-      dataIndex: 'labels',
-      key: 'labels',
-      render: (lbls: Label[]) => lbls.map(l => <LabelTag key={l.id} label={l} />),
     },
     {
       title: '操作',

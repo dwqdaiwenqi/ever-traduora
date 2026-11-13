@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { termsApi } from '../api/terms';
 import { errorToMessage } from '../utils/api-error';
-import type { Term, Label } from '../models';
+import type { Term } from '../models';
 
 interface TermsState {
   terms: Term[];
@@ -12,8 +12,6 @@ interface TermsState {
   createTerm: (projectId: string, value: string, context?: string) => Promise<void>;
   updateTerm: (projectId: string, termId: string, value: string, context?: string) => Promise<void>;
   deleteTerm: (projectId: string, termId: string) => Promise<void>;
-  labelTerm: (termId: string, label: Label) => void;
-  unlabelTerm: (termId: string, label: Label) => void;
   clearMessages: () => void;
   reset: () => void;
 }
@@ -72,18 +70,6 @@ export const useTermsStore = create<TermsState>((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
-  },
-
-  labelTerm: (termId, label) => {
-    set(state => ({
-      terms: state.terms.map(v => v.id === termId ? { ...v, labels: [...v.labels, label] } : v),
-    }));
-  },
-
-  unlabelTerm: (termId, label) => {
-    set(state => ({
-      terms: state.terms.map(v => v.id === termId ? { ...v, labels: v.labels.filter(l => l.id !== label.id) } : v),
-    }));
   },
 
   clearMessages: () => set({ errorMessage: undefined }),

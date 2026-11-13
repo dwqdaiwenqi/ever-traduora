@@ -81,13 +81,12 @@ export default class TranslationController {
 
     await this.termRepo.manager.transaction(async entityManager => {
       await entityManager.save(projectLocale);
-      const terms = await entityManager.find(Term, { where: { project: { id: projectId } }, relations: ['labels'] });
+      const terms = await entityManager.find(Term, { where: { project: { id: projectId } } });
       const translations = terms.map(term =>
         this.translationRepo.create({
           projectLocale: projectLocale,
           term: term,
           value: '',
-          labels: term.labels,
         }),
       );
       await entityManager.save(translations);
@@ -141,9 +140,9 @@ export default class TranslationController {
               id: projectLocale.id,
             },
           },
-          relations: ['term', 'labels'],
+          relations: ['term'],
         });
-        const result = translations.filter(t => !!t.term).map(t => ({ termId: t.term.id, value: t.value, labels: t.labels, date: t.date }));
+        const result = translations.filter(t => !!t.term).map(t => ({ termId: t.term.id, value: t.value, date: t.date }));
         return { data: result };
       } catch (error) {
         throw new NotFoundException('project translation not found');
@@ -185,7 +184,6 @@ export default class TranslationController {
             project: { id: projectId },
             id: payload.termId,
           },
-          relations: ['labels'],
         });
         let translation = await this.translationRepo.findOne({
           where: {
@@ -194,7 +192,6 @@ export default class TranslationController {
               id: projectLocale.id,
             },
           },
-          relations: ['labels'],
         });
         if (translation) {
           translation.value = payload.value;
@@ -203,7 +200,6 @@ export default class TranslationController {
             value: payload.value,
             projectLocale,
             term,
-            labels: term.labels, // Copy term labels on creation
           });
         }
 
@@ -212,7 +208,6 @@ export default class TranslationController {
           data: {
             termId: term.id,
             value: translation.value,
-            labels: translation.labels,
             date: translation.date,
           },
         };

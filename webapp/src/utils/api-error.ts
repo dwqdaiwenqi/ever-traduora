@@ -35,11 +35,9 @@ export function errorToMessage(error: any, action = ''): string {
     return action === 'ImportLocale' ? '要导入的文件格式错误或不正确，请检查文件是否有效后重试。' : '请求有误，请检查填写的内容后重试。';
   } else if (domainCode === 'AlreadyExists') {
     if (action === 'Signup') return '该邮箱已被注册，请使用其他邮箱。';
-    if (action === 'InviteProjectUser') return '该用户已是项目团队成员';
     return '该值已存在，请使用其他值。';
   } else if (status === 404) {
     if (action === 'ResetPassword' || action === 'Login') return '找不到使用该邮箱的用户，请检查邮箱是否输入正确。';
-    if (action === 'InviteProjectUser') return '找不到使用该邮箱的用户，该用户是否已在 Traduora 注册？';
     return '未找到所请求的资源';
   } else if (status === 422) {
     if (action === 'DeleteAccount') return '无法删除你的账号，因为你是一个或多个项目的唯一管理员。请先为这些项目指定其他管理员，或先删除这些项目，然后重试。';

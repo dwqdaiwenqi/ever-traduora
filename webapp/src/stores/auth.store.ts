@@ -24,7 +24,7 @@ interface AuthState {
   getUserInfo: () => Promise<void>;
   getProviders: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, inviteToken?: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
   logout: (reason?: string) => void;
   mustLogin: (redirectTo: string) => void;
   receiveToken: (accessToken: string, navigate: (path: string, opts?: { replace?: boolean }) => void) => Promise<void>;
@@ -35,7 +35,7 @@ interface AuthState {
   deleteAccount: () => Promise<void>;
   redirectToAuthProvider: (provider: Provider, options?: { intent?: 'signin' | 'connect' }) => Promise<void>;
   handleAuthCallback: (code: string, state: string | null, navigate: (path: string) => void) => Promise<void>;
-  confirmProviderSignup: (acceptInvites: string[], navigate: (path: string) => void) => Promise<void>;
+  confirmProviderSignup: (navigate: (path: string) => void) => Promise<void>;
   cancelProviderSignup: (navigate: (path: string) => void) => void;
   handleIdentityConnectCallback: (payload: { code: string; provider: string; state: string; nonce: string; code_verifier: string }, navigate: (path: string) => void) => Promise<void>;
   confirmIdentityConnect: () => Promise<void>;
@@ -43,7 +43,6 @@ interface AuthState {
   getIdentities: () => Promise<void>;
   deleteIdentity: (id: string) => Promise<void>;
   clearMessages: () => void;
-  acceptInvite: (inviteToken: string, navigate: (path: string) => void) => Promise<string>;
   verifyEmail: (token: string) => Promise<{ email: string; emailVerified: boolean }>;
   resendVerificationEmail: () => Promise<void>;
 }
@@ -107,10 +106,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  signup: async (name, email, password, inviteToken) => {
+  signup: async (name, email, password) => {
     set({ isLoading: true });
     try {
-      const user = await authApi.signup({ name, email, password, inviteToken });
+      const user = await authApi.signup({ name, email, password });
       setToken(user.accessToken);
       set({ isAuthenticated: true, user });
     } catch (error) {
@@ -253,7 +252,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  confirmProviderSignup: async (acceptInvites, navigate) => {
+  confirmProviderSignup: async (navigate) => {
     const pending = get().pendingSignup;
     if (!pending) {
       set({ errorMessage: '注册已过期,请重新使用 Ever ID 登录。', pendingSignup: undefined });
@@ -262,7 +261,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     set({ isLoading: true });
     try {
-      const user = await authApi.confirmProviderSignup(pending.pending, acceptInvites);
+      const user = await authApi.confirmProviderSignup(pending.pending);
       set({ pendingSignup: undefined });
       await get().receiveToken(user.accessToken, navigate);
     } catch (error) {
@@ -337,19 +336,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearMessages: () => {
     set({ errorMessage: undefined, statusMessage: undefined });
-  },
-
-  acceptInvite: async (inviteToken, navigate) => {
-    set({ isLoading: true });
-    try {
-      const result = await authApi.acceptInvite(inviteToken);
-      return result.projectId;
-    } catch (error) {
-      set({ errorMessage: errorToMessage(error, 'AcceptInvite') });
-      throw error;
-    } finally {
-      set({ isLoading: false });
-    }
   },
 
   verifyEmail: async (token) => {

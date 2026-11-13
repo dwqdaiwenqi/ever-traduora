@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Checkbox, Alert } from 'antd';
+import React, { useEffect } from 'react';
+import { Button, Alert } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../shared/Logo';
 import { useAuthStore } from '../../stores/auth.store';
@@ -7,7 +7,6 @@ import { useAuthStore } from '../../stores/auth.store';
 export default function EverIdConfirm() {
   const navigate = useNavigate();
   const { pendingSignup, confirmProviderSignup, cancelProviderSignup, isLoading, errorMessage, clearMessages } = useAuthStore();
-  const [acceptedInvites, setAcceptedInvites] = useState<string[]>([]);
 
   useEffect(() => () => clearMessages(), []);
 
@@ -20,10 +19,6 @@ export default function EverIdConfirm() {
       </div>
     );
   }
-
-  const toggleInvite = (id: string) => {
-    setAcceptedInvites(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -40,24 +35,9 @@ export default function EverIdConfirm() {
           <label>邮箱地址</label>
           <input className="ant-input" type="email" value={pendingSignup.email} readOnly style={{ width: '100%', marginTop: 4 }} />
         </div>
-        {pendingSignup.invites && pendingSignup.invites.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ marginBottom: 8 }}>你已受邀加入以下项目。请勾选要接受的邀请:</p>
-            {pendingSignup.invites.map(invite => (
-              <div key={invite.id} style={{ marginBottom: 4 }}>
-                <Checkbox
-                  checked={acceptedInvites.includes(invite.id)}
-                  onChange={() => toggleInvite(invite.id)}
-                >
-                  {invite.projectName}
-                </Checkbox>
-              </div>
-            ))}
-          </div>
-        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
           <Button onClick={() => cancelProviderSignup(navigate)}>取消</Button>
-          <Button type="primary" loading={isLoading} onClick={() => confirmProviderSignup(acceptedInvites, navigate)}>
+          <Button type="primary" loading={isLoading} onClick={() => confirmProviderSignup(navigate)}>
             确认创建账号
           </Button>
         </div>

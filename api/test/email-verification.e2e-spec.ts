@@ -2,23 +2,20 @@ import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as request from 'supertest';
 import { Connection } from 'typeorm';
-import { Invite, InviteStatus } from '../src/entity/invite.entity';
 import { User } from '../src/entity/user.entity';
 import { AuthService } from '../src/services/auth.service';
 import MailService from '../src/services/mail.service';
 import { UserService } from '../src/services/user.service';
 import './util';
-import { createAndMigrateApp, createTestProject, signupTestUser, TestingProject, TestingUser } from './util';
+import { createAndMigrateApp, signupTestUser, TestingUser } from './util';
 
 describe('Email verification (e2e)', () => {
   let app: INestApplication;
   let admin: TestingUser;
-  let project: TestingProject;
 
   beforeEach(async () => {
     app = await createAndMigrateApp();
     admin = await signupTestUser(app, 'admin@test.com');
-    project = await createTestProject(app, admin);
   });
 
   // The verification link from the last welcome or verification email
@@ -58,15 +55,6 @@ describe('Email verification (e2e)', () => {
     const idToken = new JwtService({ secret: 'provider-test' }).sign({ email, name: 'Provider User', ...claims });
     jest.spyOn(app.get(AuthService), 'getTokenFromGoogle').mockResolvedValue({ id_token: idToken });
     return request(app.getHttpServer()).post('/api/v1/auth/signup-provider').send({ code: 'provider-code' });
-  };
-  const invite = (email: string, role = 'editor') =>
-    request(app.getHttpServer())
-      .post(`/api/v1/projects/${project.id}/invites`)
-      .set('Authorization', `Bearer ${admin.accessToken}`)
-      .send({ email, role });
-  const projectRole = async (user: { accessToken: string }) => {
-    const res = await request(app.getHttpServer()).get(`/api/v1/projects/${project.id}`).set('Authorization', `Bearer ${user.accessToken}`);
-    return res.status === 200 ? res.body.data.role : undefined;
   };
   const emailVerified = async (user: { accessToken: string }) => (await me(user).expect(200)).body.data.emailVerified;
   const users = () => app.get(Connection).getRepository(User);
@@ -180,10 +168,8 @@ describe('Email verification (e2e)', () => {
     expect(await emailVerified(user)).toBe(false);
   });
 
-  it('should verify the email, accept pending invites and end earlier sessions with a password reset', async () => {
+  it('should verify the email and end earlier sessions with a password reset', async () => {
     const user = await signupTestUser(app, 'new-user@test.com', false);
-    await invite('new-user@test.com', 'viewer').expect(201);
-
     await resetPassword(user.email, 'a-new-password');
 
     // e.g. the sessions of someone who registered this email before its owner, even one opened just before
@@ -192,7 +178,6 @@ describe('Email verification (e2e)', () => {
       body: { access_token: accessToken },
     } = await login(user.email, 'a-new-password').expect(200);
     expect(await emailVerified({ accessToken })).toBe(true);
-    expect(await projectRole({ accessToken })).toEqual('viewer');
   });
 
   it('should accept tokens from before session versions until the sessions end', async () => {
@@ -251,7 +236,6 @@ describe('Email verification (e2e)', () => {
     it('should remove the password and end the sessions of an unverified account it claims', async () => {
       // Someone registered the owner's email with a password they chose
       const squatter = await signupTestUser(app, 'member@test.com', false);
-      await invite('member@test.com').expect(201);
 
       const {
         body: { data: owner },
@@ -261,67 +245,6 @@ describe('Email verification (e2e)', () => {
       await me(squatter).expect(401);
       await login('member@test.com').expect(422);
       expect(await emailVerified(owner)).toBe(true);
-      expect(await projectRole(owner)).toEqual('editor');
-    });
-  });
-
-  describe('inviting an existing account', () => {
-    it('should add an account with a verified email directly', async () => {
-      const user = await signupTestUser(app, 'member@test.com');
-      await invite('member@test.com')
-        .expect(201)
-        .expect(res => expect(res.body.data).toHaveExactProperties(['userId', 'email', 'name', 'role']));
-      expect(await projectRole(user)).toEqual('editor');
-    });
-
-    it('should only send an invite link to an account with an unverified email', async () => {
-      // e.g. someone registered this email before it was invited
-      const squatter = await signupTestUser(app, 'member@test.com', false);
-
-      const {
-        body: { data: created },
-      } = await invite('member@test.com')
-        .expect(201)
-        .expect(res => expect(res.body.data).toHaveExactProperties(['id', 'email', 'status', 'role', 'inviteUrl']));
-      expect(await projectRole(squatter)).toBeUndefined();
-
-      // Without the link the account gets nothing; the one who reads the invitation email accepts it
-      await request(app.getHttpServer())
-        .post('/api/v1/auth/accept-invite')
-        .set('Authorization', `Bearer ${squatter.accessToken}`)
-        .send({ inviteToken: '0'.repeat(64) })
-        .expect(404);
-      await request(app.getHttpServer())
-        .post('/api/v1/auth/accept-invite')
-        .set('Authorization', `Bearer ${squatter.accessToken}`)
-        .send({ inviteToken: new URL(created.inviteUrl).searchParams.get('invite') })
-        .expect(200);
-      expect(await projectRole(squatter)).toEqual('editor');
-    });
-
-    it('should accept pending invites once the email is verified', async () => {
-      captureVerificationLinks();
-      const user = await signupTestUser(app, 'member@test.com', false);
-      const linkFromWelcomeEmail = lastVerifyUrl;
-
-      await invite('member@test.com', 'viewer').expect(201);
-      expect(await projectRole(user)).toBeUndefined();
-
-      await verify(user, tokenOf(linkFromWelcomeEmail)).expect(200);
-      expect(await projectRole(user)).toEqual('viewer');
-      const invites = await app
-        .get(Connection)
-        .getRepository(Invite)
-        .find({ where: { email: 'member@test.com' } });
-      expect(invites.map(i => i.status)).toEqual([InviteStatus.Accepted]);
-    });
-
-    it('should not invite an unverified account that is already a member', async () => {
-      const user = await signupTestUser(app, 'member@test.com');
-      await invite('member@test.com').expect(201);
-      await users().update({ id: user.id }, { emailVerified: false });
-
-      await invite('member@test.com').expect(409);
     });
   });
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -37,7 +37,6 @@ export default class TermController {
     // Use query builder for consistent sorting across databases
     const queryBuilder = this.termRepo
       .createQueryBuilder('term')
-      .leftJoinAndSelect('term.labels', 'label')
       .where('term.project.id = :projectId', { projectId: membership.project.id });
 
     // Apply database-specific collation for consistent lexical ordering
@@ -49,7 +48,6 @@ export default class TermController {
       id: t.id,
       value: t.value,
       context: t.context,
-      labels: t.labels,
       date: t.date,
     }));
 
@@ -58,46 +56,6 @@ export default class TermController {
     };
   }
 
-  @Get('/filter-by-label')
-  @ApiOperation({ summary: 'Filter terms by a single label' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ListProjectTermsResponse })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async findByLabel(@Req() req, @Param('projectId') projectId: string, @Query('labelId') labelId: string) {
-    const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ViewTerm);
-
-    if (!labelId) {
-      return {
-        data: [],
-        message: 'No label provided for filtering',
-      };
-    }
-
-    const queryBuilder = this.termRepo
-      .createQueryBuilder('term')
-      .leftJoinAndSelect('term.labels', 'label')
-      .where('term.project.id = :projectId', { projectId: membership.project.id })
-      .andWhere('label.id = :labelId', { labelId });
-
-    // Apply database-specific collation for consistent lexical ordering
-    queryBuilder.orderBy(getLexicalOrderClause('term.value'), 'ASC');
-
-    const terms = await queryBuilder.getMany();
-
-    const data = terms.map(t => ({
-      id: t.id,
-      value: t.value,
-      context: t.context,
-      labels: t.labels,
-      date: t.date,
-    }));
-
-    return {
-      data,
-    };
-  }
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Add a new project term' })
@@ -132,7 +90,6 @@ export default class TermController {
           projectLocale: projectLocale,
           term: term,
           value: '',
-          labels: [],
         }),
       );
       await entityManager.save(translations);
@@ -145,7 +102,6 @@ export default class TermController {
         id: term.id,
         value: term.value,
         context: term.context,
-        labels: [],
         date: term.date,
       },
     };
@@ -167,14 +123,13 @@ export default class TermController {
 
     await this.termRepo.update({ id: termId }, { value: payload.value, context: payload.context });
 
-    const term = await this.termRepo.findOneOrFail({ where: { id: termId }, relations: ['labels'] });
+    const term = await this.termRepo.findOneOrFail({ where: { id: termId } });
 
     return {
       data: {
         id: term.id,
         value: term.value,
         context: term.context,
-        labels: term.labels,
         date: term.date,
       },
     };

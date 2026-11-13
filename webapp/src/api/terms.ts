@@ -6,10 +6,6 @@ export const termsApi = {
     const res = await apiClient.get<{ data: Term[] }>(`/projects/${projectId}/terms`);
     return res.data.data;
   },
-  fetchFilteredByLabel: async (projectId: string, labelId: string): Promise<Term[]> => {
-    const res = await apiClient.get<{ data: Term[] }>(`/projects/${projectId}/terms/filter-by-label`, { params: { labelId } });
-    return res.data.data;
-  },
   create: async (projectId: string, value: string, context?: string | null): Promise<Term> => {
     const res = await apiClient.post<{ data: Term }>(`/projects/${projectId}/terms`, { value, context });
     return res.data.data;

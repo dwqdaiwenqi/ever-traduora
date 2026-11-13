@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Table, Input, Alert, Space, Button, Progress, Segmented, Tag } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
 import CountryFlag from '../shared/CountryFlag';
-import LabelTag from '../shared/LabelTag';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useTranslationsStore } from '../../stores/translations.store';
 import { useTermsStore } from '../../stores/terms.store';
@@ -100,7 +99,6 @@ export default function TranslationsList() {
             {!isFilled(record.id) && <Tag color="warning" style={{ marginLeft: 8 }}>未填写</Tag>}
           </div>
           {record.context && <div style={{ color: '#888', fontSize: 12 }}>{record.context}</div>}
-          <div>{record.labels.map(l => <LabelTag key={l.id} label={l} />)}</div>
         </div>
       ),
     },

@@ -3,7 +3,7 @@ import { config } from '../config';
 import { DbType } from '../utils/database-type-helper';
 
 export class fixCaseInsensitiveCollation1575658419248 implements MigrationInterface {
-  tables = ['migrations', 'project_locale', 'translation', 'project_client', 'term', 'project_user', 'plan', 'project', 'user', 'locale', 'invite'];
+  tables = ['migrations', 'project_locale', 'translation', 'project_client', 'term', 'project_user', 'plan', 'project', 'user', 'locale'];
 
   public async up(queryRunner: QueryRunner): Promise<any> {
     switch (config.db.default.type) {

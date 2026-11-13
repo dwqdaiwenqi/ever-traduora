@@ -35,8 +35,6 @@ export default function ProjectContainer() {
   const menuItems = [
     { key: 'translations', label: '翻译', path: 'translations' },
     { key: 'terms', label: '词条', path: 'terms' },
-    { key: 'labels', label: '标签', path: 'labels' },
-    { key: 'team', label: '团队', path: 'team' },
     { key: 'api', label: 'API 客户端', path: 'api' },
     { key: 'import', label: '导入', path: 'import' },
     { key: 'export', label: '导出', path: 'export' },

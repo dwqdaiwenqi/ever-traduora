@@ -1,13 +1,13 @@
+import { createHash, randomBytes } from 'crypto';
 import { config } from '../config';
-import { generateInviteToken, hashInviteToken } from './invite-token';
 
 /**
- * Email verification tokens prove that the account owner can read the account's mailbox: unlike invite links, they are
- * only ever emailed. They are generated and hashed like invite tokens, and only the hash is stored.
+ * Email verification tokens prove that the account owner can read the account's mailbox: they are only ever emailed.
+ * Only their SHA-256 hash is stored.
  */
-export const generateEmailVerificationToken = generateInviteToken;
+export const generateEmailVerificationToken = (): string => randomBytes(32).toString('hex');
 
-export const hashEmailVerificationToken = hashInviteToken;
+export const hashEmailVerificationToken = (token: string): string => createHash('sha256').update(token).digest('hex');
 
 export const verifyEmailUrl = (token: string): string => `${config.virtualHost}/verify-email?token=${token}`;
 

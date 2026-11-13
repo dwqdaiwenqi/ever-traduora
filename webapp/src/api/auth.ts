@@ -91,7 +91,7 @@ export const authApi = {
     const res = await apiClient.post<{ access_token: string }>('/auth/token', { username: email, password, grant_type: 'password' });
     return { accessToken: res.data.access_token };
   },
-  signup: async (data: { name: string; email: string; password: string; inviteToken?: string }) => {
+  signup: async (data: { name: string; email: string; password: string }) => {
     const res = await apiClient.post<{ data: { accessToken: string } & User }>('/auth/signup', data);
     return res.data.data;
   },
@@ -114,8 +114,8 @@ export const authApi = {
     const res = await apiClient.post<{ data: { accessToken: string } & User }>('/auth/signup-provider', data);
     return res.data.data;
   },
-  confirmProviderSignup: async (pending: string, acceptInvites: string[]) => {
-    const res = await apiClient.post<{ data: { accessToken: string } & User }>('/auth/everid/signup-confirm', { pending, acceptInvites });
+  confirmProviderSignup: async (pending: string) => {
+    const res = await apiClient.post<{ data: { accessToken: string } & User }>('/auth/everid/signup-confirm', { pending });
     return res.data.data;
   },
   connectIdentity: async (data: { code: string; provider: string; state: string; nonce: string; code_verifier: string }): Promise<IdentityConnection> => {
@@ -141,10 +141,6 @@ export const authApi = {
   },
   changePassword: async (data: { oldPassword: string; newPassword: string }) => {
     await apiClient.post('/auth/change-password', data);
-  },
-  acceptInvite: async (inviteToken: string): Promise<{ projectId: string; role: string }> => {
-    const res = await apiClient.post<{ data: { projectId: string; role: string } }>('/auth/accept-invite', { inviteToken });
-    return res.data.data;
   },
   verifyEmail: async (token: string): Promise<{ email: string; emailVerified: boolean }> => {
     const res = await apiClient.post<{ data: { email: string; emailVerified: boolean } }>('/auth/verify-email', { token });

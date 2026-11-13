@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Progress, Tag } from 'antd';
+import { Card, Progress } from 'antd';
 import type { Project } from '../../models';
 
 interface Props {
@@ -28,7 +28,6 @@ export default function ProjectCard({ project, onClick }: Props) {
         {' · '}
         <span>{project.localesCount ?? 0} 个语言</span>
       </div>
-      <Tag color="blue" style={{ marginTop: 8 }}>{project.role}</Tag>
     </Card>
   );
 }

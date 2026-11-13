@@ -1,15 +1,11 @@
 import React, { useEffect } from 'react';
 import { Form, Input, Button, Alert, Divider } from 'antd';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../shared/Logo';
 import { useAuthStore } from '../../stores/auth.store';
 
-const inviteOnly = import.meta.env.VITE_INVITE_ONLY === 'true';
-
 export default function Signup() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const inviteToken = searchParams.get('invite') || undefined;
   const { signup, isLoading, errorMessage, clearMessages, providers, getProviders, redirectToAuthProvider } = useAuthStore();
   const [form] = Form.useForm();
 
@@ -20,7 +16,7 @@ export default function Signup() {
 
   const onFinish = async (values: { name: string; email: string; password: string }) => {
     try {
-      await signup(values.name, values.email, values.password, inviteToken);
+      await signup(values.name, values.email, values.password);
       navigate('/projects');
     } catch {
       // error shown via errorMessage
@@ -32,9 +28,6 @@ export default function Signup() {
       <Logo style={{ color: '#1890ff', marginBottom: 32 }} />
       <div style={{ width: 380 }}>
         {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
-        {inviteOnly && !inviteToken && (
-          <Alert type="warning" message="该应用仅允许受邀注册。请通过邀请链接进行注册。" showIcon style={{ marginBottom: 16 }} />
-        )}
         <div style={{ padding: 24, borderRadius: 8, background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,.1)' }}>
           <h4 style={{ fontFamily: 'serif', marginBottom: 20 }}>注册</h4>
           <Form form={form} layout="vertical" onFinish={onFinish}>

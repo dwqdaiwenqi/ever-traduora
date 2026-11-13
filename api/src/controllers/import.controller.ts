@@ -105,7 +105,6 @@ export class ImportController {
         // Find existing terms and determine which terms to create
         const existingTerms = await entityManager.find(Term, {
           where: { project: { id: membership.project.id } },
-          relations: ['labels'],
         });
 
         // Resolve which terms / translations to add or update
@@ -181,7 +180,6 @@ export class ImportController {
           termId: term.id,
           projectLocaleId: projectLocale.id,
           value: translation.translation,
-          labels: term.labels,
         }),
       );
     }

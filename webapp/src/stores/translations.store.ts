@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { sortBy } from 'lodash';
 import { translationsApi } from '../api/translations';
 import { errorToMessage } from '../utils/api-error';
-import type { Locale, ProjectLocale, Translation, Label } from '../models';
+import type { Locale, ProjectLocale, Translation } from '../models';
 
 interface TranslationsState {
   projectLocales: ProjectLocale[];
@@ -17,8 +17,6 @@ interface TranslationsState {
   deleteProjectLocale: (projectId: string, localeCode: string) => Promise<void>;
   getTranslations: (projectId: string, localeCode: string, navigate?: (path: string) => void) => Promise<void>;
   updateTranslation: (projectId: string, localeCode: string, termId: string, value: string) => Promise<void>;
-  labelTranslation: (localeCode: string, termId: string, label: Label) => void;
-  unlabelTranslation: (localeCode: string, termId: string, label: Label) => void;
   clearMessages: () => void;
   reset: () => void;
 }
@@ -116,24 +114,6 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
-  },
-
-  labelTranslation: (localeCode, termId, label) => {
-    set(state => {
-      const forLocale = state.translations[localeCode];
-      if (!forLocale) return state;
-      const updated = forLocale.map(v => v.termId === termId ? { ...v, labels: [...v.labels, label] } : v);
-      return { translations: { ...state.translations, [localeCode]: updated } };
-    });
-  },
-
-  unlabelTranslation: (localeCode, termId, label) => {
-    set(state => {
-      const forLocale = state.translations[localeCode];
-      if (!forLocale) return state;
-      const updated = forLocale.map(v => v.termId === termId ? { ...v, labels: v.labels.filter(l => l.id !== label.id) } : v);
-      return { translations: { ...state.translations, [localeCode]: updated } };
-    });
   },
 
   clearMessages: () => set({ errorMessage: undefined }),
