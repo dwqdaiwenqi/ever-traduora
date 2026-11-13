@@ -49,10 +49,31 @@ export interface Plan {
   maxStrings: string;
 }
 
+export enum ProjectRole {
+  Admin = 'admin',
+  Editor = 'editor',
+  Viewer = 'viewer',
+}
+
+export const projectRoleLabels: Record<ProjectRole, string> = {
+  [ProjectRole.Admin]: '管理员',
+  [ProjectRole.Editor]: '编辑者',
+  [ProjectRole.Viewer]: '只读',
+};
+
+export interface ProjectUser {
+  userId: string;
+  name: string;
+  email: string;
+  role: ProjectRole;
+  isSelf?: boolean;
+}
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
+  role: ProjectRole;
   termsCount: number;
   localesCount: number;
   plan?: Plan;

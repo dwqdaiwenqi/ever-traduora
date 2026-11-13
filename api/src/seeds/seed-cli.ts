@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { AppModule } from '../app.module';
 import { SeedDataService } from './seed-data.service';
 import { config } from '../config';

@@ -5,11 +5,12 @@ import CountryFlag from '../shared/CountryFlag';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useTranslationsStore } from '../../stores/translations.store';
 import { useTermsStore } from '../../stores/terms.store';
+import { ProjectRole } from '../../models';
 import type { Term, Translation } from '../../models';
 
 type Filter = 'all' | 'empty' | 'filled';
 
-function TranslationCell({ initialValue, onSave }: { initialValue: string; onSave: (v: string) => void }) {
+function TranslationCell({ initialValue, onSave, readOnly }: { initialValue: string; onSave: (v: string) => void; readOnly?: boolean }) {
   const [val, setVal] = useState(initialValue);
 
   useEffect(() => {
@@ -19,9 +20,10 @@ function TranslationCell({ initialValue, onSave }: { initialValue: string; onSav
   return (
     <Input.TextArea
       value={val}
+      readOnly={readOnly}
       status={val === '' ? 'warning' : undefined}
       autoSize={{ minRows: 1, maxRows: 4 }}
-      placeholder="未填写，请输入翻译..."
+      placeholder={readOnly ? '未填写' : '未填写，请输入翻译...'}
       onChange={e => setVal(e.target.value)}
       onBlur={() => {
         if (val !== initialValue) onSave(val);
@@ -42,6 +44,7 @@ export default function TranslationsList() {
   const { currentProject, refreshProjectStats } = useProjectsStore();
   const { translations, projectLocales, isLoading, errorMessage, getTranslations, updateTranslation, clearMessages } = useTranslationsStore();
   const { terms, getTerms } = useTermsStore();
+  const readOnly = currentProject?.role === ProjectRole.Viewer;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [pageSize, setPageSize] = useState(100);
@@ -115,6 +118,7 @@ export default function TranslationsList() {
         <TranslationCell
           initialValue={translationMap[record.id]?.value || ''}
           onSave={v => handleUpdate(record.id, v)}
+          readOnly={readOnly}
         />
       ),
     },

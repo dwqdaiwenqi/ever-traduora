@@ -40,6 +40,40 @@ describe('ProjectUserController (e2e)', () => {
       });
   });
 
+  it('/api/v1/projects/:projectId/users (POST) should add a registered user by email if allowed', async () => {
+    await request(app.getHttpServer())
+      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .set('Authorization', `Bearer ${testingUser1.accessToken}`)
+      .send({ email: testingUser2.email, role: 'viewer' })
+      .expect(201)
+      .expect(res => {
+        expect(res.body.data).toHaveExactProperties(['userId', 'email', 'name', 'role']);
+        expect(res.body.data.userId).toEqual(testingUser2.id);
+        expect(res.body.data.role).toEqual('viewer');
+      });
+
+    // already a member
+    await request(app.getHttpServer())
+      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .set('Authorization', `Bearer ${testingUser1.accessToken}`)
+      .send({ email: testingUser2.email, role: 'editor' })
+      .expect(409);
+
+    // unknown email
+    await request(app.getHttpServer())
+      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .set('Authorization', `Bearer ${testingUser1.accessToken}`)
+      .send({ email: 'nobody@test.com', role: 'viewer' })
+      .expect(404);
+
+    // a viewer can not add members
+    await request(app.getHttpServer())
+      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .set('Authorization', `Bearer ${testingUser2.accessToken}`)
+      .send({ email: testingUser3.email, role: 'viewer' })
+      .expect(404); // mapped to 404 to prevent id probing
+  });
+
   it('/api/v1/projects/:projectId/users/:userId (PATCH) should be able to edit project users if allowed', async () => {
     await addTestProjectUser(app, testProject1, testingUser2, 'editor');
 

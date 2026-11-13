@@ -21,22 +21,6 @@ export class projectClientsTable1549981241264 implements MigrationInterface {
           'ALTER TABLE `project_client` ADD CONSTRAINT `FK_aed9d0c639a1d484d38bd3d0d74` FOREIGN KEY (`projectId`) REFERENCES `project`(`id`) ON DELETE CASCADE',
         );
         break;
-      case DbType.BETTER_SQLITE3:
-        await queryRunner.query('PRAGMA foreign_keys = ON');
-
-        await queryRunner.query(
-          `CREATE TABLE IF NOT EXISTS "project_client" (
-            "id" TEXT PRIMARY KEY NOT NULL DEFAULT (hex(randomblob(16))),
-            "name" TEXT NOT NULL,
-            "role" TEXT NOT NULL DEFAULT 'viewer' CHECK ("role" in ('admin', 'editor', 'viewer')),
-            "encrypted_secret" blob NOT NULL,
-            "project_id" TEXT NOT NULL,
-            "date_created" datetime NOT NULL DEFAULT (datetime('now')),
-            "date_modified" datetime NOT NULL DEFAULT (datetime('now')),
-            FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
-          );`,
-        );
-        break;
       default:
         throw new Error('Unknown DB type: ' + config.db.default.type);
     }
@@ -51,9 +35,6 @@ export class projectClientsTable1549981241264 implements MigrationInterface {
       case DbType.MYSQL:
         await queryRunner.query('ALTER TABLE `project_client` DROP FOREIGN KEY `FK_aed9d0c639a1d484d38bd3d0d74`');
         await queryRunner.query('DROP TABLE IF EXISTS `project_client`');
-        break;
-      case DbType.BETTER_SQLITE3:
-        await queryRunner.query('DROP TABLE IF EXISTS "project_client";');
         break;
       default:
         throw new Error(`Unknown DB type: ${config.db.default.type}`);

@@ -3,6 +3,7 @@ import { Outlet, useParams, useNavigate, NavLink } from 'react-router-dom';
 import { Layout, Menu, Spin, Alert, Progress } from 'antd';
 import AppBar from '../shared/AppBar';
 import { useProjectsStore } from '../../stores/projects.store';
+import { ProjectRole } from '../../models';
 
 const { Content, Sider } = Layout;
 
@@ -35,8 +36,9 @@ export default function ProjectContainer() {
   const menuItems = [
     { key: 'translations', label: '翻译', path: 'translations' },
     { key: 'terms', label: '词条', path: 'terms' },
+    { key: 'team', label: '团队', path: 'team' },
     { key: 'api', label: 'API 客户端', path: 'api' },
-    { key: 'import', label: '导入', path: 'import' },
+    ...(currentProject?.role === ProjectRole.Viewer ? [] : [{ key: 'import', label: '导入', path: 'import' }]),
     { key: 'export', label: '导出', path: 'export' },
     { key: 'settings', label: '设置', path: 'settings' },
   ];

@@ -18,10 +18,6 @@ export class fixCaseInsensitiveCollation1575658419248 implements MigrationInterf
         console.log('PostgreSQL uses case-sensitive collation by default, no changes needed');
         // PostgreSQL is case-sensitive by default, no action needed
         break;
-      case DbType.BETTER_SQLITE3:
-        console.log('SQLite uses case-sensitive collation by default, no changes needed');
-        // SQLite is case-sensitive by default, no action needed
-        break;
       default:
         throw new Error(`Unknown DB type: ${config.db.default.type}`);
     }
@@ -40,10 +36,6 @@ export class fixCaseInsensitiveCollation1575658419248 implements MigrationInterf
       case DbType.POSTGRES:
         console.log('PostgreSQL collation revert not needed');
         // No action needed for PostgreSQL
-        break;
-      case DbType.BETTER_SQLITE3:
-        console.log('SQLite collation revert not needed');
-        // No action needed for SQLite
         break;
       default:
         throw new Error(`Unknown DB type: ${config.db.default.type}`);

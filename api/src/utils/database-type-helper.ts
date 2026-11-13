@@ -7,7 +7,6 @@ import { ColumnOptions, ColumnType } from 'typeorm';
 export enum DbType {
   POSTGRES = 'postgres',
   MYSQL = 'mysql',
-  BETTER_SQLITE3 = 'better-sqlite3',
 }
 
 /**
@@ -42,7 +41,6 @@ function getDbColumnType(
   typeMap: {
     postgres?: string | ColumnType;
     mysql?: string | ColumnType;
-    betterSqlite3?: string | ColumnType;
   },
   defaultOptions: Partial<ColumnOptions> = {},
 ): ColumnOptions {
@@ -54,9 +52,6 @@ function getDbColumnType(
       break;
     case DbType.MYSQL:
       type = typeMap.mysql || 'varchar';
-      break;
-    case DbType.BETTER_SQLITE3:
-      type = typeMap.betterSqlite3 || 'varchar';
       break;
     default:
       throw new Error(`Unsupported database type: ${currentDbType}. ` + `Supported types are: ${Object.values(DbType).join(', ')}`);
@@ -73,24 +68,21 @@ export const BinaryColumnType = {
    * Type for encrypted password columns
    */
   encryptedPassword: (): ColumnOptions => {
-    return getDbColumnType(
-      { postgres: 'bytea', mysql: 'binary', betterSqlite3: 'blob' },
-      { nullable: true, ...(isDbType(DbType.MYSQL) ? { length: 60 } : {}) },
-    );
+    return getDbColumnType({ postgres: 'bytea', mysql: 'binary' }, { nullable: true, ...(isDbType(DbType.MYSQL) ? { length: 60 } : {}) });
   },
 
   /**
    * Type for encrypted token columns
    */
   encryptedToken: (): ColumnOptions => {
-    return getDbColumnType({ postgres: 'bytea', mysql: 'binary', betterSqlite3: 'blob' }, { nullable: true });
+    return getDbColumnType({ postgres: 'bytea', mysql: 'binary' }, { nullable: true });
   },
 
   /**
    * Type for encrypted secret columns
    */
   encryptedSecret: (): ColumnOptions => {
-    return getDbColumnType({ postgres: 'bytea', mysql: 'binary', betterSqlite3: 'blob' }, { ...(isDbType(DbType.MYSQL) ? { length: 60 } : {}) });
+    return getDbColumnType({ postgres: 'bytea', mysql: 'binary' }, { ...(isDbType(DbType.MYSQL) ? { length: 60 } : {}) });
   },
 };
 
@@ -104,9 +96,6 @@ export const EnumColumnType = {
    * @param defaultValue Default role value
    */
   projectRole: <T extends string | number>(enumObj: Record<string, T>, defaultValue: T): ColumnOptions => {
-    if (isDbType(DbType.BETTER_SQLITE3)) {
-      return { type: 'varchar', nullable: false, default: defaultValue };
-    }
     return { type: 'enum', enum: enumObj, nullable: false, default: defaultValue };
   },
 };
@@ -119,24 +108,13 @@ export const EnumColumnType = {
 export function getLexicalOrderClause(column: string): string {
   if (isDbType(DbType.POSTGRES)) return `${column} COLLATE "C"`;
   if (isDbType(DbType.MYSQL)) return `${column} COLLATE utf8mb4_bin`;
-  return column; // SQLite default collation is already consistent
+  return column;
 }
 
 /**
  * Timestamp precision for PostgreSQL and MySQL
  */
 const TIMESTAMP_PRECISION = 6;
-
-/**
- * Interface for SQLite PRAGMA table_info column information
- */
-export interface ColumnInfo {
-  name: string;
-  type?: string;
-  notnull?: number;
-  dflt_value?: any;
-  pk?: number;
-}
 
 /**
  * Helper for time column types
@@ -147,7 +125,7 @@ export const TimeColumnType = {
    */
   date: (): ColumnOptions => {
     return getDbColumnType(
-      { postgres: 'timestamp', mysql: 'timestamp', betterSqlite3: 'datetime' },
+      { postgres: 'timestamp', mysql: 'timestamp' },
       { nullable: true, ...(isDbType(DbType.POSTGRES) || isDbType(DbType.MYSQL) ? { precision: TIMESTAMP_PRECISION } : {}) },
     );
   },
@@ -157,7 +135,7 @@ export const TimeColumnType = {
    */
   createDate: (): ColumnOptions => {
     return getDbColumnType(
-      { postgres: 'timestamp', mysql: 'timestamp', betterSqlite3: 'datetime' },
+      { postgres: 'timestamp', mysql: 'timestamp' },
       { ...(isDbType(DbType.POSTGRES) || isDbType(DbType.MYSQL) ? { precision: TIMESTAMP_PRECISION } : {}) },
     );
   },
@@ -167,7 +145,7 @@ export const TimeColumnType = {
    */
   updateDate: (): ColumnOptions => {
     return getDbColumnType(
-      { postgres: 'timestamp', mysql: 'timestamp', betterSqlite3: 'datetime' },
+      { postgres: 'timestamp', mysql: 'timestamp' },
       { ...(isDbType(DbType.POSTGRES) || isDbType(DbType.MYSQL) ? { precision: TIMESTAMP_PRECISION } : {}) },
     );
   },
@@ -182,6 +160,6 @@ export const NumberColumnType = {
    * @param defaultValue Default integer value
    */
   integer: (defaultValue = 0): ColumnOptions => {
-    return getDbColumnType({ postgres: 'int', mysql: 'int', betterSqlite3: 'integer' }, { default: defaultValue });
+    return getDbColumnType({ postgres: 'int', mysql: 'int' }, { default: defaultValue });
   },
 };

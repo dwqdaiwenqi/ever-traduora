@@ -21,10 +21,6 @@ export class setDefaultEncoding1552729314169 implements MigrationInterface {
         console.log('PostgreSQL uses UTF-8 by default, no encoding changes needed');
         // PostgreSQL uses UTF-8 by default, no action needed
         break;
-      case DbType.BETTER_SQLITE3:
-        console.log('SQLite uses UTF-8 by default, no encoding changes needed');
-        // SQLite uses UTF-8 by default, no action needed
-        break;
       default:
         throw new Error(`Unknown DB type: ${config.db.default.type}`);
     }

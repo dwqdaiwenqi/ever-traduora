@@ -420,6 +420,16 @@ export class UpdateProjectUserRequest {
   role: ProjectRole;
 }
 
+export class AddProjectUserRequest {
+  @ApiProperty({ description: 'Email of an already registered user' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ enum: ProjectRole })
+  @IsEnum(ProjectRole)
+  role: ProjectRole;
+}
+
 export class AddProjectClientRequest {
   @IsString()
   @Length(1, 255)

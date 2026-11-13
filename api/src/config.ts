@@ -86,12 +86,12 @@ export const config = {
   },
   db: {
     default: {
-      type: env.TR_DB_TYPE || 'better-sqlite3',
+      type: env.TR_DB_TYPE || 'mysql',
       host: env.TR_DB_HOST || '127.0.0.1',
       port: parseInt(env.TR_DB_PORT, 10) || 3306,
       username: env.TR_DB_USER || 'root',
       password: env.TR_DB_PASSWORD || '',
-      database: env.TR_DB_DATABASE || 'data/tr_dev.sqlite3',
+      database: env.TR_DB_DATABASE || 'tr_dev',
       // forcing typeorm to use (mysql2) if both (mysql/mysql2) packages found, it prioritize to load (mysql)
       connectorPackage: 'mysql2',
       charset: 'utf8mb4',
@@ -100,7 +100,7 @@ export const config = {
       keepConnectionAlive: true,
       entities: ['src/entity/*.entity*'],
       migrations: ['src/migrations/*'],
-      namingStrategy: env.TR_DB_TYPE === 'postgres' || env.TR_DB_TYPE === 'better-sqlite3' ? new SnakeNamingStrategy() : new DefaultNamingStrategy(),
+      namingStrategy: env.TR_DB_TYPE === 'postgres' ? new SnakeNamingStrategy() : new DefaultNamingStrategy(),
     } as TypeOrmModuleOptions,
   },
 

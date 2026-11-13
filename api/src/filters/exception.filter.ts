@@ -45,22 +45,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
           message: 'This resource already exists',
         },
       });
-    } else if (this.isSqliteError(exception)) {
-      // SQLite generic errors - log for debugging and return internal error
-      console.error('SQLite Error Details:', {
-        name: exception.name,
-        code: exception.code,
-        message: exception.message,
-        stack: exception.stack,
-        sql: exception.sql,
-        parameters: exception.parameters,
-      });
-      response.status(500).json({
-        error: {
-          code: 'Internal',
-          message: 'An internal error occurred',
-        },
-      });
     } else if (exception.status === 401) {
       response.status(401).json({
         error: {
@@ -125,11 +109,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
     return (
       exception.status === 409 ||
       (exception.name === 'QueryFailedError' && exception.code === 'ER_DUP_ENTRY') || // MySQL
-      (exception.name === 'QueryFailedError' && exception.code === '23505') || // PostgreSQL unique constraint violation
-      (exception.name === 'SqliteError' && exception.code === 'SQLITE_CONSTRAINT_UNIQUE') || // SQLite unique constraint
-      (exception.name === 'QueryFailedError' && exception.code === 'SQLITE_CONSTRAINT_UNIQUE') || // SQLite via TypeORM
-      (exception.errno === 19 && exception.code === 'SQLITE_CONSTRAINT') || // SQLite constraint error
-      (exception.message && exception.message.includes('UNIQUE constraint failed')) // SQLite unique constraint message
+      (exception.name === 'QueryFailedError' && exception.code === '23505') // PostgreSQL unique constraint violation
     );
   }
 
@@ -140,9 +120,5 @@ export class CustomExceptionFilter implements ExceptionFilter {
       exception.message &&
       exception.message.includes('invalid input syntax for type uuid')
     );
-  }
-
-  private isSqliteError(exception: any): boolean {
-    return exception.name === 'SqliteError' && exception.code === 'SQLITE_ERROR';
   }
 }

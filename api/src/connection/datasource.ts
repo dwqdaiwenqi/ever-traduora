@@ -1,8 +1,4 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import * as process from 'node:process';
-import { SnakeNamingStrategy } from '../utils/snake-naming-strategy';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
 import { DbType } from '../utils/database-type-helper';
 import { config } from '../config';
 
@@ -27,32 +23,6 @@ export const dataSourceOptions = (): DataSourceOptions => {
     entities: [`${__dirname}/../entity/*.entity.{js,ts}`],
     migrations: [`${__dirname}/../migrations/*.{js,ts}`],
   };
-
-  // Handle SQLite configuration
-  if (dbType === DbType.BETTER_SQLITE3) {
-    // Use SQLite path from config or fallback to environment variable
-    const dbPath = (config.db.default.database as string) || process.env.TR_DB_SQLITE_PATH || 'data/tr_dev.sqlite3';
-    const resolvedPath = path.resolve(process.cwd(), dbPath);
-    const dbDir = path.dirname(resolvedPath);
-
-    if (!fs.existsSync(dbDir)) {
-      console.log(`Creating SQLite database directory: ${dbDir}`);
-      try {
-        fs.mkdirSync(dbDir, { recursive: true });
-      } catch (error) {
-        console.error(`Failed to create database directory: ${error.message}`);
-        throw error;
-      }
-    }
-
-    return {
-      ...commonOptions,
-      type: DbType.BETTER_SQLITE3,
-      database: resolvedPath,
-      foreignKeys: true,
-      namingStrategy: new SnakeNamingStrategy(),
-    } as DataSourceOptions;
-  }
 
   // Handle MySQL or PostgreSQL configuration
   // Use configuration from config.ts (cast to any to access the properties)

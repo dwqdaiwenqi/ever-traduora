@@ -103,84 +103,6 @@ export class init1537535282567 implements MigrationInterface {
           'ALTER TABLE `translation` ADD CONSTRAINT `FK_52b10ad0b87f2f52ed24b7dc451` FOREIGN KEY (`projectLocaleId`) REFERENCES `project_locale`(`id`) ON DELETE CASCADE',
         );
         break;
-      case DbType.BETTER_SQLITE3:
-        await queryRunner.query(
-          `CREATE TABLE IF NOT EXISTS "project" (
-            "id" TEXT PRIMARY KEY NOT NULL DEFAULT (hex(randomblob(16))),
-              "name" TEXT NOT NULL,
-              "date_created" TEXT NOT NULL DEFAULT (datetime('now')),
-              "date_modified" TEXT NOT NULL DEFAULT (datetime('now'))
-            )`,
-        );
-
-        await queryRunner.query(
-          `CREATE TABLE IF NOT EXISTS "project_locale" (
-             "id" TEXT PRIMARY KEY NOT NULL DEFAULT (hex(randomblob(16))),
-              "locale_code" TEXT,
-              "project_id" TEXT,
-              "date_created" TEXT NOT NULL DEFAULT (datetime('now')),
-              "date_modified" TEXT NOT NULL DEFAULT (datetime('now')),
-              UNIQUE ("project_id", "locale_code"),
-              FOREIGN KEY ("locale_code") REFERENCES "locale"("code") ON DELETE CASCADE,
-              FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
-            )`,
-        );
-
-        await queryRunner.query(
-          `CREATE TABLE IF NOT EXISTS "user" (
-              "id" TEXT PRIMARY KEY NOT NULL DEFAULT (hex(randomblob(16))),
-              "name" TEXT NOT NULL,
-              "email" TEXT NOT NULL UNIQUE,
-              "encrypted_password" BLOB NOT NULL,
-              "encrypted_password_reset_token" BLOB,
-              "password_reset_expires" TEXT,
-              "login_attempts" INTEGER NOT NULL DEFAULT 0,
-              "last_login" TEXT,
-              "date_created" TEXT NOT NULL DEFAULT (datetime('now')),
-              "date_modified" TEXT NOT NULL DEFAULT (datetime('now'))
-            )`,
-        );
-
-        await queryRunner.query(
-          `CREATE TABLE IF NOT EXISTS "project_user" (
-              "id" TEXT PRIMARY KEY NOT NULL DEFAULT (hex(randomblob(16))),
-              "project_id" TEXT,
-              "user_id" TEXT,
-              "date_created" TEXT NOT NULL DEFAULT (datetime('now')),
-              "date_modified" TEXT NOT NULL DEFAULT (datetime('now')),
-              FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE,
-              FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE
-            )`,
-        );
-
-        await queryRunner.query(
-          `CREATE TABLE IF NOT EXISTS "term" (
-              "id" TEXT PRIMARY KEY NOT NULL DEFAULT (hex(randomblob(16))),
-              "value" TEXT NOT NULL,
-              "project_id" TEXT NOT NULL,
-              "date_created" TEXT NOT NULL DEFAULT (datetime('now')),
-              "date_modified" TEXT NOT NULL DEFAULT (datetime('now')),
-              UNIQUE ("project_id", "value"),
-              FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE
-            )`,
-        );
-
-        await queryRunner.query(
-          `CREATE TABLE IF NOT EXISTS "translation" (
-              "id" TEXT PRIMARY KEY NOT NULL DEFAULT (hex(randomblob(16))),
-              "value" TEXT NOT NULL,
-              "term_id" TEXT NOT NULL,
-              "project_locale_id" TEXT NOT NULL,
-              "date_created" TEXT NOT NULL DEFAULT (datetime('now')),
-              "date_modified" TEXT NOT NULL DEFAULT (datetime('now')),
-              FOREIGN KEY ("term_id") REFERENCES "term"("id") ON DELETE CASCADE,
-              FOREIGN KEY ("project_locale_id") REFERENCES "project_locale"("id") ON DELETE CASCADE
-            )`,
-        );
-
-        await queryRunner.query(`CREATE INDEX "IDX_translation_term_id" ON "translation" ("term_id")`);
-        await queryRunner.query(`CREATE INDEX "IDX_translation_project_locale_id" ON "translation" ("project_locale_id")`);
-        break;
       default:
         throw new Error(`Unknown DB type: ${config.db.default.type}`);
     }
@@ -225,16 +147,6 @@ export class init1537535282567 implements MigrationInterface {
         await queryRunner.query('DROP INDEX `IDX_2eaddab6fd95ae7425fc346db1` ON `project_locale`');
         await queryRunner.query('DROP TABLE IF EXISTS `project_locale`');
         await queryRunner.query('DROP TABLE IF EXISTS `project`');
-        break;
-      case DbType.BETTER_SQLITE3:
-        await queryRunner.query('DROP INDEX IF EXISTS "IDX_translation_project_locale_id"');
-        await queryRunner.query('DROP INDEX IF EXISTS "IDX_translation_term_id"');
-        await queryRunner.query('DROP TABLE IF EXISTS "translation"');
-        await queryRunner.query('DROP TABLE IF EXISTS "term"');
-        await queryRunner.query('DROP TABLE IF EXISTS "project_user"');
-        await queryRunner.query('DROP TABLE IF EXISTS "user"');
-        await queryRunner.query('DROP TABLE IF EXISTS "project_locale"');
-        await queryRunner.query('DROP TABLE IF EXISTS "project"');
         break;
       default:
         throw new Error(`Unknown DB type: ${config.db.default.type}`);

@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        db: [better-sqlite3, postgres, mysql]
+        db: [postgres, mysql]
     # Throwaway databases of this job only, reachable from the job alone: no credentials needed
     services:
       postgres:
@@ -59,7 +59,7 @@ jobs:
       TR_DB_HOST: 127.0.0.1
       TR_DB_PORT: ${{ matrix.db == 'mysql' && '3306' || '5432' }}
       TR_DB_USER: ${{ matrix.db == 'mysql' && 'root' || 'tr' }}
-      TR_DB_DATABASE: ${{ matrix.db == 'better-sqlite3' && 'data/tr_e2e.sqlite3' || 'tr_e2e' }}
+      TR_DB_DATABASE: tr_e2e
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

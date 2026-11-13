@@ -11,9 +11,6 @@ export class projectUsersIndex1549613347230 implements MigrationInterface {
       case DbType.MYSQL:
         await queryRunner.query('CREATE UNIQUE INDEX `IDX_20543d6caa7324ce6706fad2f5` ON `project_user`(`projectId`, `userId`)');
         break;
-      case DbType.BETTER_SQLITE3:
-        await queryRunner.query('CREATE UNIQUE INDEX "IDX_20543d6caa7324ce6706fad2f5" ON "project_user"("project_id", "user_id")');
-        break;
       default:
         throw new Error(`Unsupported database type: ${config.db.default.type}`);
     }
@@ -26,9 +23,6 @@ export class projectUsersIndex1549613347230 implements MigrationInterface {
         break;
       case DbType.MYSQL:
         await queryRunner.query('DROP INDEX `IDX_20543d6caa7324ce6706fad2f5` ON `project_user`');
-        break;
-      case DbType.BETTER_SQLITE3:
-        await queryRunner.query('DROP INDEX IF EXISTS "IDX_20543d6caa7324ce6706fad2f5"');
         break;
       default:
         throw new Error(`Unknown DB type: ${config.db.default.type}`);

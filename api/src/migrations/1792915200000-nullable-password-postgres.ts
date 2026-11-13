@@ -4,7 +4,7 @@ import { DbType } from '../utils/database-type-helper';
 
 /**
  * Accounts can have no password: provider sign-ins never set one, and a published password is removed. The
- * providerGoogle migration made the column nullable on MySQL and SQLite but not on PostgreSQL.
+ * providerGoogle migration made the column nullable on MySQL but not on PostgreSQL.
  */
 export class nullablePasswordPostgres1792915200000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {

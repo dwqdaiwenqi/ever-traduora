@@ -64,7 +64,12 @@ export async function createTestProject(app: INestApplication, user: TestingUser
 /**
  * Adds a user to a project with the given role, straight in the database: there is no invite endpoint any more.
  */
-export async function addTestProjectUser(app: INestApplication, project: TestingProject, user: TestingUser, role: ProjectRole | string): Promise<void> {
+export async function addTestProjectUser(
+  app: INestApplication,
+  project: TestingProject,
+  user: TestingUser,
+  role: ProjectRole | string,
+): Promise<void> {
   const repo = app.get(Connection).getRepository(ProjectUser);
   await repo.save(repo.create({ project: { id: project.id }, user: { id: user.id }, role: role as ProjectRole }));
 }
@@ -135,6 +140,12 @@ export async function createAndMigrateApp(): Promise<INestApplication> {
 
   // Get the database connection from the application
   const connection = app.get(Connection);
+
+  // dropDatabase wipes everything: never let it hit a non-e2e database (e.g. tr_dev)
+  const dbName = String(connection.options.database || '');
+  if (!dbName.includes('e2e')) {
+    throw new Error(`Refusing to drop database "${dbName}": e2e tests must use a database whose name contains "e2e"`);
+  }
 
   try {
     // Drop the database

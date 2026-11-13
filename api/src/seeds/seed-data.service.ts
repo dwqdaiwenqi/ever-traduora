@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { UserSeed } from './user.seed';
 
 /**

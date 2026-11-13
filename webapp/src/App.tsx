@@ -21,6 +21,7 @@ import ProjectContainer from './components/projects/ProjectContainer';
 import ProjectLocales from './components/projects/ProjectLocales';
 import TranslationsList from './components/projects/TranslationsList';
 import TermsList from './components/projects/TermsList';
+import TeamOverview from './components/projects/TeamOverview';
 import ApiClientsOverview from './components/projects/ApiClientsOverview';
 import ImportContainer from './components/projects/ImportContainer';
 import ExportContainer from './components/projects/ExportContainer';
@@ -75,6 +76,7 @@ export default function App() {
           <Route path="translations" element={<ProjectLocales />} />
           <Route path="translations/:localeCode" element={<TranslationsList />} />
           <Route path="terms" element={<TermsList />} />
+          <Route path="team" element={<TeamOverview />} />
           <Route path="api" element={<ApiClientsOverview />} />
           <Route path="import" element={<ImportContainer />} />
           <Route path="export" element={<ExportContainer />} />

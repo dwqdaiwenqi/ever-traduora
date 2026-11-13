@@ -1,11 +1,28 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  ConflictException,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOAuth2, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectAction } from '../domain/actions';
-import { ListProjectUsersResponse, ProjectUserResponse, UpdateProjectUserRequest } from '../domain/http';
+import { AddProjectUserRequest, ListProjectUsersResponse, ProjectUserResponse, UpdateProjectUserRequest } from '../domain/http';
+import { normalizeEmail } from '../domain/validators';
 import { ProjectUser } from '../entity/project-user.entity';
+import { User } from '../entity/user.entity';
 import AuthorizationService from '../services/authorization.service';
 
 @Controller('api/v1/projects')
@@ -16,6 +33,7 @@ export default class ProjectUserController {
   constructor(
     private auth: AuthorizationService,
     @InjectRepository(ProjectUser) private projectUserRepo: Repository<ProjectUser>,
+    @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
   @Get(':projectId/users')
@@ -39,6 +57,41 @@ export default class ProjectUserController {
         name: member.user.name,
         email: member.user.email,
       })),
+    };
+  }
+
+  @Post(':projectId/users')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Add an already registered user to a project by email' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Created', type: ProjectUserResponse })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'No registered user with this email' })
+  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'The user is already part of the project' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  async create(@Req() req, @Param('projectId') projectId: string, @Body() addProjectUserRequest: AddProjectUserRequest) {
+    const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
+    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.EditProjectUsers);
+
+    const targetUser = await this.userRepo.findOne({ where: { email: normalizeEmail(addProjectUserRequest.email) } });
+    if (!targetUser) {
+      throw new NotFoundException('no registered user with this email, ask them to sign in once first');
+    }
+
+    const existing = await this.projectUserRepo.findOne({ where: { project: { id: projectId }, user: { id: targetUser.id } } });
+    if (existing) {
+      throw new ConflictException('this user is already part of the project');
+    }
+
+    const created = await this.projectUserRepo.save(
+      this.projectUserRepo.create({ project: { id: projectId }, user: targetUser, role: addProjectUserRequest.role }),
+    );
+
+    return {
+      data: {
+        userId: targetUser.id,
+        role: created.role,
+        name: targetUser.name,
+        email: targetUser.email,
+      },
     };
   }
 

@@ -3,11 +3,13 @@ import { Table, Button, Input, Modal, Form, Space, Popconfirm, Alert } from 'ant
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useTermsStore } from '../../stores/terms.store';
+import { ProjectRole } from '../../models';
 import type { Term } from '../../models';
 
 export default function TermsList() {
   const { currentProject } = useProjectsStore();
   const { terms, isLoading, errorMessage, getTerms, createTerm, updateTerm, deleteTerm, clearMessages } = useTermsStore();
+  const readOnly = currentProject?.role === ProjectRole.Viewer;
   const [search, setSearch] = useState('');
   const [newTermModal, setNewTermModal] = useState(false);
   const [form] = Form.useForm();
@@ -47,6 +49,7 @@ export default function TermsList() {
         <Input
           defaultValue={val}
           variant="borderless"
+          readOnly={readOnly}
           onBlur={e => {
             if (e.target.value !== val && currentProject) {
               updateTerm(currentProject.id, record.id, e.target.value, record.context ?? undefined);
@@ -67,6 +70,7 @@ export default function TermsList() {
           defaultValue={val || ''}
           placeholder="添加备注..."
           variant="borderless"
+          readOnly={readOnly}
           onBlur={e => {
             if (e.target.value !== (val || '') && currentProject) {
               updateTerm(currentProject.id, record.id, record.value, e.target.value || undefined);
@@ -78,7 +82,7 @@ export default function TermsList() {
         />
       ),
     },
-    {
+    ...(readOnly ? [] : [{
       title: '操作',
       key: 'action',
       width: 80,
@@ -87,7 +91,7 @@ export default function TermsList() {
           <Button type="text" danger icon={<DeleteOutlined />} size="small" />
         </Popconfirm>
       ),
-    },
+    }]),
   ];
 
   return (
@@ -96,7 +100,7 @@ export default function TermsList() {
         <h3 style={{ margin: 0 }}>词条列表</h3>
         <Space>
           <Input.Search placeholder="搜索词条..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 240 }} />
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setNewTermModal(true)}>新增词条</Button>
+          {!readOnly && <Button type="primary" icon={<PlusOutlined />} onClick={() => setNewTermModal(true)}>新增词条</Button>}
         </Space>
       </div>
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
