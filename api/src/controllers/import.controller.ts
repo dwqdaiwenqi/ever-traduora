@@ -45,7 +45,7 @@ import { ProjectRole } from '../entity/project-user.entity';
 import { User } from '../entity/user.entity';
 import { TranslationVersionService } from '../services/translation-version.service';
 
-@Controller('api/v1/projects/:projectId/imports')
+@Controller('api/v1/activities/:activityId/imports')
 @ApiTags('Imports')
 export class ImportController {
   constructor(
@@ -70,7 +70,7 @@ export class ImportController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'No such resource found' })
   @ApiResponse({ status: HttpStatus.PAYMENT_REQUIRED, description: 'Plan limit reached' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async import(@Req() req, @Param('projectId') projectId: string, @Query() query: ImportQuery, @UploadedFile('file') file) {
+  async import(@Req() req, @Param('activityId') activityId: string, @Query() query: ImportQuery, @UploadedFile('file') file) {
     if (!file) {
       throw new BadRequestException('missing file to import');
     }
@@ -78,7 +78,7 @@ export class ImportController {
     const user = this.auth.getRequestUserOrClient(req);
 
     // Authorize user for import
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ImportTranslation, 0, 0);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ImportTranslation, 0, 0);
 
     try {
       const locale = await this.localeRepo.findOneOrFail({ where: { code: query.locale } });
@@ -94,7 +94,7 @@ export class ImportController {
 
         if (!projectLocale) {
           // Authorize if has access to project import and can add 1 locale
-          await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ImportTranslation, 0, 1);
+          await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ImportTranslation, 0, 1);
 
           // Extract into service for creating project locales
           projectLocale = this.projectLocaleRepo.create({
@@ -116,7 +116,7 @@ export class ImportController {
         const termsToAdd = this.determineTermsToAdd(existingTerms, incoming.translations, membership.project);
 
         // Authorize if user would have enough terms left in plan for import
-        await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ImportTranslation, termsToAdd.length, 1);
+        await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ImportTranslation, termsToAdd.length, 1);
 
         const addedTerms = await entityManager.save(Term, termsToAdd);
         const allTerms = [...addedTerms, ...existingTerms];

@@ -43,7 +43,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Sign in with just an email',
-    description: 'Only for accounts without a password, i.e. members added to a project by an admin. The admin account must use a password.',
+    description: 'Only for accounts without a password, i.e. members added to an activity by an admin. The admin account must use a password.',
   })
   @ApiResponse({ status: HttpStatus.OK, description: 'Signed in' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'EmailNotRegistered, or PasswordRequired for the admin account' })
@@ -56,7 +56,7 @@ export class AuthController {
   @Post('token')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Request an authentication token for the admin user or a project client',
+    summary: 'Request an authentication token for the admin user or an activity client',
     description:
       'The grant type must be one of **password** or **client_credentials**. ' +
       'When using a grant type of *password*, you must provide the fields *username* (email) and *password*. ' +

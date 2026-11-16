@@ -56,7 +56,7 @@ describe('ImportController (e2e)', () => {
     // Pre-existing Terms
     {
       let res = await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/terms`)
+        .post(`/api/v1/activities/${testProject.id}/terms`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           value: 'term.one',
@@ -65,7 +65,7 @@ describe('ImportController (e2e)', () => {
       termOneId = res.body.data.id;
 
       res = await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/terms`)
+        .post(`/api/v1/activities/${testProject.id}/terms`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           value: 'term.two',
@@ -78,7 +78,7 @@ describe('ImportController (e2e)', () => {
 
     {
       await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/translations`)
+        .post(`/api/v1/activities/${testProject.id}/translations`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           code: 'de_DE',
@@ -86,7 +86,7 @@ describe('ImportController (e2e)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/de_DE`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termOneId,
@@ -95,7 +95,7 @@ describe('ImportController (e2e)', () => {
         .expect(200);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/de_DE`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termTwoId,
@@ -104,7 +104,7 @@ describe('ImportController (e2e)', () => {
         .expect(200);
 
       await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/translations`)
+        .post(`/api/v1/activities/${testProject.id}/translations`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           code: 'fr',
@@ -112,7 +112,7 @@ describe('ImportController (e2e)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/fr`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/fr`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termOneId,
@@ -121,7 +121,7 @@ describe('ImportController (e2e)', () => {
         .expect(200);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/fr`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/fr`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termTwoId,
@@ -131,9 +131,9 @@ describe('ImportController (e2e)', () => {
     }
   });
 
-  it('/api/v1/projects/:projectId/imports (POST) should automatically create locale for project', async () => {
+  it('/api/v1/activities/:activityId/imports (POST) should automatically create locale for project', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?locale=nb_NO&format=jsonflat`)
+      .post(`/api/v1/activities/${testProject.id}/imports?locale=nb_NO&format=jsonflat`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .attach('file', Buffer.from(norwayTranslations), 'file')
       .expect(200)
@@ -150,7 +150,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations/nb_NO`)
+      .get(`/api/v1/activities/${testProject.id}/translations/nb_NO`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -172,7 +172,7 @@ describe('ImportController (e2e)', () => {
     // Ensure did not affect other locales
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+      .get(`/api/v1/activities/${testProject.id}/translations/de_DE`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -192,7 +192,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations/fr`)
+      .get(`/api/v1/activities/${testProject.id}/translations/fr`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -212,7 +212,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/terms`)
+      .get(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -223,7 +223,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations`)
+      .get(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -235,9 +235,9 @@ describe('ImportController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/imports (POST) should replace/add translations if locale already exists', async () => {
+  it('/api/v1/activities/:activityId/imports (POST) should replace/add translations if locale already exists', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?locale=de_DE&format=jsonflat`)
+      .post(`/api/v1/activities/${testProject.id}/imports?locale=de_DE&format=jsonflat`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .attach('file', Buffer.from(jsonFlatWithNewTerms), 'file')
       .expect(200)
@@ -254,7 +254,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+      .get(`/api/v1/activities/${testProject.id}/translations/de_DE`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -276,7 +276,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations/fr`)
+      .get(`/api/v1/activities/${testProject.id}/translations/fr`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -295,7 +295,7 @@ describe('ImportController (e2e)', () => {
         });
       });
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/terms`)
+      .get(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -307,7 +307,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations`)
+      .get(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -318,15 +318,15 @@ describe('ImportController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/imports (POST) should fail import if would exceed plan limits', async () => {
+  it('/api/v1/activities/:activityId/imports (POST) should fail import if would exceed plan limits', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?locale=es_MX&format=jsonflat`)
+      .post(`/api/v1/activities/${testProject.id}/imports?locale=es_MX&format=jsonflat`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .attach('file', Buffer.from(jsonFlat100), 'file')
       .expect(402);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+      .get(`/api/v1/activities/${testProject.id}/translations/de_DE`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -346,7 +346,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations/fr`)
+      .get(`/api/v1/activities/${testProject.id}/translations/fr`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -366,7 +366,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/terms`)
+      .get(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -377,7 +377,7 @@ describe('ImportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/translations`)
+      .get(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -388,35 +388,35 @@ describe('ImportController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/imports (POST) should not import if params are missing or invalid', async () => {
+  it('/api/v1/activities/:activityId/imports (POST) should not import if params are missing or invalid', async () => {
     // Missing payload
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?locale=de_DE&format=xliff12`)
+      .post(`/api/v1/activities/${testProject.id}/imports?locale=de_DE&format=xliff12`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(400);
 
     // Missing locale
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?format=xliff12`)
+      .post(`/api/v1/activities/${testProject.id}/imports?format=xliff12`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .attach('file', Buffer.from('<xml />'), 'file')
       .expect(400);
 
     // Unknown locale
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?locale=de_MX&format=xliff12`)
+      .post(`/api/v1/activities/${testProject.id}/imports?locale=de_MX&format=xliff12`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .attach('file', Buffer.from('<xml />'), 'file')
       .expect(404);
   });
 
-  it('/api/v1/projects/:projectId/imports should not access imports resource if not authenticated', async () => {
-    await request(app.getHttpServer()).post(`/api/v1/projects/${testProject.id}/imports`).attach('file', Buffer.from('<xml />'), 'file').expect(401);
+  it('/api/v1/activities/:activityId/imports should not access imports resource if not authenticated', async () => {
+    await request(app.getHttpServer()).post(`/api/v1/activities/${testProject.id}/imports`).attach('file', Buffer.from('<xml />'), 'file').expect(401);
   });
 
-  it('/api/v1/projects/:projectId/imports should not access imports resource if not authorized', async () => {
+  it('/api/v1/activities/:activityId/imports should not access imports resource if not authorized', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?locale=de_DE&format=xliff12`)
+      .post(`/api/v1/activities/${testProject.id}/imports?locale=de_DE&format=xliff12`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .attach('file', Buffer.from('<xml />'), 'file')
       .expect(404);

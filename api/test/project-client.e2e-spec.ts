@@ -40,9 +40,9 @@ describe('ProjectClientController (e2e)', () => {
     testProjectClient3 = await createTestProjectClient(app, testingUser1, testProject1c);
   });
 
-  it('/api/v1/projects/:projectId/clients (GET) should return all project clients', async () => {
+  it('/api/v1/activities/:activityId/clients (GET) should return all project clients', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/clients`)
+      .get(`/api/v1/activities/${testProject1.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -57,14 +57,14 @@ describe('ProjectClientController (e2e)', () => {
 
     // project b has no clients
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1b.id}/clients`)
+      .get(`/api/v1/activities/${testProject1b.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => expect(res.body.data).toHaveLength(0));
 
     // project c has
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1c.id}/clients`)
+      .get(`/api/v1/activities/${testProject1c.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -79,7 +79,7 @@ describe('ProjectClientController (e2e)', () => {
 
     // the other user can only access his project's clients
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject2.id}/clients`)
+      .get(`/api/v1/activities/${testProject2.id}/clients`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -93,19 +93,19 @@ describe('ProjectClientController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/clients`)
+      .get(`/api/v1/activities/${testProject1.id}/clients`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .expect(404);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1b.id}/clients`)
+      .get(`/api/v1/activities/${testProject1b.id}/clients`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .expect(404);
   });
 
-  it('/api/v1/projects/:projectId/clients (POST) should create a project clients, and be able to authenticate with the secret given', async () => {
+  it('/api/v1/activities/:activityId/clients (POST) should create a project clients, and be able to authenticate with the secret given', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1b.id}/clients`)
+      .get(`/api/v1/activities/${testProject1b.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -116,7 +116,7 @@ describe('ProjectClientController (e2e)', () => {
     let newClientSecret: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1b.id}/clients`)
+      .post(`/api/v1/activities/${testProject1b.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         name: 'My new project client',
@@ -145,9 +145,9 @@ describe('ProjectClientController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/clients (POST) should not create a project client if the request is malformed', async () => {
+  it('/api/v1/activities/:activityId/clients (POST) should not create a project client if the request is malformed', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1b.id}/clients`)
+      .post(`/api/v1/activities/${testProject1b.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: ProjectRole.Editor,
@@ -155,7 +155,7 @@ describe('ProjectClientController (e2e)', () => {
       .expect(400);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1b.id}/clients`)
+      .post(`/api/v1/activities/${testProject1b.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         name: 'My new project client',
@@ -163,7 +163,7 @@ describe('ProjectClientController (e2e)', () => {
       .expect(400);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1b.id}/clients`)
+      .post(`/api/v1/activities/${testProject1b.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         name: 'My new project client',
@@ -172,9 +172,9 @@ describe('ProjectClientController (e2e)', () => {
       .expect(400);
   });
 
-  it('/api/v1/projects/:projectId/clients/:clientId (PATCH) should be able to edit project clients if allowed', async () => {
+  it('/api/v1/activities/:activityId/clients/:clientId (PATCH) should be able to edit project clients if allowed', async () => {
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/clients/${testProjectClient1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/clients/${testProjectClient1.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: ProjectRole.Editor,
@@ -186,7 +186,7 @@ describe('ProjectClientController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/clients`)
+      .get(`/api/v1/activities/${testProject1.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -200,7 +200,7 @@ describe('ProjectClientController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/clients/${testProjectClient1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/clients/${testProjectClient1.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: ProjectRole.Admin,
@@ -212,7 +212,7 @@ describe('ProjectClientController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/clients`)
+      .get(`/api/v1/activities/${testProject1.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -226,14 +226,14 @@ describe('ProjectClientController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/clients/:clientId (DELETE) should remove project clients if allowed', async () => {
+  it('/api/v1/activities/:activityId/clients/:clientId (DELETE) should remove project clients if allowed', async () => {
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject1.id}/clients/${testProjectClient1.id}`)
+      .delete(`/api/v1/activities/${testProject1.id}/clients/${testProjectClient1.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(204);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/clients`)
+      .get(`/api/v1/activities/${testProject1.id}/clients`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -244,19 +244,19 @@ describe('ProjectClientController (e2e)', () => {
   it('a project client should be able to access endpoints according to its role', async () => {
     // try to get project terms
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/terms`)
+      .get(`/api/v1/activities/${testProject1.id}/terms`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .expect(200);
 
     // try to get project translations
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/translations`)
+      .get(`/api/v1/activities/${testProject1.id}/translations`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .expect(200);
 
     // try to create project translations with wrong role
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/translations`)
+      .post(`/api/v1/activities/${testProject1.id}/translations`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .send({
         code: 'de_DE',
@@ -265,7 +265,7 @@ describe('ProjectClientController (e2e)', () => {
 
     // try to add project terms with wrong role
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/terms`)
+      .post(`/api/v1/activities/${testProject1.id}/terms`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .send({
         value: 'first.term',
@@ -273,7 +273,7 @@ describe('ProjectClientController (e2e)', () => {
       .expect(404);
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/clients/${testProjectClient1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/clients/${testProjectClient1.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: ProjectRole.Editor,
@@ -282,7 +282,7 @@ describe('ProjectClientController (e2e)', () => {
 
     // now try again with the right role
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/terms`)
+      .post(`/api/v1/activities/${testProject1.id}/terms`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .send({
         value: 'first.term',
@@ -291,7 +291,7 @@ describe('ProjectClientController (e2e)', () => {
 
     // try to create project translations with wrong role
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/translations`)
+      .post(`/api/v1/activities/${testProject1.id}/translations`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .send({
         code: 'de_DE',
@@ -300,16 +300,16 @@ describe('ProjectClientController (e2e)', () => {
 
     // try to export project translations
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject1.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .expect(200);
   });
 
   it('a project client should not be able to access non-project specific endpoints', async () => {
-    await request(app.getHttpServer()).get(`/api/v1/projects`).set('Authorization', `Bearer ${testProjectClient1.accessToken}`).expect(401);
+    await request(app.getHttpServer()).get(`/api/v1/activities`).set('Authorization', `Bearer ${testProjectClient1.accessToken}`).expect(401);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects`)
+      .post(`/api/v1/activities`)
       .set('Authorization', `Bearer ${testProjectClient1.accessToken}`)
       .send({
         name: 'bla',
@@ -322,24 +322,24 @@ describe('ProjectClientController (e2e)', () => {
   it('a project client should not be able to access a project which is not his own', async () => {
     // try to get project terms
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/terms`)
+      .get(`/api/v1/activities/${testProject1.id}/terms`)
       .set('Authorization', `Bearer ${testProjectClient2.accessToken}`)
       .expect(404);
 
     // try to get project translations
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/translations`)
+      .get(`/api/v1/activities/${testProject1.id}/translations`)
       .set('Authorization', `Bearer ${testProjectClient2.accessToken}`)
       .expect(404);
   });
 
-  it('/api/v1/projects/:projectId/clients should not access project clients resource if not authenticated', async () => {
-    await request(app.getHttpServer()).get(`/api/v1/projects/${testProject1.id}/clients`).expect(401);
+  it('/api/v1/activities/:activityId/clients should not access project clients resource if not authenticated', async () => {
+    await request(app.getHttpServer()).get(`/api/v1/activities/${testProject1.id}/clients`).expect(401);
   });
 
-  it('/api/v1/projects/:projectId/clients should not access project clients resource if not authorized', async () => {
+  it('/api/v1/activities/:activityId/clients should not access project clients resource if not authorized', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/clients`)
+      .get(`/api/v1/activities/${testProject1.id}/clients`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .expect(404);
   });

@@ -12,7 +12,7 @@ import { Translation } from '../entity/translation.entity';
 import { getLexicalOrderClause } from '../utils/database-type-helper';
 import { ProjectLocale } from '../entity/project-locale.entity';
 
-@Controller('api/v1/projects/:projectId/terms')
+@Controller('api/v1/activities/:activityId/terms')
 @UseGuards(AuthGuard())
 @ApiOAuth2([])
 @ApiTags('Terms')
@@ -25,19 +25,19 @@ export default class TermController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: `List a project's terms` })
+  @ApiOperation({ summary: `List an activity's terms` })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ListProjectTermsResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async find(@Req() req, @Param('projectId') projectId: string) {
+  async find(@Req() req, @Param('activityId') activityId: string) {
     const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ViewTerm);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ViewTerm);
 
     // Use query builder for consistent sorting across databases
     const queryBuilder = this.termRepo
       .createQueryBuilder('term')
-      .where('term.project.id = :projectId', { projectId: membership.project.id });
+      .where('term.project.id = :activityId', { activityId: membership.project.id });
 
     // Apply database-specific collation for consistent lexical ordering
     queryBuilder.orderBy(getLexicalOrderClause('term.value'), 'ASC');
@@ -58,15 +58,15 @@ export default class TermController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Add a new project term' })
+  @ApiOperation({ summary: 'Add a new activity term' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Created', type: ProjectTermResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity not found' })
   @ApiResponse({ status: HttpStatus.PAYMENT_REQUIRED, description: 'Plan limit reached' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async create(@Req() req, @Param('projectId') projectId: string, @Body() payload: AddTermRequest) {
+  async create(@Req() req, @Param('activityId') activityId: string, @Body() payload: AddTermRequest) {
     const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.AddTerm, 1);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.AddTerm, 1);
 
     const term = this.termRepo.create({
       value: payload.value,
@@ -108,18 +108,18 @@ export default class TermController {
   }
 
   @Patch(':termId')
-  @ApiOperation({ summary: `Update a project's term` })
+  @ApiOperation({ summary: `Update an activity's term` })
   @ApiResponse({ status: HttpStatus.OK, description: 'Updated', type: ProjectTermResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async update(@Req() req, @Param('projectId') projectId: string, @Param('termId') termId: string, @Body() payload: UpdateTermRequest) {
+  async update(@Req() req, @Param('activityId') activityId: string, @Param('termId') termId: string, @Body() payload: UpdateTermRequest) {
     const user = this.auth.getRequestUserOrClient(req);
 
-    await this.auth.authorizeProjectAction(user, projectId, ProjectAction.EditTerm);
+    await this.auth.authorizeProjectAction(user, activityId, ProjectAction.EditTerm);
 
     // Ensure is project term
-    await this.termRepo.findOneOrFail({ where: { id: termId, project: { id: projectId } } });
+    await this.termRepo.findOneOrFail({ where: { id: termId, project: { id: activityId } } });
 
     await this.termRepo.update({ id: termId }, { value: payload.value, context: payload.context });
 
@@ -137,14 +137,14 @@ export default class TermController {
 
   @Delete(':termId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: `Remove a project's term`, description: `Removes a project's term and all related translations` })
+  @ApiOperation({ summary: `Remove an activity's term`, description: `Removes an activity's term and all related translations` })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Deleted' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async delete(@Req() req, @Param('projectId') projectId: string, @Param('termId') termId: string) {
+  async delete(@Req() req, @Param('activityId') activityId: string, @Param('termId') termId: string) {
     const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.DeleteTerm);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.DeleteTerm);
     await this.termRepo.manager.transaction(async entityManager => {
       const term = await entityManager.findOneOrFail(Term, { where: { id: termId, project: { id: membership.project.id } } });
       await entityManager.remove(term);

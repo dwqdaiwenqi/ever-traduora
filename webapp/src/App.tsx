@@ -4,6 +4,7 @@ import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { useAuthStore } from './stores/auth.store';
 import { setUnauthorizedCallback } from './api/client';
+import { theme } from './theme';
 
 // Auth pages
 import Login from './components/auth/Login';
@@ -35,7 +36,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 function NoAuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
   if (isAuthenticated) {
-    return <Navigate to="/projects" replace />;
+    return <Navigate to="/activities" replace />;
   }
   return <>{children}</>;
 }
@@ -49,14 +50,14 @@ export default function App() {
   }, []);
 
   return (
-    <ConfigProvider locale={zhCN} theme={{ token: { colorPrimary: '#1890ff' } }}>
+    <ConfigProvider locale={zhCN} theme={theme}>
       <Routes>
         {/* Public auth routes */}
         <Route path="/login" element={<NoAuthGuard><Login /></NoAuthGuard>} />
 
         {/* Protected project routes */}
-        <Route path="/projects" element={<AuthGuard><ProjectList /></AuthGuard>} />
-        <Route path="/projects/:projectId" element={<AuthGuard><ProjectContainer /></AuthGuard>}>
+        <Route path="/activities" element={<AuthGuard><ProjectList /></AuthGuard>} />
+        <Route path="/activities/:activityId" element={<AuthGuard><ProjectContainer /></AuthGuard>}>
           <Route index element={<Navigate to="matrix" replace />} />
           <Route path="matrix" element={<TranslationMatrix />} />
           <Route path="translations" element={<ProjectLocales />} />
@@ -70,7 +71,7 @@ export default function App() {
         </Route>
 
         {/* Root redirect */}
-        <Route path="/" element={<Navigate to="/projects" replace />} />
+        <Route path="/" element={<Navigate to="/activities" replace />} />
 
         {/* 404 */}
         <Route path="/404" element={<NotFound />} />

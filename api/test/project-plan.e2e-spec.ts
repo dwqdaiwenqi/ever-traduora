@@ -19,9 +19,9 @@ describe('PlansController (e2e)', () => {
     testProject = await createTestProject(app, testingUser);
   });
 
-  it('/v1/projects/:projectId/plan (GET) should return the current project plan', async () => {
+  it('/v1/projects/:activityId/plan (GET) should return the current project plan', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/plan`)
+      .get(`/api/v1/activities/${testProject.id}/plan`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -33,7 +33,7 @@ describe('PlansController (e2e)', () => {
 
   it('adding terms should count towards the project plan', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -42,7 +42,7 @@ describe('PlansController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -51,7 +51,7 @@ describe('PlansController (e2e)', () => {
       .expect(res => (termId = res.body.data.id));
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -62,7 +62,7 @@ describe('PlansController (e2e)', () => {
 
   it('removing terms should count towards the project plan', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -71,12 +71,12 @@ describe('PlansController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject.id}/terms/${termId}`)
+      .delete(`/api/v1/activities/${testProject.id}/terms/${termId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(204);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -87,7 +87,7 @@ describe('PlansController (e2e)', () => {
 
   it('adding locales should count towards the project plan', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -96,7 +96,7 @@ describe('PlansController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/translations`)
+      .post(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         code: 'de_DE',
@@ -104,7 +104,7 @@ describe('PlansController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -115,7 +115,7 @@ describe('PlansController (e2e)', () => {
 
   it('removing locales should count towards the project plan', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -124,12 +124,12 @@ describe('PlansController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+      .delete(`/api/v1/activities/${testProject.id}/translations/de_DE`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(204);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -140,7 +140,7 @@ describe('PlansController (e2e)', () => {
 
   it('should not be able to add terms if would exceed current plan quota', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/imports?locale=es_MX&format=jsonflat`)
+      .post(`/api/v1/activities/${testProject.id}/imports?locale=es_MX&format=jsonflat`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .attach(
         'file',
@@ -154,7 +154,7 @@ describe('PlansController (e2e)', () => {
       .expect(200);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -162,7 +162,7 @@ describe('PlansController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -171,7 +171,7 @@ describe('PlansController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.two',
@@ -179,7 +179,7 @@ describe('PlansController (e2e)', () => {
       .expect(402);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -188,14 +188,14 @@ describe('PlansController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject.id}/translations/es_MX`)
+      .delete(`/api/v1/activities/${testProject.id}/translations/es_MX`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(204);
   });
 
   it('should not be able to add locales if would exceed current plan quota', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}`)
+      .get(`/api/v1/activities/${testProject.id}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -204,7 +204,7 @@ describe('PlansController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/translations`)
+      .post(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         code: 'nb_NO',
@@ -212,7 +212,7 @@ describe('PlansController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/translations`)
+      .post(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         code: 'fr',
@@ -220,13 +220,13 @@ describe('PlansController (e2e)', () => {
       .expect(402);
   });
 
-  it('/v1/projects/:projectId/plan should not access plan resource if not authenticated', async () => {
-    await request(app.getHttpServer()).get(`/api/v1/projects/${testProject.id}/plan`).expect(401);
+  it('/v1/projects/:activityId/plan should not access plan resource if not authenticated', async () => {
+    await request(app.getHttpServer()).get(`/api/v1/activities/${testProject.id}/plan`).expect(401);
   });
 
-  it('/v1/projects/:projectId/plan should not access plan resource if not authorized', async () => {
+  it('/v1/projects/:activityId/plan should not access plan resource if not authorized', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/plan`)
+      .get(`/api/v1/activities/${testProject.id}/plan`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .expect(404);
   });

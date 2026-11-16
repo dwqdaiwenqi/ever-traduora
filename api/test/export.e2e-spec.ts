@@ -23,7 +23,7 @@ describe('ExportController (e2e)', () => {
     // Terms
     {
       let res = await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/terms`)
+        .post(`/api/v1/activities/${testProject.id}/terms`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           value: 'term.one',
@@ -32,7 +32,7 @@ describe('ExportController (e2e)', () => {
       termOneId = res.body.data.id;
 
       res = await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/terms`)
+        .post(`/api/v1/activities/${testProject.id}/terms`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           value: 'term.two',
@@ -45,7 +45,7 @@ describe('ExportController (e2e)', () => {
 
     {
       await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/translations`)
+        .post(`/api/v1/activities/${testProject.id}/translations`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           code: 'de_DE',
@@ -53,7 +53,7 @@ describe('ExportController (e2e)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/de_DE`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termOneId,
@@ -62,7 +62,7 @@ describe('ExportController (e2e)', () => {
         .expect(200);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/de_DE`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termTwoId,
@@ -71,7 +71,7 @@ describe('ExportController (e2e)', () => {
         .expect(200);
 
       await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/translations`)
+        .post(`/api/v1/activities/${testProject.id}/translations`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           code: 'fr',
@@ -79,7 +79,7 @@ describe('ExportController (e2e)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/fr`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/fr`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termOneId,
@@ -88,7 +88,7 @@ describe('ExportController (e2e)', () => {
         .expect(200);
 
       await request(app.getHttpServer())
-        .patch(`/api/v1/projects/${testProject.id}/translations/fr`)
+        .patch(`/api/v1/activities/${testProject.id}/translations/fr`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           termId: termTwoId,
@@ -98,9 +98,9 @@ describe('ExportController (e2e)', () => {
     }
   });
 
-  it('/api/v1/projects/:projectId/exports?format=jsonflat (GET) should export project translation in JSON flat format', async () => {
+  it('/api/v1/activities/:activityId/exports?format=jsonflat (GET) should export project translation in JSON flat format', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -111,7 +111,7 @@ describe('ExportController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/exports (GET) should export terms in lexical order', async () => {
+  it('/api/v1/activities/:activityId/exports (GET) should export terms in lexical order', async () => {
     const input = ['app.login', 'should be before base terms', '1 goes first', 'app.logout', 'app.exit', 'menu.start', 'a term', '2 goes second'];
 
     // Account for term.one and term.two from base test
@@ -130,7 +130,7 @@ describe('ExportController (e2e)', () => {
 
     for (const term of input) {
       await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/terms`)
+        .post(`/api/v1/activities/${testProject.id}/terms`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           value: term,
@@ -139,7 +139,7 @@ describe('ExportController (e2e)', () => {
     }
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -150,7 +150,7 @@ describe('ExportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=de_DE&format=properties&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=de_DE&format=properties&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(async res => {
@@ -161,9 +161,9 @@ describe('ExportController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/exports (GET) should export translation with utf-8 characters in various formats', async () => {
+  it('/api/v1/activities/:activityId/exports (GET) should export translation with utf-8 characters in various formats', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=fr&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=fr&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -174,7 +174,7 @@ describe('ExportController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=fr&format=properties&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=fr&format=properties&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(async res => {
@@ -187,9 +187,9 @@ describe('ExportController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/exports?format=jsonflat (GET) should include empty translations on export', async () => {
+  it('/api/v1/activities/:activityId/exports?format=jsonflat (GET) should include empty translations on export', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/translations`)
+      .post(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         code: 'es_CR',
@@ -197,7 +197,7 @@ describe('ExportController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=es_CR&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=es_CR&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -208,49 +208,49 @@ describe('ExportController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/exports?format=jsonflat (GET) should not export if params are missing or invalid', async () => {
+  it('/api/v1/activities/:activityId/exports?format=jsonflat (GET) should not export if params are missing or invalid', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?format=jsonflat`)
+      .get(`/api/v1/activities/${testProject.id}/exports?format=jsonflat`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(400);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=de_DE`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=de_DE`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(400);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports`)
+      .get(`/api/v1/activities/${testProject.id}/exports`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(400);
 
     // unknown locale
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=dd_DD&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=dd_DD&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(404);
 
     // unknown format
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=de_DE&format=flatjson&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=de_DE&format=flatjson&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(400);
   });
 
-  it('/api/v1/projects/:projectId/exports?format=jsonflat (GET) should not export if locale does not exist for project', async () => {
+  it('/api/v1/activities/:activityId/exports?format=jsonflat (GET) should not export if locale does not exist for project', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=es&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=es&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(404);
   });
 
-  it('/api/v1/projects/:projectId/exports should not access exports resource if not authenticated', async () => {
-    await request(app.getHttpServer()).get(`/api/v1/projects/${testProject.id}/exports?locale=de_DE&format=jsonflat`).expect(401);
+  it('/api/v1/activities/:activityId/exports should not access exports resource if not authenticated', async () => {
+    await request(app.getHttpServer()).get(`/api/v1/activities/${testProject.id}/exports?locale=de_DE&format=jsonflat`).expect(401);
   });
 
-  it('/api/v1/projects/:projectId/exports should not access exports resource if not authorized', async () => {
+  it('/api/v1/activities/:activityId/exports should not access exports resource if not authorized', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
+      .get(`/api/v1/activities/${testProject.id}/exports?locale=de_DE&format=jsonflat&untranslated=false`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .expect(404);
   });

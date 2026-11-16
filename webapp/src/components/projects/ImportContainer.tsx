@@ -10,11 +10,12 @@ import { importApi } from '../../api/export-import';
 import { IMPORT_FORMATS } from '../../models';
 import { errorToMessage } from '../../utils/api-error';
 import type { Locale, ImportFormat, ImportResult } from '../../models';
+import PageHeader from '../shared/PageHeader';
 
 const { Dragger } = Upload;
 
 export default function ImportContainer() {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { activityId } = useParams<{ activityId: string }>();
   const navigate = useNavigate();
   const { currentProject, refreshProjectStats } = useProjectsStore();
   const { projectLocales, knownLocales, getProjectLocales, getKnownLocales } = useTranslationsStore();
@@ -66,13 +67,13 @@ export default function ImportContainer() {
   if (result) {
     return (
       <div>
-        <h3>导入结果</h3>
+        <PageHeader title="导入结果" />
         <Result
           status="success"
           title="导入成功"
           subTitle={`添加了 ${result.terms.added} 个词条，跳过了 ${result.terms.skipped} 个，更新了 ${result.translations.upserted} 条翻译。`}
           extra={[
-            <Button key="view" type="primary" onClick={() => navigate(`/projects/${projectId}/translations/${selectedLocale?.code}`)}>
+            <Button key="view" type="primary" onClick={() => navigate(`/activities/${activityId}/translations/${selectedLocale?.code}`)}>
               查看翻译
             </Button>,
             <Button key="again" onClick={reset}>再次导入</Button>,
@@ -86,7 +87,7 @@ export default function ImportContainer() {
 
   return (
     <div>
-      <h3>导入翻译</h3>
+      <PageHeader title="导入" description="从文件导入词条和翻译；开发导入的内容直接生效，运营导入的内容需要开发确认" />
       <Card style={{ maxWidth: 560 }}>
         {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
         <Form layout="vertical">
@@ -99,7 +100,7 @@ export default function ImportContainer() {
             >
               <p className="ant-upload-drag-icon"><InboxOutlined /></p>
               <p>点击或拖拽文件到此区域上传</p>
-              <p style={{ color: '#888', fontSize: 12 }}>支持 JSON、YAML、CSV、XML 等格式</p>
+              <p style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }}>支持 JSON、YAML、CSV、XML 等格式</p>
             </Dragger>
           </Form.Item>
           <Form.Item label="目标语言" required>

@@ -4,6 +4,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useProjectClientsStore } from '../../stores/project-clients.store';
 import type { ProjectClient } from '../../models';
+import PageHeader from '../shared/PageHeader';
 
 const { Text } = Typography;
 
@@ -70,10 +71,11 @@ export default function ApiClientsOverview() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h3 style={{ margin: 0 }}>API 客户端</h3>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModal(true)}>添加客户端</Button>
-      </div>
+      <PageHeader
+        title="API 客户端"
+        description="给程序用的访问凭证，比如脚本批量导入导出"
+        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModal(true)}>添加客户端</Button>}
+      />
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
       <Table dataSource={clients} columns={columns} rowKey="id" loading={isLoading} pagination={false} />
 

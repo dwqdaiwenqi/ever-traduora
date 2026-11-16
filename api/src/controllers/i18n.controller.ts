@@ -9,9 +9,9 @@ import { TranslationVersionService } from '../services/translation-version.servi
 /**
  * 给业务前端使用的公开读取接口，不需要登录。
  * 只返回开发已确认（已生效）的翻译，运营刚提交、还没确认的内容不会出现在这里。
- * projectId 是 uuid（一个活动一个项目），不可猜测。缺失的 key 不返回，由前端回退到国服文案。
+ * activityId 是 uuid（一个活动一个项目），不可猜测。缺失的 key 不返回，由前端回退到国服文案。
  */
-@Controller('api/v1/i18n/:projectId')
+@Controller('api/v1/i18n/:activityId')
 @ApiTags('I18n')
 export class I18nController {
   constructor(
@@ -24,13 +24,13 @@ export class I18nController {
   @ApiOperation({ summary: 'Get the confirmed (effective) translations of a locale as flat JSON' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success' })
   @ApiResponse({ status: HttpStatus.NOT_MODIFIED, description: 'Not modified' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project or locale not found' })
-  async get(@Req() req, @Res() res, @Param('projectId') projectId: string, @Param('localeCode') localeCode: string) {
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity or locale not found' })
+  async get(@Req() req, @Res() res, @Param('activityId') activityId: string, @Param('localeCode') localeCode: string) {
     const projectLocale = await this.projectLocaleRepo.findOne({
-      where: { project: { id: projectId }, locale: { code: localeCode } },
+      where: { project: { id: activityId }, locale: { code: localeCode } },
     });
     if (!projectLocale) {
-      throw new NotFoundException('project locale not found');
+      throw new NotFoundException('activity locale not found');
     }
 
     const content = await this.versions.buildEffectiveContent(this.projectLocaleRepo.manager, projectLocale.id);

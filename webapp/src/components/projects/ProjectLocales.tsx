@@ -7,9 +7,10 @@ import SelectLocale from '../shared/SelectLocale';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useTranslationsStore } from '../../stores/translations.store';
 import type { ProjectLocale, Locale } from '../../models';
+import PageHeader from '../shared/PageHeader';
 
 export default function ProjectLocales() {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { activityId } = useParams<{ activityId: string }>();
   const navigate = useNavigate();
   const { currentProject, currentProjectStats, refreshProjectStats } = useProjectsStore();
   const { projectLocales, knownLocales, isLoading, errorMessage, getProjectLocales, getKnownLocales, addProjectLocale, deleteProjectLocale, clearMessages } = useTranslationsStore();
@@ -53,7 +54,7 @@ export default function ProjectLocales() {
         <Space>
           <CountryFlag locale={record.locale} />
           <span>{record.locale.language}</span>
-          <span style={{ color: '#888', fontSize: 12 }}>({record.locale.code})</span>
+          <span style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }}>({record.locale.code})</span>
           {!!record.pendingCount && <Tag color="orange">待确认 {record.pendingCount}</Tag>}
         </Space>
       ),
@@ -67,7 +68,7 @@ export default function ProjectLocales() {
         return (
           <Space>
             <Progress percent={Math.round(stats.progress * 100)} size="small" style={{ width: 120 }} />
-            <span style={{ fontSize: 12, color: '#888' }}>{stats.translated}/{stats.total}</span>
+            <span style={{ fontSize: 12, color: 'var(--tr-text-tertiary)' }}>{stats.translated}/{stats.total}</span>
           </Space>
         );
       },
@@ -77,7 +78,7 @@ export default function ProjectLocales() {
       key: 'action',
       render: (_: any, record: ProjectLocale) => (
         <Space>
-          <Button size="small" onClick={() => navigate(`/projects/${projectId}/translations/${record.locale.code}`)}>
+          <Button size="small" onClick={() => navigate(`/activities/${activityId}/translations/${record.locale.code}`)}>
             查看翻译
           </Button>
           <Popconfirm
@@ -86,7 +87,7 @@ export default function ProjectLocales() {
             okText="删除"
             cancelText="取消"
           >
-            <Button size="small" danger icon={<DeleteOutlined />} />
+            <Button size="small" type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -95,10 +96,11 @@ export default function ProjectLocales() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h3 style={{ margin: 0 }}>语言</h3>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModalOpen(true)}>添加语言</Button>
-      </div>
+      <PageHeader
+        title="按语言翻译"
+        description="选择一种语言，只看这一种语言的词条"
+        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModalOpen(true)}>添加语言</Button>}
+      />
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
       <Table
         dataSource={projectLocales}

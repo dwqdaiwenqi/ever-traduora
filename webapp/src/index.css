@@ -1,0 +1,50 @@
+:root {
+  --tr-primary: #3370ff;
+  --tr-text: #1f2329;
+  --tr-text-secondary: #646a73;
+  --tr-text-tertiary: #8f959e;
+  --tr-border: #dee0e3;
+  --tr-border-light: #eceef1;
+  --tr-bg-layout: #f5f6f7;
+}
+
+html,
+body {
+  background: var(--tr-bg-layout);
+  color: var(--tr-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 表格：外面包一圈细边框和圆角，看起来是一块独立的白色卡片 */
+.ant-table-wrapper .ant-table {
+  border: 1px solid var(--tr-border-light);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ant-table-wrapper .ant-table-thead > tr > th {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* 细一点的滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d0d3d8 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #d0d3d8;
+  border-radius: 4px;
+}
+
+/* 页面容器 */
+.tr-page-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+}

@@ -23,10 +23,10 @@ import { ProjectUser } from '../entity/project-user.entity';
 import AuthorizationService from '../services/authorization.service';
 import { UserService } from '../services/user.service';
 
-@Controller('api/v1/projects')
+@Controller('api/v1/activities')
 @UseGuards(AuthGuard())
 @ApiOAuth2([])
-@ApiTags('Project Users')
+@ApiTags('Activity Users')
 export default class ProjectUserController {
   constructor(
     private auth: AuthorizationService,
@@ -34,17 +34,17 @@ export default class ProjectUserController {
     private userService: UserService,
   ) {}
 
-  @Get(':projectId/users')
-  @ApiOperation({ summary: 'List all users with access to a project' })
+  @Get(':activityId/users')
+  @ApiOperation({ summary: 'List all users with access to an activity' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ListProjectUsersResponse })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async find(@Req() req, @Param('projectId') projectId: string) {
+  async find(@Req() req, @Param('activityId') activityId: string) {
     const user = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ViewProjectUsers);
+    await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ViewProjectUsers);
 
     const users = await this.projectUserRepo.find({
-      where: { project: { id: projectId } },
+      where: { project: { id: activityId } },
       relations: ['user'],
     });
 
@@ -58,26 +58,26 @@ export default class ProjectUserController {
     };
   }
 
-  @Post(':projectId/users')
+  @Post(':activityId/users')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Add a member to a project by email; an account without a password is created if the email is new' })
+  @ApiOperation({ summary: 'Add a member to an activity by email; an account without a password is created if the email is new' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Created', type: ProjectUserResponse })
-  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'The user is already part of the project' })
+  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'The user is already part of the activity' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async create(@Req() req, @Param('projectId') projectId: string, @Body() addProjectUserRequest: AddProjectUserRequest) {
+  async create(@Req() req, @Param('activityId') activityId: string, @Body() addProjectUserRequest: AddProjectUserRequest) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.EditProjectUsers);
+    await this.auth.authorizeProjectAction(requestingUser, activityId, ProjectAction.EditProjectUsers);
 
     // 新邮箱会自动建一个没有密码的账号，成员之后只凭邮箱登录
     const targetUser = await this.userService.findOrCreatePasswordless(addProjectUserRequest.email);
 
-    const existing = await this.projectUserRepo.findOne({ where: { project: { id: projectId }, user: { id: targetUser.id } } });
+    const existing = await this.projectUserRepo.findOne({ where: { project: { id: activityId }, user: { id: targetUser.id } } });
     if (existing) {
-      throw new ConflictException('this user is already part of the project');
+      throw new ConflictException('this user is already part of the activity');
     }
 
     const created = await this.projectUserRepo.save(
-      this.projectUserRepo.create({ project: { id: projectId }, user: targetUser, role: addProjectUserRequest.role }),
+      this.projectUserRepo.create({ project: { id: activityId }, user: targetUser, role: addProjectUserRequest.role }),
     );
 
     return {
@@ -90,20 +90,20 @@ export default class ProjectUserController {
     };
   }
 
-  @Patch(':projectId/users/:userId')
-  @ApiOperation({ summary: `Update a project user's role` })
+  @Patch(':activityId/users/:userId')
+  @ApiOperation({ summary: `Update an activity user's role` })
   @ApiResponse({ status: HttpStatus.OK, description: 'Updated', type: ProjectUserResponse })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request params or attempting to edit own role' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   async update(
     @Req() req,
-    @Param('projectId') projectId: string,
+    @Param('activityId') activityId: string,
     @Param('userId') userId: string,
     @Body() updateProjectUserRequest: UpdateProjectUserRequest,
   ) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.EditProjectUsers);
+    await this.auth.authorizeProjectAction(requestingUser, activityId, ProjectAction.EditProjectUsers);
 
     // Prevent the current user from editing himself
     if (requestingUser.id === userId) {
@@ -111,7 +111,7 @@ export default class ProjectUserController {
     }
 
     const targetUser = await this.projectUserRepo.findOneOrFail({
-      where: { user: { id: userId }, project: { id: projectId } },
+      where: { user: { id: userId }, project: { id: activityId } },
       relations: ['user', 'project'],
     });
 
@@ -129,16 +129,16 @@ export default class ProjectUserController {
     };
   }
 
-  @Delete(':projectId/users/:userId')
+  @Delete(':activityId/users/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: `Revoke a user's access to a project` })
+  @ApiOperation({ summary: `Revoke a user's access to an activity` })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Deleted' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: `Bad request, can't edit your own role` })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async delete(@Req() req, @Param('projectId') projectId: string, @Param('userId') userId: string) {
+  async delete(@Req() req, @Param('activityId') activityId: string, @Param('userId') userId: string) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.DeleteProjectUsers);
+    await this.auth.authorizeProjectAction(requestingUser, activityId, ProjectAction.DeleteProjectUsers);
 
     // Prevent the current user from removing himself
     if (requestingUser.id === userId) {
@@ -148,13 +148,13 @@ export default class ProjectUserController {
     const targetUser = await this.projectUserRepo.findOne({
       where: {
         user: { id: userId },
-        project: { id: projectId },
+        project: { id: activityId },
       },
       relations: ['user', 'project'],
     });
 
     if (!targetUser) {
-      throw new BadRequestException(`The specified user is not part of this project.`);
+      throw new BadRequestException(`The specified user is not part of this activity.`);
     }
 
     await this.projectUserRepo.remove(targetUser);

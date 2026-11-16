@@ -16,27 +16,27 @@ import { ProjectClient } from '../entity/project-client.entity';
 import AuthorizationService from '../services/authorization.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiOAuth2 } from '@nestjs/swagger';
 
-@Controller('api/v1/projects')
+@Controller('api/v1/activities')
 @UseGuards(AuthGuard())
 @ApiOAuth2([])
-@ApiTags('Project Clients')
+@ApiTags('Activity Clients')
 export default class ProjectClientController {
   constructor(
     private auth: AuthorizationService,
     @InjectRepository(ProjectClient) private projectClientRepo: Repository<ProjectClient>,
   ) {}
 
-  @Get(':projectId/clients')
-  @ApiOperation({ summary: `List a project's clients` })
+  @Get(':activityId/clients')
+  @ApiOperation({ summary: `List an activity's clients` })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ListProjectClientsResponse })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async find(@Req() req, @Param('projectId') projectId: string) {
+  async find(@Req() req, @Param('activityId') activityId: string) {
     const user = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ViewProjectClients);
+    await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ViewProjectClients);
 
     const clients = await this.projectClientRepo.find({
-      where: { project: { id: projectId } },
+      where: { project: { id: activityId } },
     });
 
     return {
@@ -48,21 +48,21 @@ export default class ProjectClientController {
     };
   }
 
-  @Post(':projectId/clients')
+  @Post(':activityId/clients')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: `Create a new project client` })
+  @ApiOperation({ summary: `Create a new activity client` })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Created', type: ProjectClientWithSecretResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async create(@Req() req, @Param('projectId') projectId: string, @Body() addProjectClientRequest: AddProjectClientRequest) {
+  async create(@Req() req, @Param('activityId') activityId: string, @Body() addProjectClientRequest: AddProjectClientRequest) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.AddProjectClient);
+    await this.auth.authorizeProjectAction(requestingUser, activityId, ProjectAction.AddProjectClient);
 
     const { secret, encryptedSecret } = await this.generateSecret();
 
     let client = this.projectClientRepo.create({
-      project: { id: projectId },
+      project: { id: activityId },
       name: addProjectClientRequest.name,
       role: addProjectClientRequest.role,
       encryptedSecret: encryptedSecret,
@@ -80,23 +80,23 @@ export default class ProjectClientController {
     };
   }
 
-  @Patch(':projectId/clients/:clientId')
-  @ApiOperation({ summary: `Update a project's client` })
+  @Patch(':activityId/clients/:clientId')
+  @ApiOperation({ summary: `Update an activity's client` })
   @ApiResponse({ status: HttpStatus.OK, description: 'Updated', type: ProjectClientResponse })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project or client not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity or client not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   async update(
     @Req() req,
-    @Param('projectId') projectId: string,
+    @Param('activityId') activityId: string,
     @Param('clientId') clientId: string,
     @Body() updateProjectClientRequest: UpdateProjectClientRequest,
   ) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.EditProjectClients);
+    await this.auth.authorizeProjectAction(requestingUser, activityId, ProjectAction.EditProjectClients);
 
     const client = await this.projectClientRepo.findOneOrFail({
-      where: { project: { id: projectId }, id: clientId },
+      where: { project: { id: activityId }, id: clientId },
     });
 
     client.role = updateProjectClientRequest.role;
@@ -112,17 +112,17 @@ export default class ProjectClientController {
     };
   }
 
-  @Post(':projectId/clients/:clientId/rotate-secret')
-  @ApiOperation({ summary: `Rotate a project's client secret key` })
+  @Post(':activityId/clients/:clientId/rotate-secret')
+  @ApiOperation({ summary: `Rotate an activity's client secret key` })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ProjectClientWithSecretResponse })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project or client not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity or client not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async rotate(@Req() req, @Param('projectId') projectId: string, @Param('clientId') clientId: string) {
+  async rotate(@Req() req, @Param('activityId') activityId: string, @Param('clientId') clientId: string) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.EditProjectClients);
+    await this.auth.authorizeProjectAction(requestingUser, activityId, ProjectAction.EditProjectClients);
 
     const client = await this.projectClientRepo.findOneOrFail({
-      where: { project: { id: projectId }, id: clientId },
+      where: { project: { id: activityId }, id: clientId },
     });
 
     const { secret, encryptedSecret } = await this.generateSecret();
@@ -141,18 +141,18 @@ export default class ProjectClientController {
     };
   }
 
-  @Delete(':projectId/clients/:clientId')
+  @Delete(':activityId/clients/:clientId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: `Revoke access from a project's client` })
+  @ApiOperation({ summary: `Revoke access from an activity's client` })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Deleted' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project or client not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity or client not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async delete(@Req() req, @Param('projectId') projectId: string, @Param('clientId') clientId: string) {
+  async delete(@Req() req, @Param('activityId') activityId: string, @Param('clientId') clientId: string) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.DeleteProjectClients);
+    await this.auth.authorizeProjectAction(requestingUser, activityId, ProjectAction.DeleteProjectClients);
 
     const client = await this.projectClientRepo.findOneOrFail({
-      where: { project: { id: projectId }, id: clientId },
+      where: { project: { id: activityId }, id: clientId },
     });
 
     await this.projectClientRepo.remove(client);

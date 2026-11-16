@@ -41,7 +41,7 @@ export interface Project {
 }
 
 export interface ProjectStats {
-  projectStats: {
+  activityStats: {
     progress: number;
     translated: number;
     total: number;

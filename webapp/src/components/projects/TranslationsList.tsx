@@ -8,6 +8,7 @@ import { useTermsStore } from '../../stores/terms.store';
 import { ProjectRole, isPendingConfirmation } from '../../models';
 import type { Term, Translation } from '../../models';
 import ContextView from '../shared/ContextView';
+import PageHeader from '../shared/PageHeader';
 
 type Filter = 'all' | 'empty' | 'filled' | 'pending';
 
@@ -22,7 +23,6 @@ function TranslationCell({ initialValue, onSave, readOnly }: { initialValue: str
     <Input.TextArea
       value={val}
       readOnly={readOnly}
-      status={val === '' ? 'warning' : undefined}
       autoSize={{ minRows: 1, maxRows: 4 }}
       placeholder={readOnly ? '未填写' : '未填写，请输入翻译...'}
       onChange={e => setVal(e.target.value)}
@@ -40,10 +40,10 @@ function TranslationCell({ initialValue, onSave, readOnly }: { initialValue: str
 }
 
 export default function TranslationsList() {
-  const { projectId, localeCode } = useParams<{ projectId: string; localeCode: string }>();
+  const { activityId, localeCode } = useParams<{ activityId: string; localeCode: string }>();
   const navigate = useNavigate();
   const { currentProject, refreshProjectStats } = useProjectsStore();
-  const { translations, projectLocales, isLoading, errorMessage, getTranslations, updateTranslation, confirmTranslations, clearMessages } = useTranslationsStore();
+  const { translations, projectLocales, isLoading, errorMessage, getTranslations, getProjectLocales, updateTranslation, confirmTranslations, clearMessages } = useTranslationsStore();
   const { terms, getTerms } = useTermsStore();
   const readOnly = currentProject?.role === ProjectRole.Viewer;
   // 只有 admin（开发）能确认
@@ -57,6 +57,7 @@ export default function TranslationsList() {
   useEffect(() => {
     if (currentProject && localeCode) {
       getTranslations(currentProject.id, localeCode, navigate);
+      if (projectLocales.length === 0) getProjectLocales(currentProject.id);
       getTerms(currentProject.id);
     }
     return () => clearMessages();
@@ -119,9 +120,9 @@ export default function TranslationsList() {
         <div>
           <div style={{ fontWeight: 500 }}>
             {val}
-            {!isFilled(record.id) && <Tag color="warning" style={{ marginLeft: 8 }}>未填写</Tag>}
+            {!isFilled(record.id) && <Tag color="warning" bordered={false} style={{ marginLeft: 8 }}>未填写</Tag>}
           </div>
-          <ContextView context={record.context} projectId={currentProject!.id} style={{ color: '#888', fontSize: 12 }} />
+          <ContextView context={record.context} activityId={currentProject!.id} style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }} />
         </div>
       ),
     },
@@ -143,8 +144,8 @@ export default function TranslationsList() {
           />
           {isPendingConfirmation(translationMap[record.id]) && (
             <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-              <Tag color="orange" style={{ margin: 0 }}>待开发确认</Tag>
-              <span style={{ color: '#888', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <Tag color="orange" bordered={false} style={{ margin: 0 }}>待开发确认</Tag>
+              <span style={{ color: 'var(--tr-text-tertiary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 线上当前：{translationMap[record.id]?.confirmedValue || '（无，使用兜底文案）'}
               </span>
               {canConfirm && (
@@ -165,24 +166,24 @@ export default function TranslationsList() {
 
   return (
     <div>
-      <style>{`.tr-row-empty > td { background: #fffbe6 !important; }`}</style>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {locale && <CountryFlag locale={locale} />}
-          <h3 style={{ margin: 0 }}>{locale?.language || localeCode}</h3>
-        </div>
-        <Button onClick={() => navigate(`/projects/${projectId}/translations`)}>
-          返回语言列表
-        </Button>
-      </div>
+      <style>{`.tr-row-empty > td { background: #fffdf7 !important; }`}</style>
+      <PageHeader
+        title={
+          <Space size={8}>
+            {locale && <CountryFlag locale={locale} />}
+            <span>{locale?.language || localeCode}</span>
+          </Space>
+        }
+        extra={<Button onClick={() => navigate(`/activities/${activityId}/translations`)}>返回语言列表</Button>}
+      />
 
-      <div style={{ background: '#fff', padding: '12px 16px', borderRadius: 8, marginBottom: 12 }}>
+      <div style={{ background: '#fff', padding: '12px 16px', borderRadius: 10, marginBottom: 12, border: '1px solid var(--tr-border-light)' }}>
         <Progress
           percent={percent}
           status={emptyCount === 0 && total > 0 ? 'success' : 'active'}
           format={p => `${p}%`}
         />
-        <div style={{ color: '#888', fontSize: 12 }}>
+        <div style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }}>
           共 {total} 条，已填写 {filledCount} 条，
           <span style={{ color: emptyCount > 0 ? '#d48806' : undefined }}>未填写 {emptyCount} 条</span>
         </div>

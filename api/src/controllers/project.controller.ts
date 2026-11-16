@@ -14,10 +14,10 @@ import { TooManyRequestsException } from '../errors';
 import AuthorizationService from '../services/authorization.service';
 import { ApiOAuth2, ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
-@Controller('api/v1/projects')
+@Controller('api/v1/activities')
 @UseGuards(AuthGuard())
 @ApiOAuth2([])
-@ApiTags('Projects')
+@ApiTags('Activities')
 export default class ProjectController {
   constructor(
     private auth: AuthorizationService,
@@ -26,7 +26,7 @@ export default class ProjectController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List projects' })
+  @ApiOperation({ summary: 'List activities' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ListProjectsResponse })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   async find(@Req() req) {
@@ -45,14 +45,14 @@ export default class ProjectController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new project', description: 'Creates a new project and assigns the requesting user as the admin' })
+  @ApiOperation({ summary: 'Create a new activity', description: 'Creates a new activity and assigns the requesting user as the admin' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Created', type: ProjectResponse })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   async create(@Req() req, @Body() payload: CreateProjectRequest) {
     const user = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
 
     if (user.numProjectsCreated >= config.maxProjectsPerUser) {
-      throw new TooManyRequestsException('Too many projects for a single user, please contact support to request a limit increase');
+      throw new TooManyRequestsException('Too many activities for a single user, please contact support to request a limit increase');
     }
 
     const result = await this.projectRepo.manager.transaction(async tx => {
@@ -77,14 +77,14 @@ export default class ProjectController {
     return { data: { ...omit(result.project, ['plan']), role: result.role } };
   }
 
-  @Get(':projectId')
-  @ApiOperation({ summary: 'Get a project by id' })
+  @Get(':activityId')
+  @ApiOperation({ summary: 'Get an activity by id' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ProjectResponse })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async findOne(@Req() req, @Param('projectId') projectId: string) {
+  async findOne(@Req() req, @Param('activityId') activityId: string) {
     const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ViewProject);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ViewProject);
     return {
       data: {
         ...omit(membership.project, 'plan'),
@@ -93,35 +93,35 @@ export default class ProjectController {
     };
   }
 
-  @Patch(':projectId')
-  @ApiOperation({ summary: 'Update a project' })
+  @Patch(':activityId')
+  @ApiOperation({ summary: 'Update an activity' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ProjectResponse })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async update(@Req() req, @Param('projectId') projectId: string, @Body() payload: UpdateProjectRequest) {
+  async update(@Req() req, @Param('activityId') activityId: string, @Body() payload: UpdateProjectRequest) {
     const user = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
 
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.EditProject);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.EditProject);
 
-    await this.projectRepo.update(projectId, payload);
-    const project = await this.projectRepo.findOneByOrFail({ id: projectId });
+    await this.projectRepo.update(activityId, payload);
+    const project = await this.projectRepo.findOneByOrFail({ id: activityId });
 
     return { data: { ...project, role: membership.role } };
   }
 
-  @Delete(':projectId')
+  @Delete(':activityId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a project' })
+  @ApiOperation({ summary: 'Delete an activity' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Deleted' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async delete(@Req() req, @Param('projectId') projectId: string) {
+  async delete(@Req() req, @Param('activityId') activityId: string) {
     const user = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
-    await this.auth.authorizeProjectAction(user, projectId, ProjectAction.DeleteProject);
+    await this.auth.authorizeProjectAction(user, activityId, ProjectAction.DeleteProject);
 
     await this.projectRepo.manager.transaction(async tx => {
-      await tx.delete(Project, { id: projectId });
+      await tx.delete(Project, { id: activityId });
 
       user.numProjectsCreated -= 1;
       if (user.numProjectsCreated < 0) {

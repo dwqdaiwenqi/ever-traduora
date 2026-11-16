@@ -7,6 +7,7 @@ import { EXPORT_FORMATS } from '../../models';
 import { errorToMessage } from '../../utils/api-error';
 import SelectLocale from '../shared/SelectLocale';
 import type { Locale, ExportFormat } from '../../models';
+import PageHeader from '../shared/PageHeader';
 
 export default function ExportContainer() {
   const { currentProject } = useProjectsStore();
@@ -39,8 +40,8 @@ export default function ExportContainer() {
 
   return (
     <div>
-      <h3>导出翻译</h3>
-      <Card style={{ maxWidth: 500 }}>
+      <PageHeader title="导出" description="把某种语言的翻译导出成文件" />
+      <Card style={{ maxWidth: 520 }}>
         {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
         <Form layout="vertical">
           <Form.Item label="选择语言" required>

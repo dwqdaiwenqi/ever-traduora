@@ -26,7 +26,7 @@ import { merge } from 'lodash';
 import { resolveColumnName } from '../utils/alias-helper';
 import { getLexicalOrderClause } from '../utils/database-type-helper';
 
-@Controller('api/v1/projects/:projectId/exports')
+@Controller('api/v1/activities/:activityId/exports')
 export class ExportsController {
   constructor(
     private auth: AuthorizationService,
@@ -39,15 +39,15 @@ export class ExportsController {
   @UseGuards(AuthGuard())
   @ApiTags('Exports')
   @ApiOAuth2([])
-  @ApiOperation({ summary: `Export all translated terms for a project's locale` })
+  @ApiOperation({ summary: `Export all translated terms for an activity's locale` })
   @ApiProduces('application/octet-stream')
   @ApiResponse({ status: HttpStatus.OK, description: 'File exported' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad request' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project or locale not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity or locale not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async export(@Req() req: Request, @Res() res: Response, @Param('projectId') projectId: string, @Query() query: ExportQuery) {
+  async export(@Req() req: Request, @Res() res: Response, @Param('activityId') activityId: string, @Query() query: ExportQuery) {
     const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ExportTranslation);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ExportTranslation);
 
     if (!query.locale) {
       throw new BadRequestException('locale is a required param');
@@ -74,7 +74,7 @@ export class ExportsController {
       .leftJoinAndSelect('term.translations', 'translation', `translation.${resolveColumnName('projectLocaleId')} = :projectLocaleId`, {
         projectLocaleId: projectLocale.id,
       })
-      .where(`term.${resolveColumnName('projectId')} = :projectId`, { projectId });
+      .where(`term.${resolveColumnName('projectId')} = :activityId`, { activityId });
 
     queryBuilder.orderBy(getLexicalOrderClause('term.value'), 'ASC');
 
@@ -118,7 +118,7 @@ export class ExportsController {
           .leftJoinAndSelect('term.translations', 'translation', `translation.${resolveColumnName('projectLocaleId')} = :projectLocaleId`, {
             projectLocaleId: fallbackProjectLocale.id,
           })
-          .where(`term.${resolveColumnName('projectId')} = :projectId`, { projectId });
+          .where(`term.${resolveColumnName('projectId')} = :activityId`, { activityId });
 
         fallbackQueryBuilder.orderBy(getLexicalOrderClause('term.value'), 'ASC');
 

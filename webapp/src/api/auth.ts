@@ -3,7 +3,7 @@ import type { User } from '../models';
 
 /**
  * 登录只有两种：
- *  - 成员：只用邮箱（emailLogin），前提是管理员已经把这个邮箱加进了某个项目
+ *  - 成员：只用邮箱（emailLogin），前提是管理员已经把这个邮箱加进了某个活动
  *  - 管理员：邮箱 + 密码（passwordLogin）
  */
 export const authApi = {

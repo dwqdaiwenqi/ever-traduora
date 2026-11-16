@@ -4,6 +4,7 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useProjectUsersStore } from '../../stores/project-users.store';
 import { useAuthStore } from '../../stores/auth.store';
+import PageHeader from '../shared/PageHeader';
 import { ProjectRole, projectRoleLabels } from '../../models';
 import type { ProjectUser } from '../../models';
 
@@ -64,7 +65,7 @@ export default function TeamOverview() {
             okText="移除"
             cancelText="取消"
           >
-            <Button size="small" danger icon={<DeleteOutlined />} />
+            <Button size="small" type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         ) : null,
     },
@@ -72,12 +73,10 @@ export default function TeamOverview() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h3 style={{ margin: 0 }}>团队管理</h3>
-        {canEdit && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModal(true)}>添加成员</Button>
-        )}
-      </div>
+      <PageHeader
+        title="团队"
+        extra={canEdit && <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModal(true)}>添加成员</Button>}
+      />
       <Alert
         type="info"
         showIcon

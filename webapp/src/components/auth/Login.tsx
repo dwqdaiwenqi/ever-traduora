@@ -23,7 +23,7 @@ export default function Login() {
       } else {
         await emailLogin(values.email);
       }
-      navigate('/projects');
+      navigate('/activities');
     } catch (error) {
       if (get(error, 'response.data.error.code') === 'PasswordRequired') {
         setNeedPassword(true);
@@ -31,41 +31,47 @@ export default function Login() {
     }
   };
 
+  const isGenericError = !!errorMessage && errorMessage !== PASSWORD_REQUIRED_MESSAGE;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <Logo style={{ color: '#1890ff', marginBottom: 32 }} />
-      <div style={{ width: 380 }}>
-        {errorMessage && !needPassword && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
-        {needPassword && (
-          <Alert
-            type={errorMessage && errorMessage !== PASSWORD_REQUIRED_MESSAGE ? 'error' : 'info'}
-            message={errorMessage && errorMessage !== PASSWORD_REQUIRED_MESSAGE ? errorMessage : '这是管理员账号，请输入密码'}
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
-        <div className="ant-card ant-card-bordered" style={{ padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,.1)' }}>
-          <h4 style={{ fontFamily: 'serif', marginBottom: 20 }}>登录</h4>
-          <Form form={form} layout="vertical" onFinish={onFinish} autoComplete="off">
-            <Form.Item label="邮箱" name="email" rules={[{ required: true, type: 'email', message: '请输入有效的邮箱地址' }]}>
-              <Input
-                type="email"
-                autoComplete="email"
-                autoFocus
-                placeholder="请输入管理员添加的邮箱"
-                onChange={() => needPassword && setNeedPassword(false)}
-              />
-            </Form.Item>
-            {needPassword && (
-              <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
-                <Input.Password autoComplete="current-password" autoFocus />
-              </Form.Item>
-            )}
-            <Form.Item style={{ marginBottom: 0 }}>
-              <Button type="primary" htmlType="submit" loading={isLoading} block>登录</Button>
-            </Form.Item>
-          </Form>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+      <Logo style={{ fontSize: 26, marginBottom: 28 }} />
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 380,
+          padding: '28px 28px 24px',
+          background: '#fff',
+          border: '1px solid var(--tr-border-light)',
+          borderRadius: 12,
+          boxShadow: '0 8px 30px rgba(31, 35, 41, 0.06)',
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>登录</h2>
+        <div style={{ margin: '4px 0 20px', color: 'var(--tr-text-tertiary)', fontSize: 13 }}>
+          {needPassword ? '这是管理员账号，请输入密码' : '输入管理员添加的邮箱即可登录'}
         </div>
+        {isGenericError && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
+        <Form form={form} layout="vertical" onFinish={onFinish} autoComplete="off" requiredMark={false}>
+          <Form.Item label="邮箱" name="email" rules={[{ required: true, type: 'email', message: '请输入有效的邮箱地址' }]}>
+            <Input
+              size="large"
+              type="email"
+              autoComplete="email"
+              autoFocus
+              placeholder="name@company.com"
+              onChange={() => needPassword && setNeedPassword(false)}
+            />
+          </Form.Item>
+          {needPassword && (
+            <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }]}>
+              <Input.Password size="large" autoComplete="current-password" autoFocus />
+            </Form.Item>
+          )}
+          <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
+            <Button type="primary" size="large" htmlType="submit" loading={isLoading} block>登录</Button>
+          </Form.Item>
+        </Form>
       </div>
     </div>
   );

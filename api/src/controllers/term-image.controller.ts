@@ -38,7 +38,7 @@ export function sniffImageType(buf: Buffer): string | null {
   return null;
 }
 
-@Controller('api/v1/projects/:projectId/term-images')
+@Controller('api/v1/activities/:activityId/term-images')
 @ApiTags('Term images')
 export class TermImageController {
   constructor(
@@ -57,9 +57,9 @@ export class TermImageController {
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Created' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Not an allowed image' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async upload(@Req() req, @Param('projectId') projectId: string, @UploadedFile('file') file) {
+  async upload(@Req() req, @Param('activityId') activityId: string, @UploadedFile('file') file) {
     const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.EditTerm);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.EditTerm);
 
     if (!file?.buffer) {
       throw new BadRequestException('missing image');
@@ -76,14 +76,14 @@ export class TermImageController {
   }
 
   /**
-   * 不需要登录：<img> 标签没法带 Authorization 头。图片 id 是不可猜测的 uuid，并且必须和 projectId 匹配。
+   * 不需要登录：<img> 标签没法带 Authorization 头。图片 id 是不可猜测的 uuid，并且必须和 activityId 匹配。
    */
   @Get(':imageId')
   @ApiOperation({ summary: 'Get an uploaded term image' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not found' })
-  async get(@Res() res, @Param('projectId') projectId: string, @Param('imageId') imageId: string) {
-    const image = await this.imageRepo.findOne({ where: { id: imageId, project: { id: projectId } } });
+  async get(@Res() res, @Param('activityId') activityId: string, @Param('imageId') imageId: string) {
+    const image = await this.imageRepo.findOne({ where: { id: imageId, project: { id: activityId } } });
     if (!image) {
       throw new NotFoundException('image not found');
     }

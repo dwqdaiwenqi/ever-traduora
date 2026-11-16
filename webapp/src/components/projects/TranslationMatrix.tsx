@@ -8,6 +8,7 @@ import { useTermsStore } from '../../stores/terms.store';
 import { ProjectRole, isPendingConfirmation } from '../../models';
 import type { Locale, Term, Translation } from '../../models';
 import ContextView from '../shared/ContextView';
+import PageHeader from '../shared/PageHeader';
 
 type Filter = 'all' | 'todo' | 'pending';
 
@@ -38,10 +39,9 @@ function Cell({
       <Input.TextArea
         value={val}
         readOnly={readOnly}
-        status={val === '' ? 'warning' : undefined}
         autoSize={{ minRows: 1, maxRows: 6 }}
         placeholder={readOnly ? '' : '待翻译'}
-        style={pending ? { borderColor: '#fa8c16' } : undefined}
+        style={pending ? { borderColor: '#ff8800', background: '#fffaf0' } : undefined}
         onChange={e => setVal(e.target.value)}
         onBlur={() => {
           if (val !== initial) onSave(val);
@@ -55,9 +55,9 @@ function Cell({
       />
       {pending && (
         <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-          <Tag color="orange" style={{ margin: 0 }}>待确认</Tag>
+          <Tag color="orange" bordered={false} style={{ margin: 0 }}>待确认</Tag>
           <Tooltip title={`线上当前：${translation?.confirmedValue || '（无，使用兜底文案）'}`}>
-            <span style={{ color: '#888', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'var(--tr-text-tertiary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               线上：{translation?.confirmedValue || '（无）'}
             </span>
           </Tooltip>
@@ -75,7 +75,7 @@ function Cell({
  * key 是前端起的内部名字，可读性不强，所以只作为小号灰字显示，也可以隐藏。
  */
 export default function TranslationMatrix() {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { activityId } = useParams<{ activityId: string }>();
   const { currentProject, refreshProjectStats } = useProjectsStore();
   const { projectLocales, translations, errorMessage, getProjectLocales, getTranslations, updateTranslation, confirmTranslations, clearMessages } =
     useTranslationsStore();
@@ -91,12 +91,12 @@ export default function TranslationMatrix() {
   const [pageSize, setPageSize] = useState(100);
   const [loading, setLoading] = useState(false);
 
-  const loadAll = async (projectId: string) => {
+  const loadAll = async (activityId: string) => {
     setLoading(true);
     try {
-      await Promise.all([getProjectLocales(projectId), getTerms(projectId)]);
+      await Promise.all([getProjectLocales(activityId), getTerms(activityId)]);
       const locales = useTranslationsStore.getState().projectLocales;
-      await Promise.all(locales.map(pl => getTranslations(projectId, pl.locale.code)));
+      await Promise.all(locales.map(pl => getTranslations(activityId, pl.locale.code)));
     } finally {
       setLoading(false);
     }
@@ -172,7 +172,7 @@ export default function TranslationMatrix() {
         <Space size={6}>
           <CountryFlag locale={l} />
           <span>{localeLabel(l)}</span>
-          {pendingCount > 0 && <Tag color="orange" style={{ margin: 0 }}>待确认 {pendingCount}</Tag>}
+          {pendingCount > 0 && <Tag color="orange" bordered={false} style={{ margin: 0 }}>待确认 {pendingCount}</Tag>}
         </Space>
         {canConfirm && pendingCount > 0 && (
           <Popconfirm
@@ -197,9 +197,9 @@ export default function TranslationMatrix() {
       width: 180,
       fixed: 'left' as const,
       render: (_: any, t: Term) => (
-        <div style={{ color: '#aaa', fontSize: 12, wordBreak: 'break-all' }}>
+        <div style={{ color: 'var(--tr-text-tertiary)', fontSize: 12, wordBreak: 'break-all' }}>
           {showKey && <div>{t.value}</div>}
-          <ContextView context={t.context} projectId={currentProject!.id} size={96} style={{ color: '#666', marginTop: showKey ? 4 : 0 }} />
+          <ContextView context={t.context} activityId={currentProject!.id} size={96} style={{ color: 'var(--tr-text-secondary)', marginTop: showKey ? 4 : 0 }} />
         </div>
       ),
     },
@@ -213,12 +213,13 @@ export default function TranslationMatrix() {
       key: 'source',
       width: 240,
       fixed: 'left' as const,
+      onCell: () => ({ style: { background: 'var(--tr-bg-layout)' } }),
       render: (_: any, t: Term) =>
         sourceCode && canConfirm ? (
           // 开发（admin）可以直接修改原文，修改后立即生效
           <Cell translation={get(sourceCode, t.id)} readOnly={false} canConfirm={false} onSave={v => handleSave(sourceCode, t.id, v)} onConfirm={() => {}} />
         ) : (
-          <div style={{ whiteSpace: 'pre-wrap', fontWeight: 500 }}>{(sourceCode && get(sourceCode, t.id)?.value) || <span style={{ color: '#bbb' }}>（原文为空）</span>}</div>
+          <div style={{ whiteSpace: 'pre-wrap', fontWeight: 500 }}>{(sourceCode && get(sourceCode, t.id)?.value) || <span style={{ color: 'var(--tr-text-tertiary)' }}>（原文为空）</span>}</div>
         ),
     },
     ...targets.map(l => ({
@@ -239,22 +240,13 @@ export default function TranslationMatrix() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-        <Space>
-          <span style={{ color: '#888' }}>原文语言</span>
-          <Select
-            value={sourceCode}
-            onChange={setSourceCode}
-            style={{ width: 160 }}
-            options={projectLocales.map(pl => ({ value: pl.locale.code, label: localeLabel(pl.locale) }))}
-          />
-          <Switch checked={showKey} onChange={setShowKey} />
-          <span style={{ color: '#888' }}>显示 Key</span>
-        </Space>
-        <Input.Search placeholder="搜索原文、翻译或 Key..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 280 }} allowClear />
-      </div>
+      <PageHeader
+        title="对照翻译"
+        description="左边是原文，右边每种语言一列，直接对着原文填写"
+        extra={<Input.Search placeholder="搜索原文、翻译或 Key..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 280 }} allowClear />}
+      />
 
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
         <Segmented
           value={filter}
           onChange={v => setFilter(v as Filter)}
@@ -264,6 +256,21 @@ export default function TranslationMatrix() {
             { label: `有待确认 (${totalPending})`, value: 'pending' },
           ]}
         />
+        <Space size={16} wrap>
+          <Space size={8}>
+            <span style={{ color: 'var(--tr-text-tertiary)' }}>原文语言</span>
+            <Select
+              value={sourceCode}
+              onChange={setSourceCode}
+              style={{ width: 180 }}
+              options={projectLocales.map(pl => ({ value: pl.locale.code, label: localeLabel(pl.locale) }))}
+            />
+          </Space>
+          <Space size={8}>
+            <Switch size="small" checked={showKey} onChange={setShowKey} />
+            <span style={{ color: 'var(--tr-text-tertiary)' }}>显示 Key</span>
+          </Space>
+        </Space>
       </div>
 
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
@@ -273,7 +280,6 @@ export default function TranslationMatrix() {
         rowKey="id"
         loading={loading}
         size="small"
-        bordered
         scroll={{ x: 'max-content' }}
         pagination={{
           pageSize,

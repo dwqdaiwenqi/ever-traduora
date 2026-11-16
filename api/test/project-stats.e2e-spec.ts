@@ -17,14 +17,14 @@ describe('ProjectStatsController (e2e)', () => {
     testProject = await createTestProject(app, testingUser);
   });
 
-  it('/api/v1/projects/:projectId/stats (GET) should get the project locale stats', async () => {
+  it('/api/v1/activities/:activityId/stats (GET) should get the project locale stats', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/stats`)
+      .get(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
         expect(res.body.data).toEqual({
-          projectStats: {
+          activityStats: {
             progress: 0,
             translated: 0,
             total: 0,
@@ -38,7 +38,7 @@ describe('ProjectStatsController (e2e)', () => {
     let termId: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -48,12 +48,12 @@ describe('ProjectStatsController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/stats`)
+      .get(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
         expect(res.body.data).toEqual({
-          projectStats: {
+          activityStats: {
             progress: 0,
             translated: 0,
             total: 1,
@@ -65,7 +65,7 @@ describe('ProjectStatsController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/translations`)
+      .post(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         code: 'de_DE',
@@ -73,12 +73,12 @@ describe('ProjectStatsController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/stats`)
+      .get(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
         expect(res.body.data).toEqual({
-          projectStats: {
+          activityStats: {
             progress: 0,
             translated: 0,
             total: 1,
@@ -96,7 +96,7 @@ describe('ProjectStatsController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject.id}/translations/de_DE`)
+      .patch(`/api/v1/activities/${testProject.id}/translations/de_DE`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         termId,
@@ -105,12 +105,12 @@ describe('ProjectStatsController (e2e)', () => {
       .expect(200);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/stats`)
+      .get(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
         expect(res.body.data).toEqual({
-          projectStats: {
+          activityStats: {
             progress: 1,
             translated: 1,
             total: 1,
@@ -128,7 +128,7 @@ describe('ProjectStatsController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/translations`)
+      .post(`/api/v1/activities/${testProject.id}/translations`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         code: 'fr',
@@ -136,12 +136,12 @@ describe('ProjectStatsController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/stats`)
+      .get(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
         expect(res.body.data).toEqual({
-          projectStats: {
+          activityStats: {
             progress: 0.5,
             translated: 1,
             total: 2,
@@ -164,19 +164,19 @@ describe('ProjectStatsController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.two',
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/stats`)
+      .get(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
         expect(res.body.data).toEqual({
-          projectStats: {
+          activityStats: {
             progress: 0.25,
             translated: 1,
             total: 4,
@@ -199,13 +199,13 @@ describe('ProjectStatsController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/translations should not access stats resource if not authenticated', async () => {
-    await request(app.getHttpServer()).get(`/api/v1/projects/${testProject.id}/stats`).expect(401);
+  it('/api/v1/activities/:activityId/translations should not access stats resource if not authenticated', async () => {
+    await request(app.getHttpServer()).get(`/api/v1/activities/${testProject.id}/stats`).expect(401);
   });
 
-  it('/api/v1/projects/:projectId/translations should not access stats resource if not authorized', async () => {
+  it('/api/v1/activities/:activityId/translations should not access stats resource if not authorized', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/stats`)
+      .post(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .send({
         code: 'bad',
@@ -213,7 +213,7 @@ describe('ProjectStatsController (e2e)', () => {
       .expect(404);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/stats`)
+      .get(`/api/v1/activities/${testProject.id}/stats`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .expect(404);
   });

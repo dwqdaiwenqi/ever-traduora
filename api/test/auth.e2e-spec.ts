@@ -125,7 +125,7 @@ describe('AuthController (e2e)', () => {
     let clientSecret: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/clients`)
+      .post(`/api/v1/activities/${testProject.id}/clients`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My project client',

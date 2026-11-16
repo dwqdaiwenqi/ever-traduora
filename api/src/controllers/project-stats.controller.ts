@@ -10,10 +10,10 @@ import { ProjectLocale } from '../entity/project-locale.entity';
 import AuthorizationService from '../services/authorization.service';
 import { resolveColumnName } from '../utils/alias-helper';
 
-@Controller('api/v1/projects/:projectId/stats')
+@Controller('api/v1/activities/:activityId/stats')
 @UseGuards(AuthGuard())
 @ApiOAuth2([])
-@ApiTags('Project Stats')
+@ApiTags('Activity Stats')
 export default class ProjectStatsController {
   constructor(
     private auth: AuthorizationService,
@@ -21,13 +21,13 @@ export default class ProjectStatsController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get stats for project' })
+  @ApiOperation({ summary: 'Get stats for an activity' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: ProjectStatsResponse })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Project not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity not found' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async getStats(@Req() req, @Param('projectId') projectId: string) {
+  async getStats(@Req() req, @Param('activityId') activityId: string) {
     const user = this.auth.getRequestUserOrClient(req);
-    const membership = await this.auth.authorizeProjectAction(user, projectId, ProjectAction.ViewTranslation);
+    const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ViewTranslation);
     const locales = await this.projectLocaleRepo.find({
       where: {
         project: { id: membership.project.id },
@@ -81,7 +81,7 @@ export default class ProjectStatsController {
     const totalTerms = localeCount > 0 ? termCount * localeCount : termCount;
     const totalProgress = totalTerms > 0 ? Math.floor((totalTranslated / totalTerms) * 100) / 100 : 0;
 
-    const projectStats = {
+    const activityStats = {
       progress: totalProgress,
       translated: totalTranslated,
       total: totalTerms,
@@ -91,7 +91,7 @@ export default class ProjectStatsController {
 
     return {
       data: {
-        projectStats,
+        activityStats,
         localeStats,
       },
     };

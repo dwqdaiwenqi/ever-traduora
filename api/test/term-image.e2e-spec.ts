@@ -16,7 +16,7 @@ describe('Term images (e2e)', () => {
 
   const upload = (user: TestingUser, projectId: string, buf: Buffer, name = 'a.png', type = 'image/png') =>
     request(app.getHttpServer())
-      .post(`/api/v1/projects/${projectId}/term-images`)
+      .post(`/api/v1/activities/${projectId}/term-images`)
       .set('Authorization', `Bearer ${user.accessToken}`)
       .attach('file', buf, { filename: name, contentType: type });
 
@@ -38,7 +38,7 @@ describe('Term images (e2e)', () => {
     expect(res.body.data).toMatchObject({ mimeType: 'image/png', size: PNG.length });
 
     const got = await request(app.getHttpServer())
-      .get(`/api/v1/projects/${project.id}/term-images/${res.body.data.id}`)
+      .get(`/api/v1/activities/${project.id}/term-images/${res.body.data.id}`)
       .buffer(true)
       .parse((r, cb) => {
         const chunks: Buffer[] = [];
@@ -53,7 +53,7 @@ describe('Term images (e2e)', () => {
 
   it('does not serve an image under another project', async () => {
     const res = await upload(admin, project.id, PNG).expect(201);
-    await request(app.getHttpServer()).get(`/api/v1/projects/${otherProject.id}/term-images/${res.body.data.id}`).expect(404);
+    await request(app.getHttpServer()).get(`/api/v1/activities/${otherProject.id}/term-images/${res.body.data.id}`).expect(404);
   });
 
   it('rejects non-images, svg and files that only claim to be images', async () => {

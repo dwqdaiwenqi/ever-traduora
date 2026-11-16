@@ -15,9 +15,9 @@ describe('ProjectController (e2e)', () => {
     anotherUser = await signupTestUser(app, 'another-user@test.com');
   });
 
-  it('/api/v1/projects (POST) should create a project and assign the user as admin', async () => {
+  it('/api/v1/activities (POST) should create a project and assign the user as admin', async () => {
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -33,9 +33,9 @@ describe('ProjectController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects (POST) should accept projects with utf-8 characters in the name or description', async () => {
+  it('/api/v1/activities (POST) should accept projects with utf-8 characters in the name or description', async () => {
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My second project őúüöá 😀👍🍉你好',
@@ -52,21 +52,21 @@ describe('ProjectController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects (POST) should not create a project if missing params or malformed request', async () => {
-    await request(app.getHttpServer()).post('/api/v1/projects').set('Authorization', `Bearer ${testingUser.accessToken}`).send({}).expect(400);
+  it('/api/v1/activities (POST) should not create a project if missing params or malformed request', async () => {
+    await request(app.getHttpServer()).post('/api/v1/activities').set('Authorization', `Bearer ${testingUser.accessToken}`).send({}).expect(400);
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({ name: 10 })
       .expect(400);
   });
 
-  it('/api/v1/projects (GET) should return projects for which requesting user has access to', async () => {
+  it('/api/v1/activities (GET) should return projects for which requesting user has access to', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -77,7 +77,7 @@ describe('ProjectController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get('/api/v1/projects')
+      .get('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -88,11 +88,11 @@ describe('ProjectController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects (GET) should not return projects for which requesting user has no access', async () => {
+  it('/api/v1/activities (GET) should not return projects for which requesting user has no access', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -103,7 +103,7 @@ describe('ProjectController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get('/api/v1/projects')
+      .get('/api/v1/activities')
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -112,7 +112,7 @@ describe('ProjectController (e2e)', () => {
 
     // Create a project for new user
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .send({
         name: 'Also my first project',
@@ -121,7 +121,7 @@ describe('ProjectController (e2e)', () => {
 
     // Check that only has access to own project
     await request(app.getHttpServer())
-      .get('/api/v1/projects')
+      .get('/api/v1/activities')
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -131,11 +131,11 @@ describe('ProjectController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId (GET) should find a project by id', async () => {
+  it('/api/v1/activities/:activityId (GET) should find a project by id', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -146,7 +146,7 @@ describe('ProjectController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${projectId}`)
+      .get(`/api/v1/activities/${projectId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -154,11 +154,11 @@ describe('ProjectController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId (GET) should not find a project by id if user has no access', async () => {
+  it('/api/v1/activities/:activityId (GET) should not find a project by id if user has no access', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -168,14 +168,14 @@ describe('ProjectController (e2e)', () => {
         projectId = res.body.data.id;
       });
 
-    await request(app.getHttpServer()).get(`/api/v1/projects/${projectId}`).set('Authorization', `Bearer ${anotherUser.accessToken}`).expect(404);
+    await request(app.getHttpServer()).get(`/api/v1/activities/${projectId}`).set('Authorization', `Bearer ${anotherUser.accessToken}`).expect(404);
   });
 
-  it('/api/v1/projects (POST) should not create a project if the user has created too many', async () => {
+  it('/api/v1/activities (POST) should not create a project if the user has created too many', async () => {
     let toDeleteProjectId;
     for (let i = 0; i < 100; i++) {
       const res = await request(app.getHttpServer())
-        .post('/api/v1/projects')
+        .post('/api/v1/activities')
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           name: 'My project',
@@ -185,7 +185,7 @@ describe('ProjectController (e2e)', () => {
     }
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My project',
@@ -193,7 +193,7 @@ describe('ProjectController (e2e)', () => {
       .expect(429);
 
     await request(app.getHttpServer())
-      .get('/api/v1/projects')
+      .get('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -202,13 +202,13 @@ describe('ProjectController (e2e)', () => {
 
     // get rid of one project
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${toDeleteProjectId}`)
+      .delete(`/api/v1/activities/${toDeleteProjectId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(204);
 
     // now try again
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My project',
@@ -216,7 +216,7 @@ describe('ProjectController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My project',
@@ -224,11 +224,11 @@ describe('ProjectController (e2e)', () => {
       .expect(429);
   });
 
-  it('/api/v1/projects/:projectId (PATCH) should update a project', async () => {
+  it('/api/v1/activities/:activityId (PATCH) should update a project', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -239,7 +239,7 @@ describe('ProjectController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${projectId}`)
+      .patch(`/api/v1/activities/${projectId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My updated project',
@@ -249,7 +249,7 @@ describe('ProjectController (e2e)', () => {
         expect(res.body.data).toHaveExactProperties(['id', 'name', 'description', 'role', 'termsCount', 'localesCount', 'date']);
       });
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${projectId}`)
+      .patch(`/api/v1/activities/${projectId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         description: 'A short project description goes here',
@@ -260,7 +260,7 @@ describe('ProjectController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${projectId}`)
+      .get(`/api/v1/activities/${projectId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -270,11 +270,11 @@ describe('ProjectController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId (PATCH) should not update a project if user has no access', async () => {
+  it('/api/v1/activities/:activityId (PATCH) should not update a project if user has no access', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -285,7 +285,7 @@ describe('ProjectController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${projectId}`)
+      .patch(`/api/v1/activities/${projectId}`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .send({
         name: 'I should not be able to update this',
@@ -293,7 +293,7 @@ describe('ProjectController (e2e)', () => {
       .expect(404);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${projectId}`)
+      .get(`/api/v1/activities/${projectId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -302,11 +302,11 @@ describe('ProjectController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId (DELETE) should not delete a project by id if user has no access', async () => {
+  it('/api/v1/activities/:activityId (DELETE) should not delete a project by id if user has no access', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -316,14 +316,14 @@ describe('ProjectController (e2e)', () => {
         projectId = res.body.data.id;
       });
 
-    await request(app.getHttpServer()).delete(`/api/v1/projects/${projectId}`).set('Authorization', `Bearer ${anotherUser.accessToken}`).expect(404);
+    await request(app.getHttpServer()).delete(`/api/v1/activities/${projectId}`).set('Authorization', `Bearer ${anotherUser.accessToken}`).expect(404);
   });
 
-  it('/api/v1/projects/:projectId (DELETE) should delete a project by id', async () => {
+  it('/api/v1/activities/:activityId (DELETE) should delete a project by id', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -333,14 +333,14 @@ describe('ProjectController (e2e)', () => {
         projectId = res.body.data.id;
       });
 
-    await request(app.getHttpServer()).delete(`/api/v1/projects/${projectId}`).set('Authorization', `Bearer ${testingUser.accessToken}`).expect(204);
+    await request(app.getHttpServer()).delete(`/api/v1/activities/${projectId}`).set('Authorization', `Bearer ${testingUser.accessToken}`).expect(204);
   });
 
-  it('/api/v1/projects should not access projects resource if not authenticated', async () => {
+  it('/api/v1/activities should not access projects resource if not authenticated', async () => {
     let projectId;
 
     await request(app.getHttpServer())
-      .post('/api/v1/projects')
+      .post('/api/v1/activities')
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         name: 'My first project',
@@ -350,15 +350,15 @@ describe('ProjectController (e2e)', () => {
         projectId = res.body.data.id;
       });
 
-    await request(app.getHttpServer()).post('/api/v1/projects').expect(401);
+    await request(app.getHttpServer()).post('/api/v1/activities').expect(401);
 
-    await request(app.getHttpServer()).get('/api/v1/projects').expect(401);
+    await request(app.getHttpServer()).get('/api/v1/activities').expect(401);
 
-    await request(app.getHttpServer()).get(`/api/v1/projects/${projectId}`).expect(401);
+    await request(app.getHttpServer()).get(`/api/v1/activities/${projectId}`).expect(401);
 
-    await request(app.getHttpServer()).patch(`/api/v1/projects/${projectId}`).expect(401);
+    await request(app.getHttpServer()).patch(`/api/v1/activities/${projectId}`).expect(401);
 
-    await request(app.getHttpServer()).delete(`/api/v1/projects/${projectId}`).expect(401);
+    await request(app.getHttpServer()).delete(`/api/v1/activities/${projectId}`).expect(401);
   });
 
   afterEach(async () => {

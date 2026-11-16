@@ -7,6 +7,7 @@ import { ProjectRole } from '../../models';
 import type { Term } from '../../models';
 import ContextEditor from '../shared/ContextEditor';
 import { parseContext } from '../../utils/term-context';
+import PageHeader from '../shared/PageHeader';
 
 export default function TermsList() {
   const { currentProject } = useProjectsStore();
@@ -69,7 +70,7 @@ export default function TermsList() {
       key: 'context',
       render: (val: string | null, record: Term) => (
         <ContextEditor
-          projectId={currentProject!.id}
+          activityId={currentProject!.id}
           value={val}
           readOnly={readOnly}
           onCommit={v => {
@@ -92,13 +93,16 @@ export default function TermsList() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h3 style={{ margin: 0 }}>词条列表</h3>
-        <Space>
-          <Input.Search placeholder="搜索词条..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 240 }} />
-          {!readOnly && <Button type="primary" icon={<PlusOutlined />} onClick={() => setNewTermModal(true)}>新增词条</Button>}
-        </Space>
-      </div>
+      <PageHeader
+        title="词条"
+        description="词条（key）和它的备注；备注里可以直接粘贴截图"
+        extra={
+          <Space>
+            <Input.Search placeholder="搜索词条..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 240 }} allowClear />
+            {!readOnly && <Button type="primary" icon={<PlusOutlined />} onClick={() => setNewTermModal(true)}>新增词条</Button>}
+          </Space>
+        }
+      />
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
       <Table
         dataSource={filtered}
@@ -121,7 +125,7 @@ export default function TermsList() {
             <Input placeholder="key.name 或 Some text..." />
           </Form.Item>
           <Form.Item label="备注（可选）" name="context">
-            <ContextEditor projectId={currentProject!.id} placeholder="该词条的说明或备注，可直接粘贴截图..." />
+            <ContextEditor activityId={currentProject!.id} placeholder="该词条的说明或备注，可直接粘贴截图..." />
           </Form.Item>
         </Form>
       </Modal>

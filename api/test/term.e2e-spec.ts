@@ -19,9 +19,9 @@ describe('TermController (e2e)', () => {
     testProject = await createTestProject(app, testingUser);
   });
 
-  it('/api/v1/projects/:projectId/terms (POST) should create terms for project', async () => {
+  it('/api/v1/activities/:activityId/terms (POST) should create terms for project', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -32,9 +32,9 @@ describe('TermController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/terms (POST) should create terms with context for project', async () => {
+  it('/api/v1/activities/:activityId/terms (POST) should create terms with context for project', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -47,9 +47,9 @@ describe('TermController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/terms (GET) should find terms for project', async () => {
+  it('/api/v1/activities/:activityId/terms (GET) should find terms for project', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -57,7 +57,7 @@ describe('TermController (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/terms`)
+      .get(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -66,13 +66,13 @@ describe('TermController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/terms (GET) should return terms in lexical order', async () => {
+  it('/api/v1/activities/:activityId/terms (GET) should return terms in lexical order', async () => {
     const input = ['app.login', 'should be last', 'app.logout', '2 goes second', 'app.exit', 'menu.start', 'a term', '1 goes first'];
     const expected = ['1 goes first', '2 goes second', 'a term', 'app.exit', 'app.login', 'app.logout', 'menu.start', 'should be last'];
 
     for (const term of input) {
       await request(app.getHttpServer())
-        .post(`/api/v1/projects/${testProject.id}/terms`)
+        .post(`/api/v1/activities/${testProject.id}/terms`)
         .set('Authorization', `Bearer ${testingUser.accessToken}`)
         .send({
           value: term,
@@ -81,7 +81,7 @@ describe('TermController (e2e)', () => {
     }
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/terms`)
+      .get(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -90,11 +90,11 @@ describe('TermController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/terms/:termId (PATCH) should update term by id', async () => {
+  it('/api/v1/activities/:activityId/terms/:termId (PATCH) should update term by id', async () => {
     let termId: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -106,7 +106,7 @@ describe('TermController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject.id}/terms/${termId}`)
+      .patch(`/api/v1/activities/${testProject.id}/terms/${termId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.two',
@@ -121,11 +121,11 @@ describe('TermController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/terms/:termId (PATCH) should accept terms with utf-8 encoding', async () => {
+  it('/api/v1/activities/:activityId/terms/:termId (PATCH) should accept terms with utf-8 encoding', async () => {
     let termId: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -136,7 +136,7 @@ describe('TermController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject.id}/terms/${termId}`)
+      .patch(`/api/v1/activities/${testProject.id}/terms/${termId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.two őúüöá 😀👍🍉你好',
@@ -151,11 +151,11 @@ describe('TermController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/terms/:termId (DELETE) should delete term by id', async () => {
+  it('/api/v1/activities/:activityId/terms/:termId (DELETE) should delete term by id', async () => {
     let termId: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -166,12 +166,12 @@ describe('TermController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject.id}/terms/${termId}`)
+      .delete(`/api/v1/activities/${testProject.id}/terms/${termId}`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(204);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/terms`)
+      .get(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -179,11 +179,11 @@ describe('TermController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/terms should not access terms resource if not authenticated', async () => {
+  it('/api/v1/activities/:activityId/terms should not access terms resource if not authenticated', async () => {
     let termId: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -193,20 +193,20 @@ describe('TermController (e2e)', () => {
         termId = res.body.data.id;
       });
 
-    await request(app.getHttpServer()).post(`/api/v1/projects/${testProject.id}/terms`).expect(401);
+    await request(app.getHttpServer()).post(`/api/v1/activities/${testProject.id}/terms`).expect(401);
 
-    await request(app.getHttpServer()).get(`/api/v1/projects/${testProject.id}/terms/`).expect(401);
+    await request(app.getHttpServer()).get(`/api/v1/activities/${testProject.id}/terms/`).expect(401);
 
-    await request(app.getHttpServer()).patch(`/api/v1/projects/${testProject.id}/terms/${termId}`).expect(401);
+    await request(app.getHttpServer()).patch(`/api/v1/activities/${testProject.id}/terms/${termId}`).expect(401);
 
-    await request(app.getHttpServer()).delete(`/api/v1/projects/${testProject.id}/terms/${termId}`).expect(401);
+    await request(app.getHttpServer()).delete(`/api/v1/activities/${testProject.id}/terms/${termId}`).expect(401);
   });
 
-  it('/api/v1/projects/:projectId/terms should not access terms resource if not authorized', async () => {
+  it('/api/v1/activities/:activityId/terms should not access terms resource if not authorized', async () => {
     let termId: string;
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${testingUser.accessToken}`)
       .send({
         value: 'term.one',
@@ -217,7 +217,7 @@ describe('TermController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject.id}/terms`)
+      .post(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .send({
         value: 'should not persist',
@@ -225,12 +225,12 @@ describe('TermController (e2e)', () => {
       .expect(404);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject.id}/terms`)
+      .get(`/api/v1/activities/${testProject.id}/terms`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .expect(404);
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject.id}/terms/${termId}`)
+      .patch(`/api/v1/activities/${testProject.id}/terms/${termId}`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .send({
         value: 'should not persist',
@@ -238,7 +238,7 @@ describe('TermController (e2e)', () => {
       .expect(404);
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject.id}/terms/${termId}`)
+      .delete(`/api/v1/activities/${testProject.id}/terms/${termId}`)
       .set('Authorization', `Bearer ${anotherUser.accessToken}`)
       .expect(404);
   });

@@ -8,7 +8,7 @@ import { errorToMessage } from '../../utils/api-error';
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 interface Props {
-  projectId: string;
+  activityId: string;
   /** 完整的备注字符串（文字 + 图片标记） */
   value?: string | null;
   readOnly?: boolean;
@@ -24,7 +24,7 @@ interface Props {
  * 词条备注编辑器：可以直接 Ctrl/Cmd+V 粘贴截图，也可以点按钮选择图片。
  * 文字和图片分开管理，保存时合成为一个字符串。
  */
-export default function ContextEditor({ projectId, value, readOnly, placeholder, onChange, onCommit, thumbSize = 88 }: Props) {
+export default function ContextEditor({ activityId, value, readOnly, placeholder, onChange, onCommit, thumbSize = 88 }: Props) {
   const parsed = parseContext(value);
   const [text, setText] = useState(parsed.text);
   const [imageIds, setImageIds] = useState(parsed.imageIds);
@@ -61,7 +61,7 @@ export default function ContextEditor({ projectId, value, readOnly, placeholder,
       }
       setUploading(n => n + 1);
       try {
-        const id = await termsApi.uploadImage(projectId, file);
+        const id = await termsApi.uploadImage(activityId, file);
         apply({ text: latest.current.text, imageIds: [...latest.current.imageIds, id] }, true);
       } catch (error) {
         message.error(`图片上传失败：${errorToMessage(error)}`);
@@ -116,7 +116,7 @@ export default function ContextEditor({ projectId, value, readOnly, placeholder,
             {imageIds.map(id => (
               <div key={id} style={{ position: 'relative' }}>
                 <Image
-                  src={termImageUrl(projectId, id)}
+                  src={termImageUrl(activityId, id)}
                   width={thumbSize}
                   height={thumbSize}
                   style={{ objectFit: 'contain', background: '#fafafa', borderRadius: 4, border: '1px solid #eee' }}
@@ -131,7 +131,7 @@ export default function ContextEditor({ projectId, value, readOnly, placeholder,
             ))}
           </Image.PreviewGroup>
           {uploading > 0 && (
-            <span style={{ color: '#888', fontSize: 12 }}>
+            <span style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }}>
               <LoadingOutlined /> 上传中...
             </span>
           )}

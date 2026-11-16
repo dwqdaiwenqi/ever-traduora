@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 
 const LOGIN_MESSAGES: { [code: string]: string } = {
-  EmailNotRegistered: '这个邮箱还没有被添加，请联系管理员把你加到项目里。',
+  EmailNotRegistered: '这个邮箱还没有被添加，请联系管理员把你加到活动里。',
   PasswordRequired: '该账号需要使用密码登录。',
 };
 
@@ -28,7 +28,7 @@ export function errorToMessage(error: any, action = ''): string {
     if (action === 'Login') return '这个账号没有密码，请直接用邮箱登录。';
     return '服务器无法处理该请求，请检查你的请求。';
   } else if (status === 402) {
-    return '这将超出当前项目套餐的限额。请查看当前用量或升级套餐。';
+    return '这将超出当前活动套餐的限额。请查看当前用量或升级套餐。';
   } else if (status === 401) {
     if (action === 'Login') return '邮箱或密码错误。';
     return '未授权。';

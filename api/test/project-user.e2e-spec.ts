@@ -27,9 +27,9 @@ describe('ProjectUserController (e2e)', () => {
     testProject3 = await createTestProject(app, testingUser3);
   });
 
-  it('/api/v1/projects/:projectId/users (GET) should return all project users including self', async () => {
+  it('/api/v1/activities/:activityId/users (GET) should return all project users including self', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/users`)
+      .get(`/api/v1/activities/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -40,9 +40,9 @@ describe('ProjectUserController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/users (POST) should add a member by email if allowed, creating the account when the email is new', async () => {
+  it('/api/v1/activities/:activityId/users (POST) should add a member by email if allowed, creating the account when the email is new', async () => {
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .post(`/api/v1/activities/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({ email: testingUser2.email, role: 'viewer' })
       .expect(201)
@@ -54,14 +54,14 @@ describe('ProjectUserController (e2e)', () => {
 
     // already a member
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .post(`/api/v1/activities/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({ email: testingUser2.email, role: 'editor' })
       .expect(409);
 
     // an email nobody used before: an account without a password is created, and that person can sign in with just the email
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .post(`/api/v1/activities/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({ email: 'New.Person@Test.com', role: 'editor' })
       .expect(201)
@@ -77,17 +77,17 @@ describe('ProjectUserController (e2e)', () => {
 
     // a viewer can not add members
     await request(app.getHttpServer())
-      .post(`/api/v1/projects/${testProject1.id}/users`)
+      .post(`/api/v1/activities/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .send({ email: testingUser3.email, role: 'viewer' })
       .expect(404); // mapped to 404 to prevent id probing
   });
 
-  it('/api/v1/projects/:projectId/users/:userId (PATCH) should be able to edit project users if allowed', async () => {
+  it('/api/v1/activities/:activityId/users/:userId (PATCH) should be able to edit project users if allowed', async () => {
     await addTestProjectUser(app, testProject1, testingUser2, 'editor');
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser2.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/users/${testingUser2.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: 'viewer',
@@ -103,7 +103,7 @@ describe('ProjectUserController (e2e)', () => {
 
     // user 2 should not be able to change the admin
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/users/${testingUser1.id}`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .send({
         role: 'viewer',
@@ -111,7 +111,7 @@ describe('ProjectUserController (e2e)', () => {
       .expect(404); // mapped to 404 to prevent id probing
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser2.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/users/${testingUser2.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: 'editor',
@@ -119,11 +119,11 @@ describe('ProjectUserController (e2e)', () => {
       .expect(200);
   });
 
-  it('/api/v1/projects/:projectId/users/:userId (PATCH) should not affect the other projects from that user', async () => {
+  it('/api/v1/activities/:activityId/users/:userId (PATCH) should not affect the other projects from that user', async () => {
     await addTestProjectUser(app, testProject1, testingUser2, 'admin');
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/users/${testingUser1.id}`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .send({
         role: 'viewer',
@@ -131,7 +131,7 @@ describe('ProjectUserController (e2e)', () => {
       .expect(200);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects`)
+      .get(`/api/v1/activities`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -143,7 +143,7 @@ describe('ProjectUserController (e2e)', () => {
       });
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/users/${testingUser1.id}`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .send({
         role: 'admin',
@@ -151,7 +151,7 @@ describe('ProjectUserController (e2e)', () => {
       .expect(200);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects`)
+      .get(`/api/v1/activities`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: 'admin',
@@ -168,7 +168,7 @@ describe('ProjectUserController (e2e)', () => {
     await addTestProjectUser(app, testProject1c, testingUser2, 'admin');
 
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1c.id}/users/${testingUser1.id}`)
+      .patch(`/api/v1/activities/${testProject1c.id}/users/${testingUser1.id}`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .send({
         role: 'editor',
@@ -176,7 +176,7 @@ describe('ProjectUserController (e2e)', () => {
       .expect(200);
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects`)
+      .get(`/api/v1/activities`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -188,9 +188,9 @@ describe('ProjectUserController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/users/:userId (PATCH) should not be able to edit or remove yourself', async () => {
+  it('/api/v1/activities/:activityId/users/:userId (PATCH) should not be able to edit or remove yourself', async () => {
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/users/${testingUser1.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .send({
         role: 'viewer',
@@ -198,22 +198,22 @@ describe('ProjectUserController (e2e)', () => {
       .expect(400);
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject1.id}/users/${testingUser1.id}`)
+      .delete(`/api/v1/activities/${testProject1.id}/users/${testingUser1.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(400);
   });
 
-  it('/api/v1/projects/:projectId/users/:userId (DELETE) should remove project users if allowed', async () => {
+  it('/api/v1/activities/:activityId/users/:userId (DELETE) should remove project users if allowed', async () => {
     await addTestProjectUser(app, testProject1, testingUser2, 'editor');
 
     await request(app.getHttpServer())
-      .delete(`/api/v1/projects/${testProject1.id}/users/${testingUser2.id}`)
+      .delete(`/api/v1/activities/${testProject1.id}/users/${testingUser2.id}`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(204);
 
     // user 2 should not be able to access anymore
     await request(app.getHttpServer())
-      .patch(`/api/v1/projects/${testProject1.id}/users/${testingUser1.id}`)
+      .patch(`/api/v1/activities/${testProject1.id}/users/${testingUser1.id}`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .send({
         role: 'viewer',
@@ -222,12 +222,12 @@ describe('ProjectUserController (e2e)', () => {
 
     // user 2 should not be able to access anymore
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}`)
+      .get(`/api/v1/activities/${testProject1.id}`)
       .set('Authorization', `Bearer ${testingUser2.accessToken}`)
       .expect(404); // mapped to 404 to prevent id probing
 
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/users`)
+      .get(`/api/v1/activities/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
       .expect(200)
       .expect(res => {
@@ -238,13 +238,13 @@ describe('ProjectUserController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/users should not access project users resource if not authenticated', async () => {
-    await request(app.getHttpServer()).get(`/api/v1/projects/${testProject1.id}/users`).expect(401);
+  it('/api/v1/activities/:activityId/users should not access project users resource if not authenticated', async () => {
+    await request(app.getHttpServer()).get(`/api/v1/activities/${testProject1.id}/users`).expect(401);
   });
 
-  it('/api/v1/projects/:projectId/users should not access project users resource if not authorized', async () => {
+  it('/api/v1/activities/:activityId/users should not access project users resource if not authorized', async () => {
     await request(app.getHttpServer())
-      .get(`/api/v1/projects/${testProject1.id}/users`)
+      .get(`/api/v1/activities/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser3.accessToken}`)
       .expect(404);
   });

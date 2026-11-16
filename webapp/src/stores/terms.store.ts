@@ -8,10 +8,10 @@ interface TermsState {
   isLoading: boolean;
   errorMessage: string | undefined;
 
-  getTerms: (projectId: string) => Promise<void>;
-  createTerm: (projectId: string, value: string, context?: string) => Promise<void>;
-  updateTerm: (projectId: string, termId: string, value: string, context?: string) => Promise<void>;
-  deleteTerm: (projectId: string, termId: string) => Promise<void>;
+  getTerms: (activityId: string) => Promise<void>;
+  createTerm: (activityId: string, value: string, context?: string) => Promise<void>;
+  updateTerm: (activityId: string, termId: string, value: string, context?: string) => Promise<void>;
+  deleteTerm: (activityId: string, termId: string) => Promise<void>;
   clearMessages: () => void;
   reset: () => void;
 }
@@ -21,10 +21,10 @@ const defaults = { terms: [], isLoading: false, errorMessage: undefined };
 export const useTermsStore = create<TermsState>((set, get) => ({
   ...defaults,
 
-  getTerms: async (projectId) => {
+  getTerms: async (activityId) => {
     set({ isLoading: true });
     try {
-      const terms = await termsApi.find(projectId);
+      const terms = await termsApi.find(activityId);
       set({ terms });
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -33,10 +33,10 @@ export const useTermsStore = create<TermsState>((set, get) => ({
     }
   },
 
-  createTerm: async (projectId, value, context) => {
+  createTerm: async (activityId, value, context) => {
     set({ isLoading: true });
     try {
-      const term = await termsApi.create(projectId, value, context);
+      const term = await termsApi.create(activityId, value, context);
       set(state => ({ terms: [term, ...state.terms] }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -46,10 +46,10 @@ export const useTermsStore = create<TermsState>((set, get) => ({
     }
   },
 
-  updateTerm: async (projectId, termId, value, context) => {
+  updateTerm: async (activityId, termId, value, context) => {
     set({ isLoading: true });
     try {
-      const term = await termsApi.update(projectId, termId, value, context);
+      const term = await termsApi.update(activityId, termId, value, context);
       set(state => ({ terms: state.terms.map(t => t.id === term.id ? term : t) }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -59,10 +59,10 @@ export const useTermsStore = create<TermsState>((set, get) => ({
     }
   },
 
-  deleteTerm: async (projectId, termId) => {
+  deleteTerm: async (activityId, termId) => {
     set({ isLoading: true });
     try {
-      await termsApi.delete(projectId, termId);
+      await termsApi.delete(activityId, termId);
       set(state => ({ terms: state.terms.filter(t => t.id !== termId) }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });

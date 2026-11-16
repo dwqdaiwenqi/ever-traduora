@@ -8,10 +8,10 @@ interface ProjectUsersState {
   isLoading: boolean;
   errorMessage: string | undefined;
 
-  getProjectUsers: (projectId: string, selfUserId?: string) => Promise<void>;
-  addProjectUser: (projectId: string, email: string, role: ProjectRole) => Promise<void>;
-  updateProjectUser: (projectId: string, userId: string, role: ProjectRole) => Promise<void>;
-  removeProjectUser: (projectId: string, userId: string) => Promise<void>;
+  getProjectUsers: (activityId: string, selfUserId?: string) => Promise<void>;
+  addProjectUser: (activityId: string, email: string, role: ProjectRole) => Promise<void>;
+  updateProjectUser: (activityId: string, userId: string, role: ProjectRole) => Promise<void>;
+  removeProjectUser: (activityId: string, userId: string) => Promise<void>;
   clearMessages: () => void;
   reset: () => void;
 }
@@ -21,10 +21,10 @@ const defaults = { users: [], isLoading: false, errorMessage: undefined };
 export const useProjectUsersStore = create<ProjectUsersState>(set => ({
   ...defaults,
 
-  getProjectUsers: async (projectId, selfUserId) => {
+  getProjectUsers: async (activityId, selfUserId) => {
     set({ isLoading: true });
     try {
-      const users = await projectUsersApi.find(projectId);
+      const users = await projectUsersApi.find(activityId);
       set({ users: users.map(u => ({ ...u, isSelf: u.userId === selfUserId })) });
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -33,10 +33,10 @@ export const useProjectUsersStore = create<ProjectUsersState>(set => ({
     }
   },
 
-  addProjectUser: async (projectId, email, role) => {
+  addProjectUser: async (activityId, email, role) => {
     set({ isLoading: true, errorMessage: undefined });
     try {
-      const user = await projectUsersApi.create(projectId, email, role);
+      const user = await projectUsersApi.create(activityId, email, role);
       set(state => ({ users: [...state.users, user] }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -46,10 +46,10 @@ export const useProjectUsersStore = create<ProjectUsersState>(set => ({
     }
   },
 
-  updateProjectUser: async (projectId, userId, role) => {
+  updateProjectUser: async (activityId, userId, role) => {
     set({ isLoading: true, errorMessage: undefined });
     try {
-      await projectUsersApi.update(projectId, userId, role);
+      await projectUsersApi.update(activityId, userId, role);
       set(state => ({ users: state.users.map(u => (u.userId === userId ? { ...u, role } : u)) }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -59,10 +59,10 @@ export const useProjectUsersStore = create<ProjectUsersState>(set => ({
     }
   },
 
-  removeProjectUser: async (projectId, userId) => {
+  removeProjectUser: async (activityId, userId) => {
     set({ isLoading: true, errorMessage: undefined });
     try {
-      await projectUsersApi.remove(projectId, userId);
+      await projectUsersApi.remove(activityId, userId);
       set(state => ({ users: state.users.filter(u => u.userId !== userId) }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });

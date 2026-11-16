@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, Progress, Tag } from 'antd';
+import { Card, Tag } from 'antd';
+import { GlobalOutlined, TagsOutlined } from '@ant-design/icons';
 import { projectRoleLabels } from '../../models';
 import type { Project } from '../../models';
 
@@ -8,28 +9,22 @@ interface Props {
   onClick?: () => void;
 }
 
+const ellipsis: React.CSSProperties = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+
 export default function ProjectCard({ project, onClick }: Props) {
   return (
-    <Card
-      hoverable
-      onClick={onClick}
-      style={{ cursor: 'pointer' }}
-      bodyStyle={{ padding: 20 }}
-    >
-      <div style={{ marginBottom: 8, fontWeight: 600, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {project.name}
+    <Card hoverable onClick={onClick} styles={{ body: { padding: 20 } }} style={{ borderColor: 'var(--tr-border-light)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ fontWeight: 600, fontSize: 16, ...ellipsis }} title={project.name}>{project.name}</div>
+        <Tag bordered={false} style={{ marginInlineEnd: 0, flexShrink: 0 }}>{projectRoleLabels[project.role] ?? project.role}</Tag>
       </div>
-      {project.description && (
-        <div style={{ color: '#888', fontSize: 13, marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {project.description}
-        </div>
-      )}
-      <div style={{ color: '#888', fontSize: 12 }}>
-        <span>{project.termsCount ?? 0} 个词条</span>
-        {' · '}
-        <span>{project.localesCount ?? 0} 个语言</span>
+      <div style={{ color: 'var(--tr-text-tertiary)', fontSize: 13, margin: '6px 0 14px', minHeight: 20, ...ellipsis }}>
+        {project.description || '暂无描述'}
       </div>
-      <Tag color="blue" style={{ marginTop: 8 }}>{projectRoleLabels[project.role] ?? project.role}</Tag>
+      <div style={{ display: 'flex', gap: 16, color: 'var(--tr-text-secondary)', fontSize: 13 }}>
+        <span><TagsOutlined /> {project.termsCount ?? 0} 个词条</span>
+        <span><GlobalOutlined /> {project.localesCount ?? 0} 个语言</span>
+      </div>
     </Card>
   );
 }

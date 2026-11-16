@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import AppBar from '../shared/AppBar';
 import { useProjectsStore } from '../../stores/projects.store';
 import ProjectCard from './ProjectCard';
+import PageHeader from '../shared/PageHeader';
 
 export default function ProjectList() {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export default function ProjectList() {
       const project = await createProject(values.name, values.description);
       setModalOpen(false);
       form.resetFields();
-      navigate(`/projects/${project.id}/matrix`);
+      navigate(`/activities/${project.id}/matrix`);
     } catch {
       // shown via store
     } finally {
@@ -33,27 +34,26 @@ export default function ProjectList() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <div style={{ minHeight: '100vh' }}>
       <AppBar />
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ margin: 0 }}>我的项目</h2>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
-            新建项目
-          </Button>
-        </div>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+        <PageHeader
+          title="我的活动"
+          description="选择一个活动开始翻译"
+          extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>新建活动</Button>}
+        />
         {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
         {isLoading ? (
           <div style={{ textAlign: 'center', padding: 64 }}><Spin size="large" /></div>
         ) : projects.length === 0 ? (
-          <Empty description="暂无项目" style={{ padding: 64 }}>
-            <Button type="primary" onClick={() => setModalOpen(true)}>创建第一个项目</Button>
+          <Empty description="暂无活动" style={{ padding: 64 }}>
+            <Button type="primary" onClick={() => setModalOpen(true)}>创建第一个活动</Button>
           </Empty>
         ) : (
           <Row gutter={[16, 16]}>
             {projects.map(project => (
               <Col key={project.id} xs={24} sm={12} md={8} lg={6}>
-                <ProjectCard project={project} onClick={() => navigate(`/projects/${project.id}/matrix`)} />
+                <ProjectCard project={project} onClick={() => navigate(`/activities/${project.id}/matrix`)} />
               </Col>
             ))}
           </Row>
@@ -61,7 +61,7 @@ export default function ProjectList() {
       </div>
 
       <Modal
-        title="新建项目"
+        title="新建活动"
         open={modalOpen}
         onCancel={() => { setModalOpen(false); form.resetFields(); }}
         onOk={() => form.submit()}
@@ -70,10 +70,10 @@ export default function ProjectList() {
         cancelText="取消"
       >
         <Form form={form} layout="vertical" onFinish={handleCreate}>
-          <Form.Item label="项目名称" name="name" rules={[{ required: true, message: '请输入项目名称' }]}>
-            <Input placeholder="我的项目..." />
+          <Form.Item label="活动名称" name="name" rules={[{ required: true, message: '请输入活动名称' }]}>
+            <Input placeholder="我的活动..." />
           </Form.Item>
-          <Form.Item label="项目描述" name="description">
+          <Form.Item label="活动描述" name="description">
             <Input.TextArea placeholder="可选描述..." rows={3} />
           </Form.Item>
         </Form>

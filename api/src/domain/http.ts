@@ -163,7 +163,7 @@ export class ProjectLocaleStatsDTO {
 
 export class GetProjectStatsDTO {
   @ApiProperty()
-  projectStats: ProjectStatsDTO;
+  activityStats: ProjectStatsDTO;
   @ApiProperty()
   localeStats: { [localeCode: string]: ProjectLocaleStatsDTO };
 }

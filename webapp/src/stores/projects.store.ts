@@ -79,7 +79,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     set({ isLoading: true });
     try {
       await projectsApi.delete(id);
-      navigate('/projects');
+      navigate('/activities');
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
       throw error;
@@ -106,12 +106,12 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
   },
 
   reloadCurrentProject: async () => {
-    const projectId = get().currentProject?.id;
-    if (!projectId) return;
+    const activityId = get().currentProject?.id;
+    if (!activityId) return;
     set({ isLoading: true });
     try {
-      const project = await projectsApi.findOne(projectId);
-      const plan = await projectsApi.findPlan(projectId);
+      const project = await projectsApi.findOne(activityId);
+      const plan = await projectsApi.findPlan(activityId);
       project.plan = plan;
       set({ currentProject: project });
     } catch (error) {
@@ -122,10 +122,10 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
   },
 
   refreshProjectStats: async () => {
-    const projectId = get().currentProject?.id;
-    if (!projectId) return;
+    const activityId = get().currentProject?.id;
+    if (!activityId) return;
     try {
-      const stats = await projectsApi.getStats(projectId);
+      const stats = await projectsApi.getStats(activityId);
       set({ currentProjectStats: stats });
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });

@@ -27,38 +27,38 @@ export default class AuthorizationService {
     return user;
   }
 
-  async mustBeProjectUserOrClient(userOrClient: User | ProjectClient, projectId: string): Promise<ProjectUser | ProjectClient> {
+  async mustBeProjectUserOrClient(userOrClient: User | ProjectClient, activityId: string): Promise<ProjectUser | ProjectClient> {
     if (userOrClient instanceof User) {
       const membership = await this.projectUserRepo.findOne({
-        where: { project: { id: projectId }, user: { id: userOrClient.id } },
+        where: { project: { id: activityId }, user: { id: userOrClient.id } },
         relations: ['project', 'project.plan'],
       });
       if (!membership) {
-        throw new ForbiddenException('project not found');
+        throw new ForbiddenException('activity not found');
       }
       return membership;
     } else if (userOrClient instanceof ProjectClient) {
       const membership = await this.projectClientRepo.findOne({
-        where: { project: { id: projectId }, id: userOrClient.id },
+        where: { project: { id: activityId }, id: userOrClient.id },
         relations: ['project', 'project.plan'],
       });
       if (!membership) {
-        throw new ForbiddenException('project not found');
+        throw new ForbiddenException('activity not found');
       }
       return membership;
     } else {
-      throw new ForbiddenException('unknown entity claims to be project client or user');
+      throw new ForbiddenException('unknown entity claims to be activity client or user');
     }
   }
 
   async authorizeProjectAction(
     userOrClient: User | ProjectClient,
-    projectId: string,
+    activityId: string,
     action: ProjectAction,
     newTermsCount: number = 0,
     newLocalesCount: number = 0,
   ): Promise<ProjectUser | ProjectClient> {
-    const membership = await this.mustBeProjectUserOrClient(userOrClient, projectId);
+    const membership = await this.mustBeProjectUserOrClient(userOrClient, activityId);
     if (!this.isAuthorized(membership.role, action)) {
       throw new ForbiddenException('you are not authorized to perform this action');
     }

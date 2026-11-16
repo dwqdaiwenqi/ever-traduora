@@ -12,13 +12,13 @@ interface TranslationsState {
   errorMessage: string | undefined;
 
   getKnownLocales: () => Promise<void>;
-  getProjectLocales: (projectId: string) => Promise<void>;
-  addProjectLocale: (projectId: string, localeCode: string) => Promise<void>;
-  deleteProjectLocale: (projectId: string, localeCode: string) => Promise<void>;
-  getTranslations: (projectId: string, localeCode: string, navigate?: (path: string) => void) => Promise<void>;
-  updateTranslation: (projectId: string, localeCode: string, termId: string, value: string) => Promise<void>;
+  getProjectLocales: (activityId: string) => Promise<void>;
+  addProjectLocale: (activityId: string, localeCode: string) => Promise<void>;
+  deleteProjectLocale: (activityId: string, localeCode: string) => Promise<void>;
+  getTranslations: (activityId: string, localeCode: string, navigate?: (path: string) => void) => Promise<void>;
+  updateTranslation: (activityId: string, localeCode: string, termId: string, value: string) => Promise<void>;
   confirmTranslations: (
-    projectId: string,
+    activityId: string,
     localeCode: string,
     items: { termId: string; value: string }[],
   ) => Promise<{ confirmed: number; skipped: number; version: number | null }>;
@@ -43,10 +43,10 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
     }
   },
 
-  getProjectLocales: async (projectId) => {
+  getProjectLocales: async (activityId) => {
     set({ isLoading: true });
     try {
-      const projectLocales = await translationsApi.findProjectLocales(projectId);
+      const projectLocales = await translationsApi.findProjectLocales(activityId);
       set({ projectLocales: sortBy(projectLocales, v => v.locale.code) });
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -55,10 +55,10 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
     }
   },
 
-  addProjectLocale: async (projectId, localeCode) => {
+  addProjectLocale: async (activityId, localeCode) => {
     set({ isLoading: true });
     try {
-      const projectLocale = await translationsApi.addProjectLocale(projectId, localeCode);
+      const projectLocale = await translationsApi.addProjectLocale(activityId, localeCode);
       set(state => ({ projectLocales: [...state.projectLocales, projectLocale] }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -68,10 +68,10 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
     }
   },
 
-  deleteProjectLocale: async (projectId, localeCode) => {
+  deleteProjectLocale: async (activityId, localeCode) => {
     set({ isLoading: true });
     try {
-      await translationsApi.deleteProjectLocale(projectId, localeCode);
+      await translationsApi.deleteProjectLocale(activityId, localeCode);
       set(state => ({ projectLocales: state.projectLocales.filter(x => x.locale.code !== localeCode) }));
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
@@ -81,10 +81,10 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
     }
   },
 
-  getTranslations: async (projectId, localeCode, navigate) => {
+  getTranslations: async (activityId, localeCode, navigate) => {
     set({ isLoading: true });
     try {
-      const translation = await translationsApi.findProjectTranslation(projectId, localeCode);
+      const translation = await translationsApi.findProjectTranslation(activityId, localeCode);
       set(state => ({ translations: { ...state.translations, [localeCode]: translation } }));
     } catch (error: any) {
       if (error?.response?.status === 404 && navigate) navigate('/404');
@@ -94,10 +94,10 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
     }
   },
 
-  updateTranslation: async (projectId, localeCode, termId, value) => {
+  updateTranslation: async (activityId, localeCode, termId, value) => {
     set({ isLoading: true });
     try {
-      const translation = await translationsApi.updateTranslation(projectId, localeCode, termId, value);
+      const translation = await translationsApi.updateTranslation(activityId, localeCode, termId, value);
       set(state => {
         const storeTranslations = state.translations;
         let found = false;
@@ -121,12 +121,12 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
     }
   },
 
-  confirmTranslations: async (projectId, localeCode, items) => {
+  confirmTranslations: async (activityId, localeCode, items) => {
     set({ isLoading: true });
     try {
-      const result = await translationsApi.confirmTranslations(projectId, localeCode, items);
+      const result = await translationsApi.confirmTranslations(activityId, localeCode, items);
       // 重新拉取，拿到最新的已生效值，以及确认期间被运营改过而跳过的条目
-      const translation = await translationsApi.findProjectTranslation(projectId, localeCode);
+      const translation = await translationsApi.findProjectTranslation(activityId, localeCode);
       set(state => ({ translations: { ...state.translations, [localeCode]: translation } }));
       return result;
     } catch (error) {
