@@ -7,6 +7,7 @@ import { useTranslationsStore } from '../../stores/translations.store';
 import { useTermsStore } from '../../stores/terms.store';
 import { ProjectRole, isPendingConfirmation } from '../../models';
 import type { Locale, Term, Translation } from '../../models';
+import ContextView from '../shared/ContextView';
 
 type Filter = 'all' | 'todo' | 'pending';
 
@@ -189,20 +190,19 @@ export default function TranslationMatrix() {
   };
 
   const columns = [
-    ...(showKey
-      ? [{
-          title: 'Key',
-          key: 'key',
-          width: 160,
-          fixed: 'left' as const,
-          render: (_: any, t: Term) => (
-            <div style={{ color: '#aaa', fontSize: 12, wordBreak: 'break-all' }}>
-              {t.value}
-              {t.context && <div>{t.context}</div>}
-            </div>
-          ),
-        }]
-      : []),
+    // 备注（文字 + 截图）始终显示，运营翻译时要靠它判断这个词条出现在哪里；key 可以用开关隐藏
+    {
+      title: showKey ? 'Key / 备注' : '备注',
+      key: 'key',
+      width: 180,
+      fixed: 'left' as const,
+      render: (_: any, t: Term) => (
+        <div style={{ color: '#aaa', fontSize: 12, wordBreak: 'break-all' }}>
+          {showKey && <div>{t.value}</div>}
+          <ContextView context={t.context} projectId={currentProject!.id} size={96} style={{ color: '#666', marginTop: showKey ? 4 : 0 }} />
+        </div>
+      ),
+    },
     {
       title: sourceLocale ? (
         <Space size={6}>

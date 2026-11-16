@@ -7,6 +7,7 @@ import { useTranslationsStore } from '../../stores/translations.store';
 import { useTermsStore } from '../../stores/terms.store';
 import { ProjectRole, isPendingConfirmation } from '../../models';
 import type { Term, Translation } from '../../models';
+import ContextView from '../shared/ContextView';
 
 type Filter = 'all' | 'empty' | 'filled' | 'pending';
 
@@ -120,7 +121,7 @@ export default function TranslationsList() {
             {val}
             {!isFilled(record.id) && <Tag color="warning" style={{ marginLeft: 8 }}>未填写</Tag>}
           </div>
-          {record.context && <div style={{ color: '#888', fontSize: 12 }}>{record.context}</div>}
+          <ContextView context={record.context} projectId={currentProject!.id} style={{ color: '#888', fontSize: 12 }} />
         </div>
       ),
     },

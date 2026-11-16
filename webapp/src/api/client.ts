@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from '../utils/token';
 
-const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:8080/api/v1';
+export const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:8080/api/v1';
 
 export const apiClient = axios.create({
   baseURL: API_ENDPOINT,

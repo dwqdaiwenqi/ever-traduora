@@ -33,6 +33,8 @@ import { Translation } from './entity/translation.entity';
 import { TranslationVersion } from './entity/translation-version.entity';
 import { TranslationVersionService } from './services/translation-version.service';
 import { I18nController } from './controllers/i18n.controller';
+import { TermImageController } from './controllers/term-image.controller';
+import { TermImage } from './entity/term-image.entity';
 import { User } from './entity/user.entity';
 import { CustomExceptionFilter } from './filters/exception.filter';
 import { AuthService } from './services/auth.service';
@@ -73,6 +75,7 @@ import { dataSourceOptions } from './connection/datasource';
       ProjectLocale,
       Translation,
       TranslationVersion,
+      TermImage,
       ProjectClient,
       Plan,
     ]),
@@ -92,6 +95,7 @@ import { dataSourceOptions } from './connection/datasource';
     ProjectClientController,
     ExportsController,
     I18nController,
+    TermImageController,
     LocaleController,
     IndexController,
   ],

@@ -5,6 +5,8 @@ import { useProjectsStore } from '../../stores/projects.store';
 import { useTermsStore } from '../../stores/terms.store';
 import { ProjectRole } from '../../models';
 import type { Term } from '../../models';
+import ContextEditor from '../shared/ContextEditor';
+import { parseContext } from '../../utils/term-context';
 
 export default function TermsList() {
   const { currentProject } = useProjectsStore();
@@ -23,7 +25,7 @@ export default function TermsList() {
 
   const filtered = terms.filter(t =>
     t.value.toLowerCase().includes(search.toLowerCase()) ||
-    (t.context || '').toLowerCase().includes(search.toLowerCase())
+    parseContext(t.context).text.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleCreate = async (values: { value: string; context?: string }) => {
@@ -66,18 +68,12 @@ export default function TermsList() {
       dataIndex: 'context',
       key: 'context',
       render: (val: string | null, record: Term) => (
-        <Input
-          defaultValue={val || ''}
-          placeholder="添加备注..."
-          variant="borderless"
+        <ContextEditor
+          projectId={currentProject!.id}
+          value={val}
           readOnly={readOnly}
-          onBlur={e => {
-            if (e.target.value !== (val || '') && currentProject) {
-              updateTerm(currentProject.id, record.id, record.value, e.target.value || undefined);
-            }
-          }}
-          onKeyDown={e => {
-            if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          onCommit={v => {
+            if (v !== (val || '')) updateTerm(currentProject!.id, record.id, record.value, v || undefined);
           }}
         />
       ),
@@ -125,7 +121,7 @@ export default function TermsList() {
             <Input placeholder="key.name 或 Some text..." />
           </Form.Item>
           <Form.Item label="备注（可选）" name="context">
-            <Input.TextArea placeholder="该词条的说明或备注..." rows={2} />
+            <ContextEditor projectId={currentProject!.id} placeholder="该词条的说明或备注，可直接粘贴截图..." />
           </Form.Item>
         </Form>
       </Modal>
