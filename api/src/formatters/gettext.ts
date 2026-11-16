@@ -1,19 +1,6 @@
 import { po } from 'gettext-parser';
 import { Exporter, IntermediateTranslationFormat, Parser } from '../domain/formatters';
 
-const streamAsPromise = stream => {
-  const result = [];
-
-  stream.on('data', data => {
-    result.push(data);
-  });
-
-  return new Promise((resolve, reject) => {
-    stream.on('finish', resolve);
-    stream.on('error', reject);
-  }).then(() => result);
-};
-
 export const gettextParser: Parser = async (data: string) => {
   const res = po.parse(data);
 

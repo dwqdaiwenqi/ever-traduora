@@ -35,7 +35,6 @@ export default class TranslationController {
     @InjectRepository(ProjectLocale) private projectLocaleRepo: Repository<ProjectLocale>,
     @InjectRepository(Term) private termRepo: Repository<Term>,
     @InjectRepository(Locale) private localeRepo: Repository<Locale>,
-    @InjectRepository(Project) private projectRepo: Repository<Project>,
     private versions: TranslationVersionService,
   ) {}
 

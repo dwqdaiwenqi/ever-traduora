@@ -1,13 +1,11 @@
 import { MorganMiddleware } from './middlewares/morgan-middleware';
 import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { renderFile } from 'ejs';
 import { config } from './config';
 import { AuthController } from './controllers/auth.controller';
 import { ExportsController } from './controllers/exports.controller';
@@ -77,7 +75,6 @@ import { dataSourceOptions } from './connection/datasource';
       ProjectClient,
       Plan,
     ]),
-    HttpModule,
   ],
   controllers: [
     HealthController,
@@ -162,8 +159,4 @@ export const addPipesAndFilters = (app: NestExpressApplication): void => {
   app.use(redirectDemoIndexFile);
 
   app.useStaticAssets(config.publicDir, { index: false, redirect: false });
-
-  app.setBaseViewsDir('src/templates');
-
-  app.engine('html', renderFile);
 };

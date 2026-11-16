@@ -6,11 +6,7 @@ import * as _ from 'lodash';
 import { Repository } from 'typeorm';
 import { ProjectAction } from '../domain/actions';
 import { ProjectStatsResponse } from '../domain/http';
-import { Locale } from '../entity/locale.entity';
 import { ProjectLocale } from '../entity/project-locale.entity';
-import { Project } from '../entity/project.entity';
-import { Term } from '../entity/term.entity';
-import { Translation } from '../entity/translation.entity';
 import AuthorizationService from '../services/authorization.service';
 import { resolveColumnName } from '../utils/alias-helper';
 
@@ -21,11 +17,7 @@ import { resolveColumnName } from '../utils/alias-helper';
 export default class ProjectStatsController {
   constructor(
     private auth: AuthorizationService,
-    @InjectRepository(Translation) private translationRepo: Repository<Translation>,
     @InjectRepository(ProjectLocale) private projectLocaleRepo: Repository<ProjectLocale>,
-    @InjectRepository(Term) private termRepo: Repository<Term>,
-    @InjectRepository(Locale) private localeRepo: Repository<Locale>,
-    @InjectRepository(Project) private projectRepo: Repository<Project>,
   ) {}
 
   @Get()

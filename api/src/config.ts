@@ -48,7 +48,6 @@ export const config = {
   secret: resolveSecret(env.TR_SECRET, env.NODE_ENV),
   virtualHost: env.TR_VIRTUAL_HOST || 'http://localhost:8080',
   publicDir: env.TR_PUBLIC_DIR || join(__dirname, '../public'),
-  templatesDir: env.TR_TEMPLATES_DIR || join(__dirname, '../src/templates'),
   corsEnabled: getBoolOrDefault(env.TR_CORS_ENABLED, false),
   accessLogsEnabled: getBoolOrDefault(env.TR_ACCESS_LOGS_ENABLED, true),
   authTokenExpires: parseInt(env.TR_AUTH_TOKEN_EXPIRES, 10) || 86400,

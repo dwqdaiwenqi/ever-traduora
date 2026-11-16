@@ -13,7 +13,6 @@ import {
   ProjectClientWithSecretResponse,
 } from '../domain/http';
 import { ProjectClient } from '../entity/project-client.entity';
-import { User } from '../entity/user.entity';
 import AuthorizationService from '../services/authorization.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiOAuth2 } from '@nestjs/swagger';
 
@@ -25,7 +24,6 @@ export default class ProjectClientController {
   constructor(
     private auth: AuthorizationService,
     @InjectRepository(ProjectClient) private projectClientRepo: Repository<ProjectClient>,
-    @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
   @Get(':projectId/clients')

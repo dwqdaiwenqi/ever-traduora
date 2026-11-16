@@ -5,13 +5,10 @@ import {
   IsBoolean,
   IsEmail,
   IsEnum,
-  IsHexColor,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
-  Matches,
-  MaxLength,
   Validate,
   ValidateNested,
 } from 'class-validator';
@@ -432,12 +429,6 @@ export class AddLocaleRequest {
   @ApiProperty({ minLength: 2, maxLength: 16 })
   @Length(2, 16)
   code: string;
-}
-
-export class UpdateProjectPlanRequest {
-  @IsNotEmpty()
-  @ApiProperty()
-  planId: string;
 }
 
 export class UpdateTranslationRequest {
