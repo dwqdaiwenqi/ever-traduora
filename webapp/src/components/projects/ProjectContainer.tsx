@@ -34,7 +34,8 @@ export default function ProjectContainer() {
   const stats = currentProjectStats?.projectStats;
 
   const menuItems = [
-    { key: 'translations', label: '翻译', path: 'translations' },
+    { key: 'matrix', label: '对照翻译', path: 'matrix' },
+    { key: 'translations', label: '按语言翻译', path: 'translations' },
     { key: 'terms', label: '词条', path: 'terms' },
     { key: 'team', label: '团队', path: 'team' },
     { key: 'api', label: 'API 客户端', path: 'api' },

@@ -24,7 +24,7 @@ export default function ProjectList() {
       const project = await createProject(values.name, values.description);
       setModalOpen(false);
       form.resetFields();
-      navigate(`/projects/${project.id}/translations`);
+      navigate(`/projects/${project.id}/matrix`);
     } catch {
       // shown via store
     } finally {
@@ -53,7 +53,7 @@ export default function ProjectList() {
           <Row gutter={[16, 16]}>
             {projects.map(project => (
               <Col key={project.id} xs={24} sm={12} md={8} lg={6}>
-                <ProjectCard project={project} onClick={() => navigate(`/projects/${project.id}/translations`)} />
+                <ProjectCard project={project} onClick={() => navigate(`/projects/${project.id}/matrix`)} />
               </Col>
             ))}
           </Row>

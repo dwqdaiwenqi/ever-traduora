@@ -20,6 +20,7 @@ import ProjectList from './components/projects/ProjectList';
 import ProjectContainer from './components/projects/ProjectContainer';
 import ProjectLocales from './components/projects/ProjectLocales';
 import TranslationsList from './components/projects/TranslationsList';
+import TranslationMatrix from './components/projects/TranslationMatrix';
 import TermsList from './components/projects/TermsList';
 import TeamOverview from './components/projects/TeamOverview';
 import ApiClientsOverview from './components/projects/ApiClientsOverview';
@@ -72,7 +73,8 @@ export default function App() {
         {/* Protected project routes */}
         <Route path="/projects" element={<AuthGuard><ProjectList /></AuthGuard>} />
         <Route path="/projects/:projectId" element={<AuthGuard><ProjectContainer /></AuthGuard>}>
-          <Route index element={<Navigate to="translations" replace />} />
+          <Route index element={<Navigate to="matrix" replace />} />
+          <Route path="matrix" element={<TranslationMatrix />} />
           <Route path="translations" element={<ProjectLocales />} />
           <Route path="translations/:localeCode" element={<TranslationsList />} />
           <Route path="terms" element={<TermsList />} />
