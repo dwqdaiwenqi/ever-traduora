@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { Connection } from 'typeorm';
 import { addPipesAndFilters, AppModule } from '../src/app.module';
 import { ProjectRole, ProjectUser } from '../src/entity/project-user.entity';
-import { User } from '../src/entity/user.entity';
+import { UserService } from '../src/services/user.service';
 import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 
 export interface TestingUser {
@@ -29,25 +29,16 @@ export interface TestingProjectClient {
 }
 
 /**
- * Signs up a user. Their email counts as verified unless `verifyEmail` is false, as if they had opened the link from
- * the welcome email.
+ * 创建一个没有密码的成员账号（和"管理员在项目里添加成员"得到的账号一样），并通过邮箱登录拿到 token。
  */
-export async function signupTestUser(app: INestApplication, email: string = 'e2e@test.com', verifyEmail = true): Promise<TestingUser> {
-  const res = await request(app.getHttpServer())
-    .post('/api/v1/auth/signup')
-    .send({
-      name: `End to End Tester (${email})`,
-      email,
-      password: 'mysupersecretpassword',
-    });
+export async function signupTestUser(app: INestApplication, email: string = 'e2e@test.com'): Promise<TestingUser> {
+  await app.get(UserService).findOrCreatePasswordless(email);
+  const res = await request(app.getHttpServer()).post('/api/v1/auth/email-login').send({ email }).expect(200);
   const result = res.body.data as TestingUser;
   if (!result.id || !result.name || !result.email || !result.accessToken) {
-    throw new Error('Malformed signup user response! Maybe fields need updating?');
+    throw new Error('Malformed email login response! Maybe fields need updating?');
   }
-  if (verifyEmail) {
-    await app.get(Connection).getRepository(User).update({ id: result.id }, { emailVerified: true });
-  }
-  return result;
+  return { ...result, name: result.name };
 }
 
 export async function createTestProject(app: INestApplication, user: TestingUser): Promise<TestingProject> {

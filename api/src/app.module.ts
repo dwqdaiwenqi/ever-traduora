@@ -37,10 +37,8 @@ import { TermImageController } from './controllers/term-image.controller';
 import { TermImage } from './entity/term-image.entity';
 import { User } from './entity/user.entity';
 import { CustomExceptionFilter } from './filters/exception.filter';
-import { AuthService } from './services/auth.service';
 import AuthorizationService from './services/authorization.service';
 import { JwtStrategy } from './services/jwt.strategy';
-import MailService from './services/mail.service';
 import { UserService } from './services/user.service';
 import ProjectStatsController from './controllers/project-stats.controller';
 import { ConfigModule } from '@nestjs/config';
@@ -105,8 +103,6 @@ import { dataSourceOptions } from './connection/datasource';
       useClass: CustomThrottlerGuard,
     },
     UserService,
-    AuthService,
-    MailService,
     JwtStrategy,
     AuthorizationService,
     TranslationVersionService,

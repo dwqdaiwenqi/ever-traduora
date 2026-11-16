@@ -29,22 +29,6 @@ export interface JwtPayload {
 export enum GrantType {
   Password = 'password',
   ClientCredentials = 'client_credentials',
-  // TODO: is this part of the oauth2 spec? Investigate alternatives for authenticating tokens
-  Provider = 'provider',
-}
-
-export class NewUserDTO {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty()
-  name: string;
-
-  @ApiProperty()
-  email: string;
-
-  @ApiProperty()
-  accessToken: string;
 }
 
 export class UserInfoDTO {
@@ -214,17 +198,6 @@ export class ProjectClientDTO {
   role: ProjectRole;
 }
 
-export class AuthProviderDTO {
-  @ApiProperty()
-  slug: string;
-  @ApiProperty()
-  clientId: string;
-  @ApiProperty()
-  url: string;
-  @ApiProperty()
-  redirectUrl: string;
-}
-
 export class ProjectClientWithSecretDTO {
   @ApiProperty()
   id: string;
@@ -258,16 +231,6 @@ export class ProjectClientWithSecretResponse extends ServiceApiResponse<ProjectC
 export class ProjectStatsResponse extends ServiceApiResponse<GetProjectStatsDTO> {
   @ApiProperty()
   data: GetProjectStatsDTO;
-}
-
-export class SignupResponse extends ServiceApiResponse<NewUserDTO> {
-  @ApiProperty()
-  data: NewUserDTO;
-}
-
-export class ListAuthProvidersResponse extends ServiceApiResponse<AuthProviderDTO[]> {
-  @ApiProperty({ type: AuthProviderDTO, isArray: true })
-  data: AuthProviderDTO[];
 }
 
 export class ImportResponse extends ServiceApiResponse<ImportFileDTO> {
@@ -340,43 +303,6 @@ export class ProjectUserResponse extends ServiceApiResponse<ProjectUserDTO> {
   data: ProjectUserDTO;
 }
 
-export class SignupRequest {
-  @ApiProperty({ minLength: 8, maxLength: 255 })
-  @Length(2, 255)
-  @Validate(IsNotOnlyWhitespace)
-  name: string;
-
-  @ApiProperty()
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ minLength: 8, maxLength: 255 })
-  @Length(8, 255)
-  password: string;
-}
-
-export class VerifyEmailRequest {
-  @ApiProperty({ description: 'Token from the email verification link' })
-  @IsString()
-  @Length(1, 255)
-  token: string;
-}
-
-export class VerifiedEmailDto {
-  @ApiProperty()
-  email: string;
-  @ApiProperty()
-  emailVerified: boolean;
-}
-
-export class VerifyEmailResponse extends ServiceApiResponse<VerifiedEmailDto> {
-  @ApiProperty()
-  data: VerifiedEmailDto;
-}
-
-// A provider slug, e.g. 'google'
-const PROVIDER_SLUG = /^[a-z0-9-]{1,32}$/;
-
 export class AuthenticateRequest {
   @ApiProperty({ enum: GrantType })
   @IsEnum(GrantType)
@@ -403,16 +329,6 @@ export class AuthenticateRequest {
   @ApiPropertyOptional({ minLength: 8, maxLength: 255 })
   @IsOptional()
   client_secret: string;
-
-  // provider
-  @IsString()
-  @IsOptional()
-  code: string;
-
-  @ApiPropertyOptional({ description: 'The sign-in provider; Google when absent' })
-  @Matches(PROVIDER_SLUG)
-  @IsOptional()
-  provider?: string;
 }
 
 export class UpdateProjectUserRequest {
@@ -422,7 +338,7 @@ export class UpdateProjectUserRequest {
 }
 
 export class AddProjectUserRequest {
-  @ApiProperty({ description: 'Email of an already registered user' })
+  @ApiProperty({ description: 'Email of the member; an account is created for it if it does not exist yet' })
   @IsEmail()
   email: string;
 
@@ -454,41 +370,13 @@ export class UpdateUserDataRequest {
   @Validate(IsNotOnlyWhitespace)
   @IsOptional()
   name?: string;
-
-  @ApiPropertyOptional()
-  @IsEmail()
-  @IsOptional()
-  email?: string;
 }
 
-export class ForgotPasswordRequest {
-  @IsEmail()
+/** 邮箱登录：只需要邮箱，不需要密码 */
+export class EmailLoginRequest {
   @ApiProperty()
+  @IsEmail()
   email: string;
-}
-
-export class ChangePasswordRequest {
-  @Length(8, 255)
-  @ApiProperty({ minLength: 8, maxLength: 255 })
-  oldPassword: string;
-
-  @Length(8, 255)
-  @ApiProperty({ minLength: 8, maxLength: 255 })
-  newPassword: string;
-}
-
-export class ResetPasswordRequest {
-  @IsEmail()
-  @ApiProperty()
-  email: string;
-
-  @IsNotEmpty()
-  @ApiProperty()
-  token: string;
-
-  @Length(8, 255)
-  @ApiProperty({ minLength: 8, maxLength: 255 })
-  newPassword: string;
 }
 
 export class CreateProjectRequest {
@@ -628,14 +516,3 @@ export class ImportQuery {
   format: ImportExportFormat;
 }
 
-export class ProviderSignInRequest {
-  @ApiPropertyOptional({ description: 'The authorization code from the provider callback' })
-  @IsString()
-  @IsOptional()
-  code: string;
-
-  @ApiPropertyOptional({ description: 'The sign-in provider; Google when absent' })
-  @Matches(PROVIDER_SLUG)
-  @IsOptional()
-  provider?: string;
-}

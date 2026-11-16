@@ -2,45 +2,6 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  emailVerified?: boolean;
-}
-
-export interface Provider {
-  slug: string;
-  url: string;
-  redirectUrl: string;
-  clientId: string;
-  scope?: string;
-  pkce?: boolean;
-}
-
-export interface Identity {
-  id: string;
-  provider: string;
-  email: string;
-  linkMethod: string;
-  linkedAt: string;
-  lastLoginAt: string | null;
-}
-
-export interface ProviderSignupConfirmation {
-  pending: string;
-  name: string;
-  email: string;
-}
-
-export interface IdentityConnection {
-  pending: string;
-  emails: { account: string; everId: string };
-}
-
-export interface PendingAuthorization {
-  provider: string;
-  state: string;
-  nonce: string;
-  codeVerifier: string;
-  intent: 'signin' | 'connect';
-  createdAt: number;
 }
 
 export interface Plan {

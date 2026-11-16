@@ -52,7 +52,6 @@ export const config = {
   corsEnabled: getBoolOrDefault(env.TR_CORS_ENABLED, false),
   accessLogsEnabled: getBoolOrDefault(env.TR_ACCESS_LOGS_ENABLED, true),
   authTokenExpires: parseInt(env.TR_AUTH_TOKEN_EXPIRES, 10) || 86400,
-  signupsEnabled: getBoolOrDefault(env.TR_SIGNUPS_ENABLED, true),
   // A public demo install (demo.traduora.co): the web app then shows a "you are using a demo account" banner
   demo: getBoolOrDefault(env.TR_DEMO, false),
   maxProjectsPerUser: parseInt(env.TR_MAX_PROJECTS_PER_USER, 10) || 100,
@@ -61,28 +60,6 @@ export const config = {
   seedData: getBoolOrDefault(env.TR_SEED_DATA, true),
   import: {
     maxNestedLevels: parseInt(env.TR_IMPORT_MAX_NESTED_LEVELS, 10) || 100,
-  },
-  providers: {
-    google: {
-      active: getBoolOrDefault(env.TR_AUTH_GOOGLE_ENABLED, false),
-      clientSecret: env.TR_AUTH_GOOGLE_CLIENT_SECRET,
-      clientId: env.TR_AUTH_GOOGLE_CLIENT_ID,
-      redirectUrl: env.TR_AUTH_GOOGLE_REDIRECT_URL,
-      apiUrl: 'https://www.googleapis.com/oauth2/v4/token',
-      url: 'https://accounts.google.com/o/oauth2/v2/auth',
-    },
-  },
-  mail: {
-    debug: getBoolOrDefault(env.TR_MAIL_DEBUG, false),
-    sender: env.TR_MAIL_SENDER,
-    host: env.TR_MAIL_HOST,
-    port: parseInt(env.TR_MAIL_PORT, 10) || 587,
-    secure: getBoolOrDefault(env.TR_MAIL_SECURE, false),
-    rejectSelfSigned: getBoolOrDefault(env.TR_MAIL_REJECT_SELF_SIGNED, true),
-    auth: {
-      user: env.TR_MAIL_USER,
-      pass: env.TR_MAIL_PASSWORD,
-    },
   },
   db: {
     default: {
@@ -122,8 +99,8 @@ export const config = {
 
   defaultAdminCredentialConfig: {
     adminEmail: process.env.TR_ADMIN_EMAIL || `local.admin@ever.co`,
-    // No default: the seed creates the admin only when a password is configured
-    adminPassword: process.env.TR_ADMIN_PASSWORD || '',
+    // 内部系统：未配置 TR_ADMIN_PASSWORD 时，管理员初始密码为 12345678（建议部署后通过环境变量改掉）
+    adminPassword: process.env.TR_ADMIN_PASSWORD || '12345678',
     adminName: process.env.TR_ADMIN_NAME || 'Admin',
   },
 };

@@ -2,9 +2,12 @@ import { Connection } from 'typeorm';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as request from 'supertest';
-import MailService from '../src/services/mail.service';
 import './util';
 import { createAndMigrateApp, createTestProject, signupTestUser, TestingUser } from './util';
+import { UserService } from '../src/services/user.service';
+
+const ADMIN_EMAIL = 'admin@test.com';
+const ADMIN_PASSWORD = 'mysupersecretpassword';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -12,77 +15,59 @@ describe('AuthController (e2e)', () => {
 
   beforeEach(async () => {
     app = await createAndMigrateApp();
+    // 管理员：唯一有密码的账号；其他成员（testingUser）没有密码，只凭邮箱登录
+    await app.get(UserService).createWithPassword({ email: ADMIN_EMAIL, name: 'Admin', password: ADMIN_PASSWORD });
     testingUser = await signupTestUser(app);
   });
 
-  it('/api/v1/auth/signup (POST) should signup user', async () => {
+  it('/api/v1/auth/email-login (POST) should sign in an existing member with just the email', async () => {
     await request(app.getHttpServer())
-      .post('/api/v1/auth/signup')
-      .send({
-        name: 'Another End to End Tester',
-        email: 'e2eanother@test.com',
-        password: 'myTrulysupersecretpassword',
-      })
+      .post('/api/v1/auth/email-login')
+      .send({ email: testingUser.email.toUpperCase() })
       .expect(200)
       .expect(res => {
-        expect(res.body.data).toHaveExactProperties(['id', 'name', 'email', 'accessToken']);
+        expect(res.body.data.id).toEqual(testingUser.id);
+        expect(res.body.data.accessToken).toBeTruthy();
       });
   });
 
-  it('/api/v1/auth/signup (POST) should reject signup with invalid email', async () => {
+  it('/api/v1/auth/email-login (POST) should reject an email nobody added, without creating an account', async () => {
     await request(app.getHttpServer())
-      .post('/api/v1/auth/signup')
-      .send({
-        name: 'End to End Tester',
-        email: 'e2etest.com',
-        password: 'mysupersecretpassword',
-      })
-      .expect(400);
+      .post('/api/v1/auth/email-login')
+      .send({ email: 'stranger@test.com' })
+      .expect(401)
+      .expect(res => expect(res.body.error.code).toBe('EmailNotRegistered'));
+    expect(await app.get(UserService).userExists('stranger@test.com')).toBe(false);
   });
 
-  it('/api/v1/auth/signup (POST) should reject signup with invalid password', async () => {
+  it('/api/v1/auth/email-login (POST) should not let anyone sign in as the admin with just its email', async () => {
     await request(app.getHttpServer())
-      .post('/api/v1/auth/signup')
-      .send({
-        name: 'End to End Tester',
-        email: 'anothere2e@test.com',
-        password: 'short',
-      })
-      .expect(400);
+      .post('/api/v1/auth/email-login')
+      .send({ email: ADMIN_EMAIL })
+      .expect(401)
+      .expect(res => {
+        expect(res.body.error.code).toBe('PasswordRequired');
+        expect(res.body.data).toBeUndefined();
+      });
   });
 
-  it('/api/v1/auth/signup (POST) should reject signup if missing params or malfomed request', async () => {
-    await request(app.getHttpServer()).post('/api/v1/auth/signup').send({}).expect(400);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/signup')
-      .send({
-        name: 100,
-        email: 100,
-        password: 12301920,
-      })
-      .expect(400);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/signup')
-      .send({
-        name: 'Totally',
-        email: 'totally@valid.com',
-        password: 12301920,
-      })
-      .expect(400);
+  it('/api/v1/auth/email-login (POST) should reject a malformed request', async () => {
+    await request(app.getHttpServer()).post('/api/v1/auth/email-login').send({}).expect(400);
+    await request(app.getHttpServer()).post('/api/v1/auth/email-login').send({ email: 'not-an-email' }).expect(400);
   });
 
-  it('/api/v1/auth/signup (POST) should reject signup when user already exists', async () => {
+  it('/api/v1/auth/token (POST) should not let a member without a password use the password grant', async () => {
     await request(app.getHttpServer())
-      .post('/api/v1/auth/signup')
-      .send({
-        name: 'Another End to End Tester',
-        email: testingUser.email,
-        password: 'myothersupersecretpassword',
-      })
-      .expect(409)
-      .expect(res => expect(res.body.error.code).toBe('AlreadyExists'));
+      .post('/api/v1/auth/token')
+      .send({ grant_type: 'password', username: testingUser.email, password: 'whatever-password' })
+      .expect(422);
+  });
+
+  it('should no longer expose signup, password reset or password change', async () => {
+    for (const path of ['signup', 'forgot-password', 'reset-password', 'change-password', 'verify-email']) {
+      await request(app.getHttpServer()).post(`/api/v1/auth/${path}`).send({}).expect(404);
+    }
+    await request(app.getHttpServer()).get('/api/v1/auth/providers').expect(404);
   });
 
   it('/api/v1/auth/token (POST) should grant token to user with valid credentials', async () => {
@@ -90,7 +75,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'password',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
         password: 'mysupersecretpassword',
       })
       .expect(200)
@@ -102,7 +87,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'password',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
       })
       .expect(400);
 
@@ -127,7 +112,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'password',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
         password: '',
       })
       .expect(400);
@@ -179,7 +164,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'client_credentials',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
       })
       .expect(400);
 
@@ -204,7 +189,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'client_credentials',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
         password: '',
       })
       .expect(400);
@@ -213,7 +198,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'client_credentials',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
         password: 'mysupersecretpassword',
       })
       .expect(400);
@@ -221,7 +206,7 @@ describe('AuthController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/v1/auth/token')
       .send({
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
         password: 'mysupersecretpassword',
       })
       .expect(400)
@@ -233,7 +218,7 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'password',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
         password: 'mynotsupersecretpassword',
       })
       .expect(401)
@@ -243,211 +228,11 @@ describe('AuthController (e2e)', () => {
       .post('/api/v1/auth/token')
       .send({
         grant_type: 'client_credentials',
-        username: testingUser.email,
+        username: ADMIN_EMAIL,
         password: 'mysupersecretpassword',
       })
       .expect(400)
       .expect(res => expect(res.body.data).toBeUndefined());
-  });
-
-  it('/api/v1/auth/forgot-password (POST) should send forgotten password email to requested user', async () => {
-    const mail = app.get(MailService);
-    jest.spyOn(mail, 'passwordResetToken');
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/forgot-password')
-      .send({
-        email: testingUser.email,
-      })
-      .expect(200)
-      .expect(res => {
-        expect(mail.passwordResetToken).toHaveBeenCalledTimes(1);
-      });
-  });
-
-  it('/api/v1/auth/change-password (POST) should change the password if the old one is valid', async () => {
-    const mail = app.get(MailService);
-    jest.spyOn(mail, 'passwordChanged');
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}`)
-      .send({
-        email: 'anothere2e@test.com',
-        oldPassword: 'mysupersecretpassword',
-        newPassword: 'myevenmoresupersecretpassword',
-      })
-      .expect(204)
-      .expect(res => {
-        expect(res.body).toEqual({});
-        expect(mail.passwordChanged).toHaveBeenCalledTimes(1);
-      });
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}`)
-      .send({
-        email: 'anothere2e@test.com',
-        oldPassword: 'myevenmoresupersecretpassword',
-        newPassword: 'mysupersecretpassword',
-      })
-      .expect(204)
-      .expect(res => {
-        expect(res.body).toEqual({});
-        expect(mail.passwordChanged).toHaveBeenCalledTimes(2);
-      });
-  });
-
-  it('/api/v1/auth/change-password (POST) should not change the password if the old one is invalid', async () => {
-    const mail = app.get(MailService);
-    jest.spyOn(mail, 'passwordChanged');
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}`)
-      .send({
-        oldPassword: 'myincorrectpassword',
-        newPassword: 'myevenmoresupersecretpassword',
-      })
-      .expect(401);
-
-    expect(mail.passwordChanged).toHaveBeenCalledTimes(0);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/token')
-      .send({
-        grant_type: 'password',
-        username: testingUser.email,
-        password: 'mysupersecretpassword',
-      })
-      .expect(200);
-  });
-
-  it('/api/v1/auth/change-password (POST) should not change the password if the request is malformed or invalid', async () => {
-    const mail = app.get(MailService);
-    jest.spyOn(mail, 'passwordChanged');
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}`)
-      .send({
-        oldPassword: 'mysupersecretpassword',
-        newPassword: '',
-      })
-      .expect(400);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}`)
-      .send({
-        oldPassword: '',
-        newPassword: 'myevenmoresupersecretpassword',
-      })
-      .expect(400);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}`)
-      .send({
-        newPassword: 'myevenmoresupersecretpassword',
-      })
-      .expect(400);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}`)
-      .send({
-        oldPassword: 'mysupersecretpassword',
-      })
-      .expect(400);
-
-    expect(mail.passwordChanged).toHaveBeenCalledTimes(0);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/token')
-      .send({
-        grant_type: 'password',
-        username: testingUser.email,
-        password: 'mysupersecretpassword',
-      })
-      .expect(200);
-  });
-
-  it('/api/v1/auth/change-password (POST) should reject the request if the user is not authenticated', async () => {
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .send({
-        email: 'anothere2e@test.com',
-        oldPassword: 'mysupersecretpassword',
-        newPassword: 'anewpasswordhasbeenreach',
-      })
-      .expect(401);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/change-password')
-      .set('Authorization', `Bearer ${testingUser.accessToken}wrongtoken`)
-      .send({
-        email: 'anothere2e@test.com',
-        oldPassword: 'mysupersecretpassword',
-        newPassword: 'anewpasswordhasbeenreach',
-      })
-      .expect(401);
-  });
-
-  it('/api/v1/auth/reset-password (POST) should reset password when token is valid', async () => {
-    const mail = app.get(MailService);
-
-    let capturedToken;
-    jest.spyOn(mail, 'passwordResetToken').mockImplementation(async (user, token) => {
-      capturedToken = token;
-    });
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/forgot-password')
-      .send({
-        email: testingUser.email,
-        password: 'mysupersecretpassword',
-      })
-      .expect(200);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/reset-password')
-      .send({
-        email: testingUser.email,
-        token: capturedToken,
-        newPassword: 'mynewpassword',
-      })
-      .expect(200);
-
-    // Check that re-using token is rejected
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/reset-password')
-      .send({
-        email: testingUser.email,
-        token: capturedToken,
-        newPassword: 'mynewerpassword',
-      })
-      .expect(401);
-
-    // Check that password was actually changed
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/token')
-      .send({
-        grant_type: 'password',
-        username: testingUser.email,
-        password: 'mynewpassword',
-      })
-      .expect(200);
-
-    // Check that re-use token attempt did not change the password
-    await request(app.getHttpServer())
-      .post('/api/v1/auth/token')
-      .send({
-        grant_type: 'password',
-        username: testingUser.email,
-        password: 'mynewerpassword',
-      })
-      .expect(401);
   });
 
   it('should reject a token signed with the former default secret', async () => {

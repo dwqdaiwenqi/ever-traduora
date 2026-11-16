@@ -96,7 +96,7 @@ export default function TeamOverview() {
         cancelText="取消"
       >
         <Form form={form} layout="vertical" onFinish={handleAdd}>
-          <Form.Item label="邮箱地址（对方需已登录过系统）" name="email" rules={[{ required: true, type: 'email' }]}>
+          <Form.Item label="邮箱地址（对方凭此邮箱即可登录，无需密码）" name="email" rules={[{ required: true, type: 'email' }]}>
             <Input type="email" />
           </Form.Item>
           <Form.Item label="角色" name="role" initialValue={ProjectRole.Viewer} rules={[{ required: true }]}>

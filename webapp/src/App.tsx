@@ -7,13 +7,6 @@ import { setUnauthorizedCallback } from './api/client';
 
 // Auth pages
 import Login from './components/auth/Login';
-import Signup from './components/auth/Signup';
-import ForgotPassword from './components/auth/ForgotPassword';
-import ResetPassword from './components/auth/ResetPassword';
-import Callback from './components/auth/Callback';
-import EverIdConfirm from './components/auth/EverIdConfirm';
-import VerifyEmail from './components/auth/VerifyEmail';
-import UserSettings from './components/auth/UserSettings';
 
 // Project pages
 import ProjectList from './components/projects/ProjectList';
@@ -60,15 +53,6 @@ export default function App() {
       <Routes>
         {/* Public auth routes */}
         <Route path="/login" element={<NoAuthGuard><Login /></NoAuthGuard>} />
-        <Route path="/signup" element={<NoAuthGuard><Signup /></NoAuthGuard>} />
-        <Route path="/forgot-password" element={<NoAuthGuard><ForgotPassword /></NoAuthGuard>} />
-        <Route path="/reset-password" element={<NoAuthGuard><ResetPassword /></NoAuthGuard>} />
-        <Route path="/auth/callback" element={<Callback />} />
-        <Route path="/auth/everid/confirm" element={<NoAuthGuard><EverIdConfirm /></NoAuthGuard>} />
-
-        {/* Protected auth routes */}
-        <Route path="/verify-email" element={<AuthGuard><VerifyEmail /></AuthGuard>} />
-        <Route path="/user-settings" element={<AuthGuard><UserSettings /></AuthGuard>} />
 
         {/* Protected project routes */}
         <Route path="/projects" element={<AuthGuard><ProjectList /></AuthGuard>} />

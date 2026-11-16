@@ -7,7 +7,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -20,10 +19,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectAction } from '../domain/actions';
 import { AddProjectUserRequest, ListProjectUsersResponse, ProjectUserResponse, UpdateProjectUserRequest } from '../domain/http';
-import { normalizeEmail } from '../domain/validators';
 import { ProjectUser } from '../entity/project-user.entity';
-import { User } from '../entity/user.entity';
 import AuthorizationService from '../services/authorization.service';
+import { UserService } from '../services/user.service';
 
 @Controller('api/v1/projects')
 @UseGuards(AuthGuard())
@@ -33,7 +31,7 @@ export default class ProjectUserController {
   constructor(
     private auth: AuthorizationService,
     @InjectRepository(ProjectUser) private projectUserRepo: Repository<ProjectUser>,
-    @InjectRepository(User) private userRepo: Repository<User>,
+    private userService: UserService,
   ) {}
 
   @Get(':projectId/users')
@@ -62,19 +60,16 @@ export default class ProjectUserController {
 
   @Post(':projectId/users')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Add an already registered user to a project by email' })
+  @ApiOperation({ summary: 'Add a member to a project by email; an account without a password is created if the email is new' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Created', type: ProjectUserResponse })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'No registered user with this email' })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'The user is already part of the project' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   async create(@Req() req, @Param('projectId') projectId: string, @Body() addProjectUserRequest: AddProjectUserRequest) {
     const requestingUser = this.auth.getRequestUserOrClient(req, { mustBeUser: true });
     await this.auth.authorizeProjectAction(requestingUser, projectId, ProjectAction.EditProjectUsers);
 
-    const targetUser = await this.userRepo.findOne({ where: { email: normalizeEmail(addProjectUserRequest.email) } });
-    if (!targetUser) {
-      throw new NotFoundException('no registered user with this email, ask them to sign in once first');
-    }
+    // 新邮箱会自动建一个没有密码的账号，成员之后只凭邮箱登录
+    const targetUser = await this.userService.findOrCreatePasswordless(addProjectUserRequest.email);
 
     const existing = await this.projectUserRepo.findOne({ where: { project: { id: projectId }, user: { id: targetUser.id } } });
     if (existing) {

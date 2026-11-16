@@ -12,20 +12,10 @@ export class ConflictException extends HttpException {
 }
 
 /**
- * A password that anyone knows, such as the former default admin password. A BadRequest with its own error code, so
- * that clients can tell it from other invalid input.
+ * 前端需要据此做出反应的错误：返回自己的状态码和稳定的 `code`（比如邮箱还没被添加、需要密码登录），
+ * 而不是被统一成 404 / 401 的通用提示。不会携带任何 token。
  */
-export class PublishedPasswordException extends HttpException {
-  constructor(message: string = 'this password is publicly known, please choose a different one') {
-    super(HttpException.createBody(message, 'PublishedPassword', HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
-  }
-}
-
-/**
- * An error of the OpenID Connect sign-in flow (e.g. Ever ID) that the webapp acts on: answered with its own status and
- * a stable `code`, plus optional `details` (e.g. what a sign-up confirmation screen shows). Never carries a token.
- */
-export class AuthProviderException extends HttpException {
+export class CodedException extends HttpException {
   constructor(
     status: HttpStatus,
     readonly code: string,

@@ -1,5 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
-import { AuthProviderException, PublishedPasswordException } from '../errors';
+import { CodedException } from '../errors';
 
 @Catch()
 export class CustomExceptionFilter implements ExceptionFilter {
@@ -7,8 +7,8 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
-    if (exception instanceof AuthProviderException) {
-      // Sign-in flow outcomes keep their status and code; the details may hold a sealed sign-up or connect record
+    if (exception instanceof CodedException) {
+      // 登录相关的结果保留自己的状态码和 code
       response.setHeader('Cache-Control', 'no-store');
       response.status(exception.getStatus()).json({
         error: {
@@ -50,13 +50,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
         error: {
           code: 'Unauthorized',
           message: 'You are not authorized to access this resource',
-        },
-      });
-    } else if (exception instanceof PublishedPasswordException) {
-      response.status(400).json({
-        error: {
-          code: 'PublishedPassword',
-          message: 'This password is publicly known, please choose a different one',
         },
       });
     } else if (exception.status === 400 || exception.code === 'ER_DATA_TOO_LONG') {

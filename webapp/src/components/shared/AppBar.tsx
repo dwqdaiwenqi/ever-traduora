@@ -17,7 +17,6 @@ export default function AppBar() {
   };
 
   const menuItems = [
-    { key: 'settings', label: '账号设置', onClick: () => navigate('/user-settings') },
     { key: 'logout', label: '退出登录', onClick: handleLogout },
   ];
 

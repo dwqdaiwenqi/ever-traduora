@@ -2,9 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import chalk from 'chalk';
 import type { User } from '../entity/user.entity';
 import { UserService } from '../services/user.service';
-import { GrantType } from '../domain/http';
 import { config } from '../config';
-import { isPublishedPassword } from '../utils/published-passwords';
 
 /**
  * Seed service for creating default users
@@ -30,17 +28,12 @@ export class UserSeed {
 
     const { adminEmail, adminPassword, adminName } = config.defaultAdminCredentialConfig;
 
-    if (isPublishedPassword(adminPassword)) {
-      this.logger.warn(chalk.yellow('⚠️ TR_ADMIN_PASSWORD is set to a publicly known value. Choose a different one. Skipping admin creation.'));
-      return null;
-    }
-
     try {
       // Check if admin user already exists
       const adminExists = await this.userService.userExists(adminEmail);
 
       if (adminExists) {
-        // An admin whose published password was removed at sign-in gets the configured one
+        // 这个邮箱之前被当作普通成员加过（没有密码）：把它升级为用密码登录的管理员
         if (await this.userService.setMissingPassword(adminEmail, adminPassword)) {
           this.logger.log(chalk.green(`✅ Default admin user had no password, set it from TR_ADMIN_PASSWORD: ${chalk.blue(adminEmail)}`));
         } else {
@@ -50,19 +43,9 @@ export class UserSeed {
       }
 
       // Create admin user
-      const { user, isNewUser } = await this.userService.create({
-        grantType: GrantType.Password,
-        email: adminEmail,
-        name: adminName,
-        password: adminPassword,
-      });
-
-      if (isNewUser) {
-        this.logger.log(chalk.green(`✅ Default admin user created successfully: ${chalk.blue(adminEmail)}`));
-        return user;
-      }
-
-      return null;
+      const user = await this.userService.createWithPassword({ email: adminEmail, name: adminName, password: adminPassword });
+      this.logger.log(chalk.green(`✅ Default admin user created successfully: ${chalk.blue(adminEmail)}`));
+      return user;
     } catch (error) {
       this.logger.error(chalk.red(`❌ Failed to create default admin user: ${error.message}`), error.stack);
       throw error;

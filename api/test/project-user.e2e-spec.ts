@@ -40,7 +40,7 @@ describe('ProjectUserController (e2e)', () => {
       });
   });
 
-  it('/api/v1/projects/:projectId/users (POST) should add a registered user by email if allowed', async () => {
+  it('/api/v1/projects/:projectId/users (POST) should add a member by email if allowed, creating the account when the email is new', async () => {
     await request(app.getHttpServer())
       .post(`/api/v1/projects/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
@@ -59,12 +59,21 @@ describe('ProjectUserController (e2e)', () => {
       .send({ email: testingUser2.email, role: 'editor' })
       .expect(409);
 
-    // unknown email
+    // an email nobody used before: an account without a password is created, and that person can sign in with just the email
     await request(app.getHttpServer())
       .post(`/api/v1/projects/${testProject1.id}/users`)
       .set('Authorization', `Bearer ${testingUser1.accessToken}`)
-      .send({ email: 'nobody@test.com', role: 'viewer' })
-      .expect(404);
+      .send({ email: 'New.Person@Test.com', role: 'editor' })
+      .expect(201)
+      .expect(res => {
+        expect(res.body.data.email).toEqual('new.person@test.com');
+        expect(res.body.data.role).toEqual('editor');
+      });
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/email-login')
+      .send({ email: 'new.person@test.com' })
+      .expect(200)
+      .expect(res => expect(res.body.data.accessToken).toBeTruthy());
 
     // a viewer can not add members
     await request(app.getHttpServer())
