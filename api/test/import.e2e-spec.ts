@@ -160,10 +160,12 @@ describe('ImportController (e2e)', () => {
         expect(res.body.data).toContainEqual({
           termId: termOneId,
           value: 'some one',
+          confirmedValue: 'some one',
         });
         expect(res.body.data).toContainEqual({
           termId: termTwoId,
           value: 'some two',
+          confirmedValue: 'some two',
         });
       });
 
@@ -180,10 +182,12 @@ describe('ImportController (e2e)', () => {
         expect(res.body.data).toContainEqual({
           termId: termOneId,
           value: 'eins',
+          confirmedValue: 'eins',
         });
         expect(res.body.data).toContainEqual({
           termId: termTwoId,
           value: 'zwei',
+          confirmedValue: 'zwei',
         });
       });
 
@@ -198,10 +202,12 @@ describe('ImportController (e2e)', () => {
         expect(res.body.data).toContainEqual({
           termId: termOneId,
           value: 'un',
+          confirmedValue: 'un',
         });
         expect(res.body.data).toContainEqual({
           termId: termTwoId,
           value: 'deux',
+          confirmedValue: 'deux',
         });
       });
 
@@ -258,10 +264,12 @@ describe('ImportController (e2e)', () => {
         expect(res.body.data).toContainEqual({
           termId: termOneId,
           value: 'eins?',
+          confirmedValue: 'eins?',
         });
         expect(res.body.data).toContainEqual({
           termId: termTwoId,
           value: 'zwei',
+          confirmedValue: 'zwei',
         });
         const termValues = res.body.data.map(t => t.value);
         expect(termValues).toContainEqual('drei ⛄ 😀👍 🍉你好');
@@ -278,10 +286,12 @@ describe('ImportController (e2e)', () => {
         expect(res.body.data).toContainEqual({
           termId: termOneId,
           value: 'un',
+          confirmedValue: 'un',
         });
         expect(res.body.data).toContainEqual({
           termId: termTwoId,
           value: 'deux',
+          confirmedValue: 'deux',
         });
       });
     await request(app.getHttpServer())
@@ -326,10 +336,12 @@ describe('ImportController (e2e)', () => {
         expect(res.body.data).toContainEqual({
           termId: termOneId,
           value: 'eins',
+          confirmedValue: 'eins',
         });
         expect(res.body.data).toContainEqual({
           termId: termTwoId,
           value: 'zwei',
+          confirmedValue: 'zwei',
         });
       });
 
@@ -344,10 +356,12 @@ describe('ImportController (e2e)', () => {
         expect(res.body.data).toContainEqual({
           termId: termOneId,
           value: 'un',
+          confirmedValue: 'un',
         });
         expect(res.body.data).toContainEqual({
           termId: termTwoId,
           value: 'deux',
+          confirmedValue: 'deux',
         });
       });
 

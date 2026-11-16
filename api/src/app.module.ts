@@ -30,6 +30,9 @@ import { ProjectUser } from './entity/project-user.entity';
 import { Project } from './entity/project.entity';
 import { Term } from './entity/term.entity';
 import { Translation } from './entity/translation.entity';
+import { TranslationVersion } from './entity/translation-version.entity';
+import { TranslationVersionService } from './services/translation-version.service';
+import { I18nController } from './controllers/i18n.controller';
 import { User } from './entity/user.entity';
 import { CustomExceptionFilter } from './filters/exception.filter';
 import { AuthService } from './services/auth.service';
@@ -69,6 +72,7 @@ import { dataSourceOptions } from './connection/datasource';
       Locale,
       ProjectLocale,
       Translation,
+      TranslationVersion,
       ProjectClient,
       Plan,
     ]),
@@ -87,6 +91,7 @@ import { dataSourceOptions } from './connection/datasource';
     ImportController,
     ProjectClientController,
     ExportsController,
+    I18nController,
     LocaleController,
     IndexController,
   ],
@@ -100,6 +105,7 @@ import { dataSourceOptions } from './connection/datasource';
     MailService,
     JwtStrategy,
     AuthorizationService,
+    TranslationVersionService,
     UserLoginAttemptsStorage,
     SeedDataService,
     UserSeed,

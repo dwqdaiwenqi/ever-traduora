@@ -21,6 +21,17 @@ export const translationsApi = {
     const res = await apiClient.get<{ data: Translation[] }>(`/projects/${projectId}/translations/${localeCode}`);
     return res.data.data;
   },
+  confirmTranslations: async (
+    projectId: string,
+    localeCode: string,
+    items: { termId: string; value: string }[],
+  ): Promise<{ confirmed: number; skipped: number; version: number | null }> => {
+    const res = await apiClient.post<{ data: { confirmed: number; skipped: number; version: number | null } }>(
+      `/projects/${projectId}/translations/${localeCode}/confirm`,
+      { items },
+    );
+    return res.data.data;
+  },
   updateTranslation: async (projectId: string, localeCode: string, termId: string, value: string): Promise<Translation> => {
     const res = await apiClient.patch<{ data: Translation }>(`/projects/${projectId}/translations/${localeCode}`, { termId, value });
     return res.data.data;

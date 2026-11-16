@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Table, Input, Alert, Space, Button, Progress, Segmented, Tag } from 'antd';
+import { Table, Input, Alert, Space, Button, Progress, Segmented, Tag, Popconfirm, message } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
 import CountryFlag from '../shared/CountryFlag';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useTranslationsStore } from '../../stores/translations.store';
 import { useTermsStore } from '../../stores/terms.store';
-import { ProjectRole } from '../../models';
+import { ProjectRole, isPendingConfirmation } from '../../models';
 import type { Term, Translation } from '../../models';
 
-type Filter = 'all' | 'empty' | 'filled';
+type Filter = 'all' | 'empty' | 'filled' | 'pending';
 
 function TranslationCell({ initialValue, onSave, readOnly }: { initialValue: string; onSave: (v: string) => void; readOnly?: boolean }) {
   const [val, setVal] = useState(initialValue);
@@ -42,9 +42,11 @@ export default function TranslationsList() {
   const { projectId, localeCode } = useParams<{ projectId: string; localeCode: string }>();
   const navigate = useNavigate();
   const { currentProject, refreshProjectStats } = useProjectsStore();
-  const { translations, projectLocales, isLoading, errorMessage, getTranslations, updateTranslation, clearMessages } = useTranslationsStore();
+  const { translations, projectLocales, isLoading, errorMessage, getTranslations, updateTranslation, confirmTranslations, clearMessages } = useTranslationsStore();
   const { terms, getTerms } = useTermsStore();
   const readOnly = currentProject?.role === ProjectRole.Viewer;
+  // 只有 admin（开发）能确认
+  const canConfirm = currentProject?.role === ProjectRole.Admin;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [pageSize, setPageSize] = useState(100);
@@ -71,12 +73,17 @@ export default function TranslationsList() {
   const total = terms.length;
   const filledCount = terms.filter(t => isFilled(t.id)).length;
   const emptyCount = total - filledCount;
+  const pendingItems = terms
+    .filter(t => isPendingConfirmation(translationMap[t.id]))
+    .map(t => ({ termId: t.id, value: translationMap[t.id].value }));
+  const pendingCount = pendingItems.length;
   const percent = total === 0 ? 0 : Math.floor((filledCount / total) * 100);
 
   const keyword = search.toLowerCase();
   const filtered = terms.filter(t => {
     if (filter === 'empty' && isFilled(t.id)) return false;
     if (filter === 'filled' && !isFilled(t.id)) return false;
+    if (filter === 'pending' && !isPendingConfirmation(translationMap[t.id])) return false;
     return (
       t.value.toLowerCase().includes(keyword) ||
       (translationMap[t.id]?.value || '').toLowerCase().includes(keyword)
@@ -87,6 +94,18 @@ export default function TranslationsList() {
     if (!currentProject || !localeCode) return;
     await updateTranslation(currentProject.id, localeCode, termId, value);
     refreshProjectStats();
+  };
+
+  const handleConfirm = async (items: { termId: string; value: string }[]) => {
+    if (!currentProject || !localeCode || items.length === 0) return;
+    try {
+      const result = await confirmTranslations(currentProject.id, localeCode, items);
+      if (result.skipped > 0) {
+        message.warning(`已确认 ${result.confirmed} 条；${result.skipped} 条在你确认前被运营修改过，请重新查看后再确认`);
+      } else {
+        message.success(`已确认 ${result.confirmed} 条，已生效`);
+      }
+    } catch {}
   };
 
   const columns = [
@@ -115,11 +134,30 @@ export default function TranslationsList() {
       key: 'translation',
       width: '55%',
       render: (_: any, record: Term) => (
-        <TranslationCell
-          initialValue={translationMap[record.id]?.value || ''}
-          onSave={v => handleUpdate(record.id, v)}
-          readOnly={readOnly}
-        />
+        <div>
+          <TranslationCell
+            initialValue={translationMap[record.id]?.value || ''}
+            onSave={v => handleUpdate(record.id, v)}
+            readOnly={readOnly}
+          />
+          {isPendingConfirmation(translationMap[record.id]) && (
+            <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+              <Tag color="orange" style={{ margin: 0 }}>待开发确认</Tag>
+              <span style={{ color: '#888', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                线上当前：{translationMap[record.id]?.confirmedValue || '（无，使用兜底文案）'}
+              </span>
+              {canConfirm && (
+                <Button
+                  size="small"
+                  type="primary"
+                  onClick={() => handleConfirm([{ termId: record.id, value: translationMap[record.id].value }])}
+                >
+                  确认
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       ),
     },
   ];
@@ -157,15 +195,32 @@ export default function TranslationsList() {
             { label: `全部 (${total})`, value: 'all' },
             { label: `只看未填写 (${emptyCount})`, value: 'empty' },
             { label: `只看已填写 (${filledCount})`, value: 'filled' },
+            { label: `待确认 (${pendingCount})`, value: 'pending' },
           ]}
         />
-        <Input.Search
-          placeholder="搜索词条或翻译..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ width: 240 }}
-          allowClear
-        />
+        <Space>
+          {canConfirm && (
+            <Popconfirm
+              title={`确认全部 ${pendingCount} 条待确认的翻译？`}
+              description="确认后立即对外生效。"
+              okText="确认"
+              cancelText="取消"
+              disabled={pendingCount === 0}
+              onConfirm={() => handleConfirm(pendingItems)}
+            >
+              <Button type="primary" disabled={pendingCount === 0}>
+                批量确认 ({pendingCount})
+              </Button>
+            </Popconfirm>
+          )}
+          <Input.Search
+            placeholder="搜索词条或翻译..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ width: 240 }}
+            allowClear
+          />
+        </Space>
       </div>
 
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}

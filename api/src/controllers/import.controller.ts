@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import {
   BadRequestException,
   Controller,
@@ -40,6 +41,9 @@ import { phpParser } from '../formatters/php';
 import { ApiFile } from './../decorators/api-file.decorator';
 import { resXParser } from '../formatters/resx';
 import { PaymentRequiredException } from './../errors';
+import { ProjectRole } from '../entity/project-user.entity';
+import { User } from '../entity/user.entity';
+import { TranslationVersionService } from '../services/translation-version.service';
 
 @Controller('api/v1/projects/:projectId/imports')
 @ApiTags('Imports')
@@ -50,6 +54,7 @@ export class ImportController {
     @InjectRepository(Term) private termRepo: Repository<Term>,
     @InjectRepository(ProjectLocale) private projectLocaleRepo: Repository<ProjectLocale>,
     @InjectRepository(Locale) private localeRepo: Repository<Locale>,
+    private versions: TranslationVersionService,
   ) {}
 
   @Post()
@@ -120,7 +125,18 @@ export class ImportController {
 
         await entityManager.increment(Project, { id: membership.project.id }, 'termsCount', termsToAdd.length);
 
-        await entityManager.save(Translation, translationsToAdd);
+        // 开发（admin）导入的内容直接生效；运营（editor）导入的内容进入待开发确认
+        if (membership.role === ProjectRole.Admin) {
+          const previous = await entityManager.find(Translation, { where: { projectLocaleId: projectLocale.id } });
+          const previousConfirmed = _.fromPairs(previous.map(t => [t.termId, t.confirmedValue ?? '']));
+          const changed = translationsToAdd.filter(t => (previousConfirmed[t.termId] ?? '') !== t.value);
+          translationsToAdd.forEach(t => (t.confirmedValue = t.value));
+          await entityManager.save(Translation, translationsToAdd);
+          const changedKeys = allTerms.filter(term => changed.some(t => t.termId === term.id)).map(term => term.value);
+          await this.versions.saveSnapshot(entityManager, projectLocale.id, user instanceof User ? user.id : null, changedKeys);
+        } else {
+          await entityManager.save(Translation, translationsToAdd);
+        }
 
         return {
           data: {

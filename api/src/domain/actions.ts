@@ -26,6 +26,8 @@ export enum ProjectAction {
   DeleteTranslation,
   ImportTranslation,
   ExportTranslation,
+  // 确认待确认的翻译，只有 admin 可以（不加入 Editor / Viewer 的允许列表）
+  ConfirmTranslation,
 
   // Clients
   AddProjectClient,

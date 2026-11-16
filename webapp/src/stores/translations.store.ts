@@ -17,6 +17,11 @@ interface TranslationsState {
   deleteProjectLocale: (projectId: string, localeCode: string) => Promise<void>;
   getTranslations: (projectId: string, localeCode: string, navigate?: (path: string) => void) => Promise<void>;
   updateTranslation: (projectId: string, localeCode: string, termId: string, value: string) => Promise<void>;
+  confirmTranslations: (
+    projectId: string,
+    localeCode: string,
+    items: { termId: string; value: string }[],
+  ) => Promise<{ confirmed: number; skipped: number; version: number | null }>;
   clearMessages: () => void;
   reset: () => void;
 }
@@ -108,6 +113,22 @@ export const useTranslationsStore = create<TranslationsState>((set, get) => ({
         if (!found) forLocale.push(translation);
         return { translations: { ...storeTranslations, [localeCode]: forLocale } };
       });
+    } catch (error) {
+      set({ errorMessage: errorToMessage(error) });
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  confirmTranslations: async (projectId, localeCode, items) => {
+    set({ isLoading: true });
+    try {
+      const result = await translationsApi.confirmTranslations(projectId, localeCode, items);
+      // 重新拉取，拿到最新的已生效值，以及确认期间被运营改过而跳过的条目
+      const translation = await translationsApi.findProjectTranslation(projectId, localeCode);
+      set(state => ({ translations: { ...state.translations, [localeCode]: translation } }));
+      return result;
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
       throw error;

@@ -13,8 +13,9 @@ import {
   Matches,
   MaxLength,
   Validate,
+  ValidateNested,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ProjectRole } from '../entity/project-user.entity';
 import { IsNotOnlyWhitespace } from '../validators/IsNotOnlyWhitespace';
 
@@ -559,6 +560,26 @@ export class UpdateTranslationRequest {
   @Length(0, 8192)
   @ApiProperty({ minLength: 0, maxLength: 8192 })
   value: string;
+}
+
+export class ConfirmTranslationItem {
+  @IsNotEmpty()
+  @ApiProperty()
+  termId: string;
+
+  /** 开发在界面上看到的值。服务端发现当前值已被运营改过，就跳过这条，避免确认了没看过的内容。 */
+  @Length(0, 8192)
+  @ApiProperty({ minLength: 0, maxLength: 8192 })
+  value: string;
+}
+
+export class ConfirmTranslationsRequest {
+  @IsArray()
+  @ArrayMaxSize(5000)
+  @ValidateNested({ each: true })
+  @Type(() => ConfirmTranslationItem)
+  @ApiProperty({ type: [ConfirmTranslationItem] })
+  items: ConfirmTranslationItem[];
 }
 
 export enum ImportExportFormat {

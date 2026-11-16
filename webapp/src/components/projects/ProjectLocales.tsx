@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Popconfirm, Progress, Alert, Space } from 'antd';
+import { Table, Button, Modal, Popconfirm, Progress, Alert, Space, Tag } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import CountryFlag from '../shared/CountryFlag';
@@ -54,6 +54,7 @@ export default function ProjectLocales() {
           <CountryFlag locale={record.locale} />
           <span>{record.locale.language}</span>
           <span style={{ color: '#888', fontSize: 12 }}>({record.locale.code})</span>
+          {!!record.pendingCount && <Tag color="orange">待确认 {record.pendingCount}</Tag>}
         </Space>
       ),
     },
