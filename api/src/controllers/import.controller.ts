@@ -114,11 +114,13 @@ export class ImportController {
 
         // Resolve which terms / translations to add or update
         const termsToAdd = this.determineTermsToAdd(existingTerms, incoming.translations, membership.project);
+        const repositioned = this.assignPositions(existingTerms, termsToAdd, incoming.translations);
 
         // Authorize if user would have enough terms left in plan for import
         await this.auth.authorizeProjectAction(user, activityId, ProjectAction.ImportTranslation, termsToAdd.length, 1);
 
         const addedTerms = await entityManager.save(Term, termsToAdd);
+        if (repositioned.length > 0) await entityManager.save(Term, repositioned);
         const allTerms = [...addedTerms, ...existingTerms];
 
         const translationsToAdd = this.determineTranslationsToAdd(allTerms, incoming.translations, projectLocale);
@@ -177,6 +179,23 @@ export class ImportController {
     }
 
     return termsToAdd;
+  }
+
+  /** 按文件里的出现顺序给还没有顺序的词条编号；已经有顺序的不动，所以再导入其他语言不会打乱顺序。返回被改了顺序的已有词条 */
+  private assignPositions(existing: Term[], added: Term[], incomingItems: IntermediateTranslation[]): Term[] {
+    const byValue = new Map<string, Term>();
+    [...existing, ...added].forEach(t => byValue.set(t.value, t));
+    const existingSet = new Set(existing);
+    let next = existing.reduce((max, t) => Math.max(max, t.position ?? -1), -1) + 1;
+    const changed: Term[] = [];
+    for (const item of incomingItems) {
+      const term = byValue.get(item.term);
+      if (term && term.position == null) {
+        term.position = next++;
+        if (existingSet.has(term)) changed.push(term);
+      }
+    }
+    return changed;
   }
 
   private determineTranslationsToAdd(allTerms: Term[], incomingItems: IntermediateTranslation[], projectLocale: ProjectLocale): Translation[] {

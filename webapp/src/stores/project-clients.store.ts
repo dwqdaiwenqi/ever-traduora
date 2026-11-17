@@ -10,6 +10,7 @@ interface ProjectClientsState {
 
   getProjectClients: (activityId: string) => Promise<void>;
   addProjectClient: (activityId: string, name: string) => Promise<ProjectClient>;
+  rotateProjectClientSecret: (activityId: string, clientId: string) => Promise<ProjectClient>;
   removeProjectClient: (activityId: string, clientId: string) => Promise<void>;
   clearMessages: () => void;
   reset: () => void;
@@ -38,6 +39,18 @@ export const useProjectClientsStore = create<ProjectClientsState>((set, get) => 
       const client = await projectClientsApi.create(activityId, name);
       set(state => ({ clients: [client, ...state.clients] }));
       return client;
+    } catch (error) {
+      set({ errorMessage: errorToMessage(error) });
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  rotateProjectClientSecret: async (activityId, clientId) => {
+    set({ isLoading: true });
+    try {
+      return await projectClientsApi.rotateSecret(activityId, clientId);
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
       throw error;

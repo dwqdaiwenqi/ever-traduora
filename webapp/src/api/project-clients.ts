@@ -10,6 +10,10 @@ export const projectClientsApi = {
     const res = await apiClient.post<{ data: ProjectClient }>(`/activities/${activityId}/clients`, { name, role: 'admin' });
     return res.data.data;
   },
+  rotateSecret: async (activityId: string, clientId: string): Promise<ProjectClient> => {
+    const res = await apiClient.post<{ data: ProjectClient }>(`/activities/${activityId}/clients/${clientId}/rotate-secret`);
+    return res.data.data;
+  },
   remove: async (activityId: string, clientId: string) => {
     await apiClient.delete(`/activities/${activityId}/clients/${clientId}`);
   },

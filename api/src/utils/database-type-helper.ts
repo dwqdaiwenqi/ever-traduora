@@ -111,6 +111,9 @@ export function getLexicalOrderClause(column: string): string {
   return column;
 }
 
+/** 词条排序：先按导入顺序（没有顺序的排最后），再按 key 字典序 */
+export const TERM_POSITION_ORDER = 'COALESCE(term.position, 2147483647)';
+
 /**
  * Timestamp precision for PostgreSQL and MySQL
  */

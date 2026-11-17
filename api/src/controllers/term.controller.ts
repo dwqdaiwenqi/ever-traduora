@@ -9,7 +9,7 @@ import { Term } from '../entity/term.entity';
 import AuthorizationService from '../services/authorization.service';
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Translation } from '../entity/translation.entity';
-import { getLexicalOrderClause } from '../utils/database-type-helper';
+import { getLexicalOrderClause, TERM_POSITION_ORDER } from '../utils/database-type-helper';
 import { ProjectLocale } from '../entity/project-locale.entity';
 
 @Controller('api/v1/activities/:activityId/terms')
@@ -40,7 +40,7 @@ export default class TermController {
       .where('term.project.id = :activityId', { activityId: membership.project.id });
 
     // Apply database-specific collation for consistent lexical ordering
-    queryBuilder.orderBy(getLexicalOrderClause('term.value'), 'ASC');
+    queryBuilder.orderBy(TERM_POSITION_ORDER, 'ASC').addOrderBy(getLexicalOrderClause('term.value'), 'ASC');
 
     const terms = await queryBuilder.getMany();
 
@@ -75,6 +75,13 @@ export default class TermController {
     });
 
     await this.termRepo.manager.transaction(async entityManager => {
+      // 新增的词条排在已有词条后面
+      const last = await entityManager
+        .createQueryBuilder(Term, 'term')
+        .select('MAX(term.position)', 'max')
+        .where('term.project.id = :projectId', { projectId: membership.project.id })
+        .getRawOne();
+      term.position = last?.max == null ? null : Number(last.max) + 1;
       await entityManager.save(term);
 
       const projectLocales = await this.projectLocaleRepo.find({

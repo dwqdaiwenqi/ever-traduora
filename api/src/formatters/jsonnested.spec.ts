@@ -172,3 +172,25 @@ test('should fail with conflicting nested object on export', async () => {
   };
   await expect(jsonNestedExporter(input)).rejects.toBeDefined();
 });
+
+test('should round-trip arrays: indexed keys are exported back as arrays', async () => {
+  const original = {
+    guide: ['第一句', '第二句', '第三句'],
+    single: ['只有一句'],
+    plain: '文本',
+    obj: { a: 'A', list: ['x', 'y'] },
+    sparse: { '1': 'only second' },
+  };
+
+  const parsed = await jsonNestedParser(JSON.stringify(original));
+  expect(parsed.translations.map(t => t.term)).toEqual(['guide.0', 'guide.1', 'guide.2', 'single.0', 'plain', 'obj.a', 'obj.list.0', 'obj.list.1', 'sparse.1']);
+
+  // 即使顺序被打乱，也按下标还原
+  const shuffled = { translations: [...parsed.translations].reverse() };
+  const exported = JSON.parse((await jsonNestedExporter(shuffled)) as string);
+  expect(exported.guide).toEqual(original.guide);
+  expect(exported.single).toEqual(original.single);
+  expect(exported.obj.list).toEqual(['x', 'y']);
+  expect(exported.plain).toBe('文本');
+  expect(Array.isArray(exported.sparse)).toBe(false);
+});

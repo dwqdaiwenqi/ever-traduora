@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, Popconfirm, Alert, Modal, Form, Input, Tag, Typography } from 'antd';
+import { Table, Button, Space, Popconfirm, Alert, Modal, Form, Input, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useProjectsStore } from '../../stores/projects.store';
 import { useProjectClientsStore } from '../../stores/project-clients.store';
@@ -10,25 +10,27 @@ const { Text } = Typography;
 
 export default function ApiClientsOverview() {
   const { currentProject } = useProjectsStore();
-  const { clients, isLoading, errorMessage, getProjectClients, addProjectClient, removeProjectClient, clearMessages } = useProjectClientsStore();
-  const [addModal, setAddModal] = useState(false);
+  const { clients, isLoading, errorMessage, getProjectClients, addProjectClient, rotateProjectClientSecret, removeProjectClient, clearMessages } = useProjectClientsStore();
   const [newClientSecret, setNewClientSecret] = useState<{ id: string; secret: string } | null>(null);
-  const [form] = Form.useForm();
 
   useEffect(() => {
     if (currentProject) getProjectClients(currentProject.id);
     return () => clearMessages();
   }, [currentProject?.id]);
 
-  const handleAdd = async (values: { name: string }) => {
+  const handleGenerate = async () => {
     if (!currentProject) return;
     try {
-      const client = await addProjectClient(currentProject.id, values.name);
-      if (client.secret) {
-        setNewClientSecret({ id: client.id, secret: client.secret });
-        setAddModal(false);
-        form.resetFields();
-      }
+      const client = await addProjectClient(currentProject.id, 'default');
+      if (client.secret) setNewClientSecret({ id: client.id, secret: client.secret });
+    } catch {}
+  };
+
+  const handleRotate = async (clientId: string) => {
+    if (!currentProject) return;
+    try {
+      const client = await rotateProjectClientSecret(currentProject.id, clientId);
+      if (client.secret) setNewClientSecret({ id: client.id, secret: client.secret });
     } catch {}
   };
 
@@ -42,29 +44,35 @@ export default function ApiClientsOverview() {
   };
 
   const columns = [
-    { title: '名称', dataIndex: 'name', key: 'name' },
     {
       title: '客户端 ID',
       dataIndex: 'id',
       key: 'id',
-      render: (id: string) => (
-        <Space>
-          <Text copyable={{ text: id }} style={{ fontFamily: 'monospace', fontSize: 12 }}>{id.substring(0, 8)}...</Text>
-        </Space>
-      ),
+      render: (id: string) => <Text copyable={{ text: id }} style={{ fontFamily: 'monospace', fontSize: 12 }}>{id}</Text>,
     },
     {
       title: '操作',
       key: 'action',
       render: (_: any, record: ProjectClient) => (
-        <Popconfirm
-          title="确定撤销此 API 客户端的访问权限？"
-          onConfirm={() => currentProject && removeProjectClient(currentProject.id, record.id)}
-          okText="撤销"
-          cancelText="取消"
-        >
-          <Button size="small" danger>撤销访问</Button>
-        </Popconfirm>
+        <Space>
+          <Popconfirm
+            title="确定重置密钥？"
+            description="会生成新密钥，旧密钥立即失效，正在使用它的脚本需要换成新密钥"
+            onConfirm={() => handleRotate(record.id)}
+            okText="重置"
+            cancelText="取消"
+          >
+            <Button size="small">重置密钥</Button>
+          </Popconfirm>
+          <Popconfirm
+            title="确定撤销此凭证？撤销后使用它的脚本将无法访问，之后可以重新生成"
+            onConfirm={() => currentProject && removeProjectClient(currentProject.id, record.id)}
+            okText="撤销"
+            cancelText="取消"
+          >
+            <Button size="small" danger>撤销访问</Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -72,30 +80,15 @@ export default function ApiClientsOverview() {
   return (
     <div>
       <PageHeader
-        title="API 客户端"
-        description="给程序用的访问凭证，比如脚本批量导入导出"
-        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModal(true)}>添加客户端</Button>}
+        title="API 凭证"
+        description="给脚本批量导入导出用的访问凭证，每个活动一个；业务前端读取译文不需要它"
+        extra={clients.length === 0 && <Button type="primary" icon={<PlusOutlined />} loading={isLoading} onClick={handleGenerate}>生成凭证</Button>}
       />
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
       <Table dataSource={clients} columns={columns} rowKey="id" loading={isLoading} pagination={false} />
 
       <Modal
-        title="添加 API 客户端"
-        open={addModal}
-        onCancel={() => { setAddModal(false); form.resetFields(); }}
-        onOk={() => form.submit()}
-        okText="保存"
-        cancelText="取消"
-      >
-        <Form form={form} layout="vertical" onFinish={handleAdd}>
-          <Form.Item label="名称" name="name" rules={[{ required: true }]}>
-            <Input placeholder="用于标识此 API 客户端的名称..." />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="API 客户端已创建"
+        title="请保存凭证"
         open={!!newClientSecret}
         onCancel={() => setNewClientSecret(null)}
         footer={[<Button key="close" type="primary" onClick={() => setNewClientSecret(null)}>完成</Button>]}

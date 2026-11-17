@@ -24,7 +24,7 @@ import { androidXmlExporter } from '../formatters/android-xml';
 import { resXExporter } from '../formatters/resx';
 import { merge } from 'lodash';
 import { resolveColumnName } from '../utils/alias-helper';
-import { getLexicalOrderClause } from '../utils/database-type-helper';
+import { getLexicalOrderClause, TERM_POSITION_ORDER } from '../utils/database-type-helper';
 
 @Controller('api/v1/activities/:activityId/exports')
 export class ExportsController {
@@ -76,7 +76,7 @@ export class ExportsController {
       })
       .where(`term.${resolveColumnName('projectId')} = :activityId`, { activityId });
 
-    queryBuilder.orderBy(getLexicalOrderClause('term.value'), 'ASC');
+    queryBuilder.orderBy(TERM_POSITION_ORDER, 'ASC').addOrderBy(getLexicalOrderClause('term.value'), 'ASC');
 
     if (query.untranslated) {
       queryBuilder.andWhere("translation.value = ''");
@@ -120,7 +120,7 @@ export class ExportsController {
           })
           .where(`term.${resolveColumnName('projectId')} = :activityId`, { activityId });
 
-        fallbackQueryBuilder.orderBy(getLexicalOrderClause('term.value'), 'ASC');
+        fallbackQueryBuilder.orderBy(TERM_POSITION_ORDER, 'ASC').addOrderBy(getLexicalOrderClause('term.value'), 'ASC');
 
         const fallbackTermsWithTranslations = await fallbackQueryBuilder.getMany();
 

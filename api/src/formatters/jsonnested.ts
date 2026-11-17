@@ -62,5 +62,19 @@ export const jsonNestedExporter: Exporter = async (data: IntermediateTranslation
     }
   }
 
-  return JSON.stringify(result, null, 4);
+  return JSON.stringify(arrayify(result), null, 4);
 };
+
+/** 导入数组时 key 会变成 "list.0"、"list.1"，导出时把键恰好是 0..n-1 的对象还原成数组 */
+function arrayify(node: any): any {
+  if (typeof node !== 'object' || node === null) {
+    return node;
+  }
+  const keys = Object.keys(node);
+  const converted = {};
+  for (const key of keys) {
+    converted[key] = arrayify(node[key]);
+  }
+  const isArray = keys.length > 0 && keys.every(k => /^(0|[1-9]\d*)$/.test(k)) && keys.every((_, i) => converted.hasOwnProperty(String(i)));
+  return isArray ? keys.map((_, i) => converted[String(i)]) : converted;
+}
