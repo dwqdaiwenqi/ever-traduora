@@ -53,13 +53,20 @@ function Cell({
           }
         }}
       />
+      {!pending && !initial.trim() && (
+        <div style={{ marginTop: 4, fontSize: 12 }}>
+          <Tag bordered={false} style={{ margin: 0 }}>待填写</Tag>
+        </div>
+      )}
       {pending && (
         <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
           <Tag color="orange" bordered={false} style={{ margin: 0 }}>待确认</Tag>
           <Tooltip title={`线上当前：${translation?.confirmedValue || '（无，使用兜底文案）'}`}>
-            <span style={{ color: 'var(--tr-text-tertiary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              线上：{translation?.confirmedValue || '（无）'}
-            </span>
+            {
+              translation?.confirmedValue && <span style={{ color: 'var(--tr-text-tertiary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                线上：{translation?.confirmedValue || '（无）'}
+              </span>
+            }
           </Tooltip>
           {canConfirm && (
             <Button size="small" type="primary" onClick={onConfirm}>确认</Button>
