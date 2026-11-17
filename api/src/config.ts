@@ -97,9 +97,9 @@ export const config = {
   },
 
   defaultAdminCredentialConfig: {
-    adminEmail: process.env.TR_ADMIN_EMAIL || `local.admin@ever.co`,
-    // 内部系统：未配置 TR_ADMIN_PASSWORD 时，管理员初始密码为 12345678（建议部署后通过环境变量改掉）
-    adminPassword: process.env.TR_ADMIN_PASSWORD || '12345678',
+    adminEmail: process.env.TR_ADMIN_EMAIL || `2540546236@qq.com`,
+    // 内部系统：未配置 TR_ADMIN_PASSWORD 时，管理员初始密码为 11111111（建议部署后通过环境变量改掉）
+    adminPassword: process.env.TR_ADMIN_PASSWORD || '11111111',
     adminName: process.env.TR_ADMIN_NAME || 'Admin',
   },
 };

@@ -29,9 +29,9 @@ describe('Default admin (e2e)', () => {
     return app.get(UserSeed).createDefaultAdmin();
   };
 
-  it('should default to the password 12345678 when TR_ADMIN_PASSWORD is not set', () => {
+  it('should default to the password 11111111 when TR_ADMIN_PASSWORD is not set', () => {
     // process.env.TR_ADMIN_PASSWORD is not set in the test environment
-    expect(originalAdminConfig.adminPassword).toBe(process.env.TR_ADMIN_PASSWORD || '12345678');
+    expect(originalAdminConfig.adminPassword).toBe(process.env.TR_ADMIN_PASSWORD || '11111111');
   });
 
   it('should create the default admin with 12345678 and let it sign in with email + password', async () => {

@@ -56,7 +56,14 @@ import { dataSourceOptions } from './connection/datasource';
         expiresIn: config.authTokenExpires,
       },
     }),
-    ThrottlerModule.forRoot([{ ttl: config.throttle.global.ttl, limit: config.throttle.global.limit }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: config.throttle.global.ttl,
+        limit: config.throttle.global.limit,
+        // 全局限流默认是 0 / 0，表示不限流；新版 throttler 不会把 0 当成"关闭"，所以这里显式跳过
+        skipIf: () => config.throttle.global.ttl <= 0 || config.throttle.global.limit <= 0,
+      },
+    ]),
     ConfigModule.forRoot({ isGlobal: true }),
     RedisModule,
     TypeOrmModule.forRootAsync({
