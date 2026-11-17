@@ -95,20 +95,20 @@ Traduora 提供了用于创建该默认管理员用户的 seed 功能。你可�
 
 ```bash
 # 在 monorepo 根目录
-yarn seed:default
+pnpm seed:default
 
 # 或在 API 包目录
-yarn seed:default
+pnpm seed:default
 ```
 
 运行所有 seed（包括默认管理员用户和其他演示数据）：
 
 ```bash
 # 在 monorepo 根目录
-yarn seed
+pnpm seed
 
 # 或在 API 包目录
-yarn seed
+pnpm seed
 ```
 
 **🚀 启动时自动 Seed：**

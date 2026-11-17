@@ -2,6 +2,6 @@
 
 set -e
 
-yarn
-cd webapp && yarn
-cd ../api && yarn
+pnpm install
+cd webapp && pnpm install
+cd ../api && pnpm install

@@ -8,8 +8,8 @@ bin/install-deps.sh
 [ -e dist ] && rm -r dist
 
 # Build webapp
-cd webapp && yarn build:prod
+cd webapp && pnpm build:prod
 
 # Build api
-cd ../api && yarn build:prod
+cd ../api && pnpm build:prod
 cp -r node_modules ../dist/

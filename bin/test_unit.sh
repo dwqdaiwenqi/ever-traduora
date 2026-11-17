@@ -23,6 +23,6 @@ pprint "Installing dependencies if needed"
 bin/install-deps.sh
 
 pprint "Running Unit Tests" "Ensure you are running a local MySQL with a database called 'tr_e2e'"
-cd api && yarn test
+cd api && pnpm test
 
 pprint "All Unit Tests passed!"

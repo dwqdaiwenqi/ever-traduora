@@ -4,4 +4,4 @@ set -e
 
 bin/install-deps.sh
 
-yarn concurrently "cd api && yarn start" "cd webapp && yarn start"
+pnpm exec concurrently "cd api && pnpm start" "cd webapp && pnpm start"

@@ -23,13 +23,13 @@ pprint "Installing dependencies if needed"
 bin/install-deps.sh
 
 pprint "Check code format"
-yarn check-fmt
+pnpm check-fmt
 
 pprint "Linting API code"
-cd api && yarn lint
+cd api && pnpm lint
 
 pprint "Linting webapp code"
-cd ../webapp && yarn lint
+cd ../webapp && pnpm lint
 
 pprint "Running unit and e2e tests" "Ensure you are running a local MySQL with a database called 'tr_e2e'"
 cd .. && bin/test.sh

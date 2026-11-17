@@ -26,7 +26,7 @@ RUN npm --version
 RUN python3 --version
 
 RUN npm install --quiet node-gyp@13.1.0 -g
-RUN npm install yarn -g --force
+RUN npm install pnpm@10.15.1 -g --force
 
 COPY wait docker-entrypoint.compose.sh docker-entrypoint.sh /
 
@@ -40,17 +40,12 @@ COPY webapp webapp
 
 RUN dos2unix bin/* && chmod +x bin/*.sh
 
-# Configure the npm/yarn registry: prefer the internal Verdaccio cache (VERDACCIO_REGISTRY build-arg,
-# anonymous), else public npm (empty, e.g. a fork). Writing to the home-level .npmrc/.yarnrc makes it
-# apply to all installs run by bin/install-deps.sh (root, webapp and api). The yarn.lock rewrites are
-# best-effort (non-fatal) so a path mismatch degrades to public downloads rather than breaking the build.
+# Configure the npm registry: prefer the internal Verdaccio cache (VERDACCIO_REGISTRY build-arg,
+# anonymous), else public npm (empty, e.g. a fork). Writing to the home-level .npmrc makes it
+# apply to all installs run by bin/install-deps.sh (root, webapp and api).
 ARG VERDACCIO_REGISTRY=""
 RUN if [ -n "$VERDACCIO_REGISTRY" ]; then \
-		echo "registry=${VERDACCIO_REGISTRY}" >> "$HOME/.npmrc" && \
-		printf 'registry "%s"\n' "${VERDACCIO_REGISTRY}" >> "$HOME/.yarnrc" && \
-		for lock in yarn.lock webapp/yarn.lock api/yarn.lock; do \
-			sed -i "s|https://registry.yarnpkg.com|${VERDACCIO_REGISTRY%/}|g; s|https://registry.npmjs.org|${VERDACCIO_REGISTRY%/}|g" "$lock" 2>/dev/null || true; \
-		done; \
+		echo "registry=${VERDACCIO_REGISTRY}" >> "$HOME/.npmrc"; \
 	fi
 
 RUN bin/build.sh
@@ -68,10 +63,6 @@ WORKDIR /opt/traduora
 COPY --from=builder /wait /docker-entrypoint.sh /docker-entrypoint.compose.sh ./
 
 COPY --from=builder /opt/traduora/dist/ /opt/traduora/
-
-# Clean up. node:26 images no longer bundle Yarn, and this stage installs nothing with it,
-# so only clean when a yarn binary is present.
-RUN if command -v yarn >/dev/null 2>&1; then yarn cache clean; fi
 
 EXPOSE 8080
 

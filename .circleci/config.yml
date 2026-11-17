@@ -16,24 +16,24 @@ jobs:
     steps:
       - checkout
       - node/install:
-          install-yarn: true
+          install-pnpm: true
           node-version: '26.12.1'
       - run: node --version
       - restore_cache:
           keys:
-            - node-26.12.1-api-deps-{{ checksum "api/yarn.lock" }}
-            - node-26.12.1-webapp-deps-{{ checksum "webapp/yarn.lock" }}
+            - node-26.12.1-api-deps-{{ checksum "api/pnpm-lock.yaml" }}
+            - node-26.12.1-webapp-deps-{{ checksum "webapp/pnpm-lock.yaml" }}
       - run:
           name: Install deps
           command: bin/install-deps.sh
       - save_cache:
           paths:
             - ~/workspace/api/node_modules
-          key: node-26.12.1-api-deps-{{ checksum "api/yarn.lock" }}
+          key: node-26.12.1-api-deps-{{ checksum "api/pnpm-lock.yaml" }}
       - save_cache:
           paths:
             - ~/workspace/webapp/node_modules
-          key: node-26.12.1-webapp-deps-{{ checksum "webapp/yarn.lock" }}
+          key: node-26.12.1-webapp-deps-{{ checksum "webapp/pnpm-lock.yaml" }}
       - run:
           name: Run Lint checks
           command: bin/check_lint.sh
@@ -49,24 +49,24 @@ jobs:
     steps:
       - checkout
       - node/install:
-          install-yarn: true
+          install-pnpm: true
           node-version: '26.12.1'
       - run: node --version
       - restore_cache:
           keys:
-            - node-26.12.1-api-deps-{{ checksum "api/yarn.lock" }}
-            - node-26.12.1-webapp-deps-{{ checksum "webapp/yarn.lock" }}
+            - node-26.12.1-api-deps-{{ checksum "api/pnpm-lock.yaml" }}
+            - node-26.12.1-webapp-deps-{{ checksum "webapp/pnpm-lock.yaml" }}
       - run:
           name: Install deps
           command: bin/install-deps.sh
       - save_cache:
           paths:
             - ~/workspace/api/node_modules
-          key: node-26.12.1-api-deps-{{ checksum "api/yarn.lock" }}
+          key: node-26.12.1-api-deps-{{ checksum "api/pnpm-lock.yaml" }}
       - save_cache:
           paths:
             - ~/workspace/webapp/node_modules
-          key: node-26.12.1-webapp-deps-{{ checksum "webapp/yarn.lock" }}
+          key: node-26.12.1-webapp-deps-{{ checksum "webapp/pnpm-lock.yaml" }}
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
@@ -85,24 +85,24 @@ jobs:
     steps:
       - checkout
       - node/install:
-          install-yarn: true
+          install-pnpm: true
           node-version: '26.12.1'
       - run: node --version
       - restore_cache:
           keys:
-            - node-26.12.1-api-deps-{{ checksum "api/yarn.lock" }}
-            - node-26.12.1-webapp-deps-{{ checksum "webapp/yarn.lock" }}
+            - node-26.12.1-api-deps-{{ checksum "api/pnpm-lock.yaml" }}
+            - node-26.12.1-webapp-deps-{{ checksum "webapp/pnpm-lock.yaml" }}
       - run:
           name: Install deps
           command: bin/install-deps.sh
       - save_cache:
           paths:
             - ~/workspace/api/node_modules
-          key: node-26.12.1-api-deps-{{ checksum "api/yarn.lock" }}
+          key: node-26.12.1-api-deps-{{ checksum "api/pnpm-lock.yaml" }}
       - save_cache:
           paths:
             - ~/workspace/webapp/node_modules
-          key: node-26.12.1-webapp-deps-{{ checksum "webapp/yarn.lock" }}
+          key: node-26.12.1-webapp-deps-{{ checksum "webapp/pnpm-lock.yaml" }}
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
@@ -117,7 +117,7 @@ jobs:
     steps:
       - checkout
       - node/install:
-          install-yarn: true
+          install-pnpm: true
           node-version: '26.12.1'
       - run: node --version
       - setup_remote_docker
@@ -132,7 +132,7 @@ jobs:
     steps:
       - checkout
       - node/install:
-          install-yarn: true
+          install-pnpm: true
           node-version: '26.12.1'
       - run: node --version
       - setup_remote_docker

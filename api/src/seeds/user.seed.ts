@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import type { User } from '../entity/user.entity';
 import { UserService } from '../services/user.service';
 import { config } from '../config';

@@ -2,4 +2,4 @@
 
 set -e
 
-cd api && yarn test:ci
+cd api && pnpm test:ci

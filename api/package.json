@@ -18,7 +18,7 @@
   },
   "scripts": {
     "fmt": "prettier --write \"src/**/*.ts\"",
-    "start": "cross-env TR_DB_TYPE=mysql TR_DB_HOST=localhost TR_DB_PORT=3306 TR_DB_USER=root TR_DB_DATABASE=tr_dev TR_MAIL_DEBUG=true TR_CORS_ENABLED=true nodemon",
+    "start": "cross-env TR_DB_TYPE=mysql TR_DB_HOST=localhost TR_DB_PORT=3306 TR_DB_USER=root TR_DB_DATABASE=traduora TR_MAIL_DEBUG=true TR_CORS_ENABLED=true nodemon",
     "build": "tsc",
     "build:prod": "tsc",
     "clean": "rimraf ../dist/src ../dist/test",
@@ -26,7 +26,7 @@
     "test": "cross-env NODE_OPTIONS=--max-old-space-size=3000 NODE_ENV=test jest --watchAll=false --maxWorkers=2",
     "test:watch": "cross-env NODE_ENV=test TR_ACCESS_LOGS_ENABLED=false jest --watch",
     "test:e2e": "cross-env NODE_ENV=e2e TR_DEFAULT_PROJECT_PLAN=default TR_ACCESS_LOGS_ENABLED=false TR_DB_TYPE=mysql TR_DB_HOST=localhost TR_DB_PORT=3306 TR_DB_USER=root TR_DB_DATABASE=tr_e2e jest --config ./test/jest-e2e.json --runInBand --verbose --detectOpenHandles --forceExit",
-    "test:ci": "yarn test && yarn test:e2e",
+    "test:ci": "pnpm test && pnpm test:e2e",
     "typeorm": "ts-node node_modules/.bin/typeorm",
     "seed": "cross-env TR_SEED_DATA=true ts-node -r tsconfig-paths/register src/seeds/seed-cli.ts",
     "seed:default": "cross-env TR_SEED_DATA=true TR_DEFAULT_SEED_ONLY=true ts-node -r tsconfig-paths/register src/seeds/seed-cli.ts"
@@ -42,9 +42,11 @@
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^11.0.3",
     "bcrypt": "^5.1.1",
+    "chalk": "^4.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "csv": "^5.5.3",
+    "csv-parse": "^4.16.3",
     "csv-stringify": "^6.0.5",
     "dotenv": "^16.4.7",
     "generate-password": "^1.6.1",
@@ -109,8 +111,12 @@
     "testEnvironment": "node"
   },
   "engines": {
-    "node": ">=22",
-    "yarn": ">=1.13.0"
+    "node": ">=22"
   },
-  "snyk": true
+  "snyk": true,
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt"
+    ]
+  }
 }

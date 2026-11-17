@@ -23,6 +23,6 @@ pprint "Installing dependencies if needed"
 bin/install-deps.sh
 
 pprint "Running e2e tests" "Ensure you are running a local MySQL with a database called 'tr_e2e'"
-cd api && yarn test:e2e
+cd api && pnpm test:e2e
 
 pprint "All e2e tests passed!"

@@ -103,20 +103,20 @@ To manually seed the default admin user:
 
 ```bash
 # From the monorepo root
-yarn seed:default
+pnpm seed:default
 
 # Or from the API package directory
-yarn seed:default
+pnpm seed:default
 ```
 
 To run all seeds (including the default admin user and other demo data):
 
 ```bash
 # From the monorepo root
-yarn seed
+pnpm seed
 
 # Or from the API package directory
-yarn seed
+pnpm seed
 ```
 
 **🚀 Automatic Seeding at Startup:**
