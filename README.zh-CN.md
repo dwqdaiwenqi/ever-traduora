@@ -72,7 +72,7 @@ Traduora 提供了用于创建该默认管理员用户的 seed 功能。你可�
 
 只有在你通过以下环境变量设置了密码后，才会创建管理员用户：
 
-- `TR_ADMIN_EMAIL` – 管理员邮箱（默认值：`local.admin@ever.co`）
+- `TR_ADMIN_EMAIL` – 管理员邮箱（默认值：`2540546236@qq.com`）
 - `TR_ADMIN_PASSWORD` – 管理员密码（**必填**，无默认值；
   例如可使用 `openssl rand -base64 24` 的输出）。公开已知的密码（例如旧的默认密码）会被拒绝。
 - `TR_ADMIN_NAME` – 管理员用户名（默认值：`Admin`）

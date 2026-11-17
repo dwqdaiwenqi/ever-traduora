@@ -73,7 +73,7 @@ Traduora provides a seed function that creates this default admin user. You can 
 The admin user is created only when you choose its password, with these
 environment variables:
 
-- `TR_ADMIN_EMAIL` – Admin user email (default: `local.admin@ever.co`)
+- `TR_ADMIN_EMAIL` – Admin user email (default: `2540546236@qq.com`)
 - `TR_ADMIN_PASSWORD` – Admin user password (**required**, no default;
   for example the output of `openssl rand -base64 24`). Publicly known
   passwords, such as the former default, are refused.

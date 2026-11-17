@@ -12,4 +12,3 @@ cd webapp && pnpm build:prod
 
 # Build api
 cd ../api && pnpm build:prod
-cp -r node_modules ../dist/
