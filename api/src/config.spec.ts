@@ -1,8 +1,8 @@
 import { resolveSecret } from './config';
 
-test('should refuse to run in production without a secret', () => {
-  expect(() => resolveSecret(undefined, 'production')).toThrow(/TR_SECRET/);
-  expect(() => resolveSecret('', 'production')).toThrow(/TR_SECRET/);
+test('should use a random secret in production when none is configured', () => {
+  expect(resolveSecret(undefined, 'production')).toMatch(/^[0-9a-f]{64}$/);
+  expect(resolveSecret('', 'production')).toMatch(/^[0-9a-f]{64}$/);
 });
 
 test('should refuse the published example secrets in every environment', () => {
@@ -19,7 +19,7 @@ test('should use the configured secret', () => {
   expect(resolveSecret(secret, 'development')).toEqual(secret);
 });
 
-test('should use a random secret outside production when none is configured', () => {
+test('should use a random secret when none is configured', () => {
   const first = resolveSecret(undefined, 'development');
   const second = resolveSecret('', undefined);
   expect(first).toMatch(/^[0-9a-f]{64}$/);

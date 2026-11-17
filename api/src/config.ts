@@ -27,17 +27,14 @@ const isPublishedSecret = (secret: string) => PUBLISHED_SECRET_HASHES.has(create
 
 /**
  * Resolves the secret used to sign and verify auth tokens.
- * Published example values are refused everywhere, and production requires TR_SECRET. Elsewhere an unset TR_SECRET
- * gets a random per-process secret, so sign-ins do not survive a restart but tokens can never be forged.
+ * Published example values are refused everywhere. An unset TR_SECRET gets a random per-process secret (内部系统，刻意允许不填),
+ * so sign-ins do not survive a restart but tokens can never be forged.
  */
 export const resolveSecret = (secret: string | undefined, nodeEnv: string | undefined): string => {
   if (secret && isPublishedSecret(secret)) {
     throw new Error(
       'TR_SECRET is set to a publicly known example value. Set it to a unique random value, e.g. the output of `openssl rand -hex 32`.',
     );
-  }
-  if (nodeEnv === 'production' && !secret) {
-    throw new Error('TR_SECRET must be set to a unique random value in production, e.g. the output of `openssl rand -hex 32`.');
   }
   return secret || randomBytes(32).toString('hex');
 };

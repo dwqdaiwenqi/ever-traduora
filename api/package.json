@@ -20,7 +20,7 @@
     "fmt": "prettier --write \"src/**/*.ts\"",
     "start": "cross-env TR_PORT=3000 TR_DB_TYPE=mysql TR_DB_HOST=localhost TR_DB_PORT=3306 TR_DB_USER=root TR_DB_DATABASE=traduora TR_MAIL_DEBUG=true TR_CORS_ENABLED=true nodemon",
     "build": "tsc",
-    "build:prod": "tsc",
+    "build:prod": "tsc && rm -rf ../dist/node_modules && cp -R node_modules ../dist/",
     "clean": "rimraf ../dist/src ../dist/test",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "cross-env NODE_OPTIONS=--max-old-space-size=3000 NODE_ENV=test jest --watchAll=false --maxWorkers=2",
