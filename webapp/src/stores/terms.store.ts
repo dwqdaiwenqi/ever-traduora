@@ -12,6 +12,7 @@ interface TermsState {
   createTerm: (activityId: string, value: string, context?: string) => Promise<void>;
   updateTerm: (activityId: string, termId: string, value: string, context?: string) => Promise<void>;
   deleteTerm: (activityId: string, termId: string) => Promise<void>;
+  deleteTerms: (activityId: string, termIds: string[]) => Promise<void>;
   clearMessages: () => void;
   reset: () => void;
 }
@@ -67,6 +68,22 @@ export const useTermsStore = create<TermsState>((set, get) => ({
     } catch (error) {
       set({ errorMessage: errorToMessage(error) });
       throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  deleteTerms: async (activityId, termIds) => {
+    set({ isLoading: true });
+    try {
+      const results = await Promise.allSettled(termIds.map(id => termsApi.delete(activityId, id)));
+      const deleted = new Set(termIds.filter((_, i) => results[i].status === 'fulfilled'));
+      set(state => ({ terms: state.terms.filter(t => !deleted.has(t.id)) }));
+      const failed = termIds.length - deleted.size;
+      if (failed > 0) {
+        const firstError = results.find(r => r.status === 'rejected') as PromiseRejectedResult;
+        set({ errorMessage: `${failed} 个词条删除失败：${errorToMessage(firstError.reason)}` });
+      }
     } finally {
       set({ isLoading: false });
     }

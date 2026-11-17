@@ -11,9 +11,10 @@ import PageHeader from '../shared/PageHeader';
 
 export default function TermsList() {
   const { currentProject } = useProjectsStore();
-  const { terms, isLoading, errorMessage, getTerms, createTerm, updateTerm, deleteTerm, clearMessages } = useTermsStore();
+  const { terms, isLoading, errorMessage, getTerms, createTerm, updateTerm, deleteTerm, deleteTerms, clearMessages } = useTermsStore();
   const readOnly = currentProject?.role === ProjectRole.Viewer;
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [newTermModal, setNewTermModal] = useState(false);
   const [form] = Form.useForm();
 
@@ -41,6 +42,12 @@ export default function TermsList() {
   const handleDelete = async (termId: string) => {
     if (!currentProject) return;
     await deleteTerm(currentProject.id, termId);
+  };
+
+  const handleBatchDelete = async () => {
+    if (!currentProject || selectedIds.length === 0) return;
+    await deleteTerms(currentProject.id, selectedIds);
+    setSelectedIds([]);
   };
 
   const columns = [
@@ -98,6 +105,18 @@ export default function TermsList() {
         description="词条（key）和它的备注；备注里可以直接粘贴截图"
         extra={
           <Space>
+            {!readOnly && selectedIds.length > 0 && (
+              <Popconfirm
+                title={`确定删除选中的 ${selectedIds.length} 个词条？`}
+                description="词条及其所有译文都会被删除，无法恢复"
+                onConfirm={handleBatchDelete}
+                okText="删除"
+                okButtonProps={{ danger: true }}
+                cancelText="取消"
+              >
+                <Button danger icon={<DeleteOutlined />}>批量删除（{selectedIds.length}）</Button>
+              </Popconfirm>
+            )}
             <Input.Search placeholder="搜索词条..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 240 }} allowClear />
             {!readOnly && <Button type="primary" icon={<PlusOutlined />} onClick={() => setNewTermModal(true)}>新增词条</Button>}
           </Space>
@@ -108,6 +127,7 @@ export default function TermsList() {
         dataSource={filtered}
         columns={columns}
         rowKey="id"
+        rowSelection={readOnly ? undefined : { selectedRowKeys: selectedIds, onChange: keys => setSelectedIds(keys as string[]), preserveSelectedRowKeys: true }}
         loading={isLoading}
         pagination={{ pageSize: 50, showSizeChanger: false }}
         size="small"

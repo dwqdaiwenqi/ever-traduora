@@ -100,7 +100,7 @@ export default function ImportContainer() {
             >
               <p className="ant-upload-drag-icon"><InboxOutlined /></p>
               <p>点击或拖拽文件到此区域上传</p>
-              <p style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }}>支持 JSON、YAML、CSV、XML 等格式</p>
+              <p style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }}>支持 JSON、CSV格式</p>
             </Dragger>
           </Form.Item>
           <Form.Item label="目标语言" required>

@@ -47,13 +47,13 @@ export default function ProjectContainer() {
 
   const menuItems = [
     { key: 'terms', label: '词条', icon: <TagsOutlined /> },
-    { key: 'translations', label: '按语言翻译', icon: <GlobalOutlined /> },
+    { key: 'translations', label: '按服翻译', icon: <GlobalOutlined /> },
     { key: 'matrix', label: '对照翻译', icon: <TableOutlined /> },
     ...(isViewer ? [] : [{ key: 'import', label: '导入', icon: <UploadOutlined /> }]),
     { key: 'export', label: '导出', icon: <DownloadOutlined /> },
-    { key: 'settings', label: '设置', icon: <SettingOutlined /> },
     { key: 'api', label: 'API 客户端', icon: <ApiOutlined /> },
-    { key: 'team', label: '团队', icon: <TeamOutlined /> },
+    { key: 'team', label: '翻译成员', icon: <TeamOutlined /> },
+    { key: 'settings', label: '设置', icon: <SettingOutlined /> },
   ];
 
   // /projects/:id/<section>/...  → 第 4 段是当前所在的菜单项

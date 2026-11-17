@@ -1,32 +1,28 @@
 import React from 'react';
+import icon from '../../assets/img/icon1.png';
 
 interface LogoProps {
   style?: React.CSSProperties;
-  /** 在深色背景上使用白色文字 */
-  light?: boolean;
 }
 
-export default function Logo({ style, light }: LogoProps) {
-  const color = light ? '#fff' : 'var(--tr-primary)';
+export default function Logo({ style }: LogoProps) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 18, letterSpacing: 0.3, color, ...style }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4em', fontSize: 20, ...style }}>
+      <img src={icon} alt="LocaHub" style={{ width: '1.8em', height: '1.8em', objectFit: 'contain', display: 'block' }} />
       <span
         style={{
-          width: 24,
-          height: 24,
-          borderRadius: 6,
-          background: light ? 'rgba(255,255,255,.2)' : 'var(--tr-primary)',
-          color: '#fff',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 14,
+          fontWeight: 700,
+          letterSpacing: '0.02em',
           lineHeight: 1,
+          background: 'linear-gradient(90deg, var(--tr-primary), #6c8dff)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent',
+          userSelect: 'none',
         }}
       >
-        T
+        LocaHub
       </span>
-      traduora
-    </span>
+    </div>
   );
 }

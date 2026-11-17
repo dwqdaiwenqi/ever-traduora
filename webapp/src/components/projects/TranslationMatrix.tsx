@@ -242,7 +242,7 @@ export default function TranslationMatrix() {
     <div>
       <PageHeader
         title="对照翻译"
-        description="左边是原文，右边每种语言一列，直接对着原文填写"
+        description="左边是原文，右边每种服一列，直接对着原文填写"
         extra={<Input.Search placeholder="搜索原文、翻译或 Key..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 280 }} allowClear />}
       />
 

@@ -97,9 +97,9 @@ export default function ProjectLocales() {
   return (
     <div>
       <PageHeader
-        title="按语言翻译"
-        description="选择一种语言，只看这一种语言的词条"
-        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModalOpen(true)}>添加语言</Button>}
+        title="按服翻译"
+        description="选择一个服，只看这个服的词条"
+        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModalOpen(true)}>添加服</Button>}
       />
       {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
       <Table
@@ -110,7 +110,7 @@ export default function ProjectLocales() {
         pagination={false}
       />
       <Modal
-        title="添加语言"
+        title="添加服"
         open={addModalOpen}
         onCancel={() => { setAddModalOpen(false); setSelectedLocale(undefined); }}
         onOk={handleAdd}

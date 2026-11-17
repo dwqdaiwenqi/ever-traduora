@@ -40,14 +40,14 @@ export default function ExportContainer() {
 
   return (
     <div>
-      <PageHeader title="导出" description="把某种语言的翻译导出成文件" />
+      <PageHeader title="导出" description="把某个服的翻译导出成文件" />
       <Card style={{ maxWidth: 520 }}>
         {errorMessage && <Alert type="error" message={errorMessage} showIcon style={{ marginBottom: 16 }} />}
         <Form layout="vertical">
-          <Form.Item label="选择语言" required>
+          <Form.Item label="选择服" required>
             <SelectLocale locales={locales} value={selectedLocale} onChange={setSelectedLocale} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item label="备用语言（可选）">
+          <Form.Item label="备用服（可选）">
             <SelectLocale
               locales={locales.filter(l => l.code !== selectedLocale?.code)}
               value={fallbackLocale}

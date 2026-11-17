@@ -11,7 +11,7 @@ interface Props {
   style?: React.CSSProperties;
 }
 
-export default function SelectLocale({ locales, value, onChange, placeholder = '选择语言', style }: Props) {
+export default function SelectLocale({ locales, value, onChange, placeholder = '选择服', style }: Props) {
   return (
     <Select
       style={{ minWidth: 200, ...style }}

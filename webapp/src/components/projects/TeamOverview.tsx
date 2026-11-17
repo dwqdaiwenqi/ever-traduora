@@ -75,7 +75,7 @@ export default function TeamOverview() {
     <div>
       <PageHeader
         title="团队"
-        extra={canEdit && <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModal(true)}>添加成员</Button>}
+        extra={canEdit && <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddModal(true)}>添加翻译成员</Button>}
       />
       <Alert
         type="info"
@@ -87,7 +87,7 @@ export default function TeamOverview() {
       <Table dataSource={users} columns={columns} rowKey="userId" loading={isLoading} pagination={false} />
 
       <Modal
-        title="添加团队成员"
+        title="添加翻译成员"
         open={addModal}
         onCancel={() => { setAddModal(false); form.resetFields(); clearMessages(); }}
         onOk={() => form.submit()}
