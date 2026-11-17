@@ -7,7 +7,7 @@
     "cacheDir": ".changelog",
     "labels": {}
   },
-  "packages": ["api", "webapp", "docs-website"],
+  "packages": ["api", "webapp"],
   "useWorkspaces": true,
   "command": {
     "exec": {},

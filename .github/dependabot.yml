@@ -5,7 +5,6 @@ updates:
       - "/"
       - "/api"
       - "/webapp"
-      - "/docs-website"
     open-pull-requests-limit: 10
     schedule:
       interval: "monthly"

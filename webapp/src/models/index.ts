@@ -101,18 +101,18 @@ export interface ImportFormat {
 }
 
 export const IMPORT_FORMATS: ImportFormat[] = [
-  { displayName: 'Android Resources (XML)', extension: 'xml', code: 'androidxml' },
+  // { displayName: 'Android Resources (XML)', extension: 'xml', code: 'androidxml' },
   { displayName: 'CSV', extension: 'csv', code: 'csv' },
-  { displayName: 'XLIFF 1.2', extension: 'xliff', code: 'xliff12' },
-  { displayName: 'JSON Flat', extension: 'json', code: 'jsonflat' },
+  // { displayName: 'XLIFF 1.2', extension: 'xliff', code: 'xliff12' },
+  // { displayName: 'JSON Flat', extension: 'json', code: 'jsonflat' },
   { displayName: 'JSON', extension: 'json', code: 'jsonnested' },
-  { displayName: 'YAML Flat', extension: 'yaml', code: 'yamlflat' },
-  { displayName: 'YAML', extension: 'yaml', code: 'yamlnested' },
-  { displayName: 'Java Properties', extension: 'properties', code: 'properties' },
-  { displayName: 'Gettext (po)', extension: 'po', code: 'po' },
-  { displayName: 'Strings', extension: 'strings', code: 'strings' },
-  { displayName: 'PHP', extension: 'php', code: 'php' },
-  { displayName: 'Resource RESX', extension: 'resx', code: 'resx' },
+  // { displayName: 'YAML Flat', extension: 'yaml', code: 'yamlflat' },
+  // { displayName: 'YAML', extension: 'yaml', code: 'yamlnested' },
+  // { displayName: 'Java Properties', extension: 'properties', code: 'properties' },
+  // { displayName: 'Gettext (po)', extension: 'po', code: 'po' },
+  // { displayName: 'Strings', extension: 'strings', code: 'strings' },
+  // { displayName: 'PHP', extension: 'php', code: 'php' },
+  // { displayName: 'Resource RESX', extension: 'resx', code: 'resx' },
 ];
 
 export interface ExportFormat {

@@ -2,7 +2,6 @@
 
 **简体中文** | [English](README.md)
 
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/ever-co/ever-traduora)
 [![Latest Release](https://img.shields.io/github/release/ever-co/ever-traduora.svg?label=latest%20release)](https://github.com/ever-co/ever-traduora/releases)
 [![GitHub License](https://img.shields.io/badge/license-AGPL-v3.svg)](https://raw.githubusercontent.com/ever-co/ever-traduora/master/LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/traduora/traduora)](https://hub.docker.com/r/traduora/traduora)
@@ -19,7 +18,6 @@
 
 创建项目后，你可以导入和导出多种格式的翻译内容，与团队成员协作，通过 OTA 方式即时发布翻译更新，并且（_即将支持_）通过第三方集成自动翻译你的项目。
 
-![Traduora 产品截图](docs-website/static/img/traduora-preview.png)
 
 我们希望 Traduora 成为管理翻译工作流的首选之地，因此将所有核心产品**开源**，旨在发展**社区**，并让开发者能够在此平台之上进行构建。
 
@@ -192,7 +190,6 @@ Traduora 由 https://github.com/anthonynsimon（https://anthonynsimon.com）和[
 ---
 
 ![visitors](https://visitor-badge.laobi.icu/badge?page_id=ever-co.traduora-platform)
-[![Circle CI](https://circleci.com/gh/ever-co/ever-traduora.svg?style=svg)](https://circleci.com/gh/ever-co/ever-traduora)
 [![codecov](https://codecov.io/gh/ever-co/ever-traduora/branch/master/graph/badge.svg)](https://codecov.io/gh/ever-co/ever-traduora)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0d5e1c68dc1e44c79249241b4abb15b8)](https://www.codacy.com/gh/ever-co/ever-traduora/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ever-co/ever-traduora&utm_campaign=Badge_Grade)
 [![DeepScan grade](https://deepscan.io/api/teams/3293/projects/16761/branches/365112/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=3293&pid=16761&bid=365112)

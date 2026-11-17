@@ -4,5 +4,5 @@
   "repository": "https://github.com/ever-co/ever-traduora.git",
   "private": true,
   "resolutions": {},
-  "workspaces": ["webapp", "api", "docs-website"]
+  "workspaces": ["webapp", "api"]
 }

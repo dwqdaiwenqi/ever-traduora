@@ -2,7 +2,6 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/ever-co/ever-traduora)
 [![Latest Release](https://img.shields.io/github/release/ever-co/ever-traduora.svg?label=latest%20release)](https://github.com/ever-co/ever-traduora/releases)
 [![GitHub License](https://img.shields.io/badge/license-AGPL-v3.svg)](https://raw.githubusercontent.com/ever-co/ever-traduora/master/LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/traduora/traduora)](https://hub.docker.com/r/traduora/traduora)
@@ -19,7 +18,6 @@
 
 Once you setup your project you can import and export your translations to various formats, work together with your team, instantly deliver translation updates over the air, and _soon_ automatically translate your project via third-party integrations.
 
-![Traduora Product Screenshot](docs-website/static/img/traduora-preview.png)
 
 We want Traduora to become the home for managing your translation workflow, that's why we have made all of the core products **open-source** with the intention of growing a **community** and enabling developers to build on top of it as a platform.
 
@@ -202,7 +200,6 @@ You can also view a full list of our [contributors tracked by Github](https://gi
 ---
 
 ![visitors](https://visitor-badge.laobi.icu/badge?page_id=ever-co.traduora-platform)
-[![Circle CI](https://circleci.com/gh/ever-co/ever-traduora.svg?style=svg)](https://circleci.com/gh/ever-co/ever-traduora)
 [![codecov](https://codecov.io/gh/ever-co/ever-traduora/branch/master/graph/badge.svg)](https://codecov.io/gh/ever-co/ever-traduora)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0d5e1c68dc1e44c79249241b4abb15b8)](https://www.codacy.com/gh/ever-co/ever-traduora/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ever-co/ever-traduora&utm_campaign=Badge_Grade)
 [![DeepScan grade](https://deepscan.io/api/teams/3293/projects/16761/branches/365112/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=3293&pid=16761&bid=365112)

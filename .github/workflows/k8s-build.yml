@@ -19,9 +19,6 @@ jobs:
           - image: ever-traduora
             dockerfile: Dockerfile
             context: .
-          - image: ever-traduora-docs
-            dockerfile: Dockerfile.everk8s
-            context: .
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v4

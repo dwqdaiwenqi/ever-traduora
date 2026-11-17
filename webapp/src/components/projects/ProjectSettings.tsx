@@ -52,10 +52,10 @@ export default function ProjectSettings() {
           </Form.Item>
         </Form>
       </Card>
-      <Card title="危险操作" style={{ borderColor: '#ffccc7' }}>
+      {/* <Card title="危险操作" style={{ borderColor: '#ffccc7' }}>
         <p style={{ color: 'var(--tr-text-tertiary)', marginBottom: 16 }}>删除活动后，所有词条和翻译将被永久删除且无法恢复。</p>
         <Button danger onClick={handleDelete} loading={isLoading}>删除活动</Button>
-      </Card>
+      </Card> */}
     </div>
   );
 }

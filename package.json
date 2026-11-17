@@ -22,11 +22,10 @@
     "fmt": "prettier --write --list-different \"**/*.ts\"",
     "check-fmt": "prettier --check \"**/*.ts\"",
     "bootstrap": "pnpm install",
-    "build": "concurrently --raw \"pnpm build:api\" \"pnpm build:webapp\" \"pnpm build:docs\"",
+    "build": "concurrently --raw \"pnpm build:api\" \"pnpm build:webapp\"",
     "build:lerna": "pnpm exec lerna run --parallel build",
     "build:api": "cross-env pnpm --dir ./api build",
     "build:webapp": "cross-env pnpm --dir ./webapp build",
-    "build:docs": "cross-env pnpm --dir ./docs-website build",
     "start:web": "cross-env pnpm --dir ./webapp start",
     "start:api": "cross-env pnpm --dir ./api start",
     "commit": "git-cz",
@@ -102,8 +101,7 @@
   "workspaces": {
     "packages": [
       "webapp",
-      "api",
-      "docs-website"
+      "api"
     ],
     "nohoist": [
       "**/@types/jasmine",

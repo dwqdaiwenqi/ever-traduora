@@ -2,7 +2,7 @@ import React from 'react';
 import type { Locale } from '../../models';
 
 function localeIconCode(code: string): string {
-  const parts = code.split('-');
+  const parts = code.split('_');
   return (parts[1] || parts[0]).toLowerCase();
 }
 
