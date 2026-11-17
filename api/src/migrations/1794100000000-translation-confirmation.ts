@@ -3,7 +3,7 @@ import { config } from '../config';
 import { DbType } from '../utils/database-type-helper';
 
 /**
- * 翻译"待开发确认"流程：
+ * 翻译"待确认"流程：
  *  - translation.confirmedValue：已确认（对外生效）的值；已有的非空翻译视为已确认，上线后不会一下子全变成待确认
  *  - translation_version：每次确认留存一份完整 JSON
  */

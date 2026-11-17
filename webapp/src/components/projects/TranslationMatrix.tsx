@@ -15,6 +15,15 @@ type Filter = 'all' | 'todo' | 'pending';
 /** 简体和繁体的 language 都是 Chinese，所以带上地区区分，例如：Chinese（China） */
 const localeLabel = (l: Locale) => (l.region ? `${l.language}（${l.region}）` : l.language);
 
+/** 没有状态标签时占住那一行的高度，让原文列和译文列的输入框对齐 */
+function StatusSpacer() {
+  return (
+    <div aria-hidden style={{ marginTop: 4, fontSize: 12, visibility: 'hidden' }}>
+      <Tag bordered={false} style={{ margin: 0 }}>占位</Tag>
+    </div>
+  );
+}
+
 /** 表格里的一个翻译格子：失焦保存；待确认的格子下方显示线上当前值，开发可以直接确认 */
 function Cell({
   translation,
@@ -22,12 +31,14 @@ function Cell({
   canConfirm,
   onSave,
   onConfirm,
+  reserveStatus,
 }: {
   translation?: Translation;
   readOnly: boolean;
   canConfirm: boolean;
   onSave: (v: string) => void;
   onConfirm: () => void;
+  reserveStatus?: boolean;
 }) {
   const initial = translation?.value ?? '';
   const [val, setVal] = useState(initial);
@@ -58,6 +69,7 @@ function Cell({
           <Tag bordered={false} style={{ margin: 0 }}>待填写</Tag>
         </div>
       )}
+      {reserveStatus && !pending && initial.trim() && <StatusSpacer />}
       {pending && (
         <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
           <Tag color="orange" bordered={false} style={{ margin: 0 }}>待确认</Tag>
@@ -224,9 +236,12 @@ export default function TranslationMatrix() {
       render: (_: any, t: Term) =>
         sourceCode && canConfirm ? (
           // 开发（admin）可以直接修改原文，修改后立即生效
-          <Cell translation={get(sourceCode, t.id)} readOnly={false} canConfirm={false} onSave={v => handleSave(sourceCode, t.id, v)} onConfirm={() => {}} />
+          <Cell translation={get(sourceCode, t.id)} readOnly={false} canConfirm={false} onSave={v => handleSave(sourceCode, t.id, v)} onConfirm={() => {}} reserveStatus />
         ) : (
-          <div style={{ whiteSpace: 'pre-wrap', fontWeight: 500 }}>{(sourceCode && get(sourceCode, t.id)?.value) || <span style={{ color: 'var(--tr-text-tertiary)' }}>（原文为空）</span>}</div>
+          <div>
+            <div style={{ whiteSpace: 'pre-wrap', fontWeight: 500 }}>{(sourceCode && get(sourceCode, t.id)?.value) || <span style={{ color: 'var(--tr-text-tertiary)' }}>（原文为空）</span>}</div>
+            <StatusSpacer />
+          </div>
         ),
     },
     ...targets.map(l => ({

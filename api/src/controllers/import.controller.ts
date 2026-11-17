@@ -125,7 +125,7 @@ export class ImportController {
 
         await entityManager.increment(Project, { id: membership.project.id }, 'termsCount', termsToAdd.length);
 
-        // 开发（admin）导入的内容直接生效；运营（editor）导入的内容进入待开发确认
+        // 开发（admin）导入的内容直接生效；运营（editor）导入的内容进入待确认
         if (membership.role === ProjectRole.Admin) {
           const previous = await entityManager.find(Translation, { where: { projectLocaleId: projectLocale.id } });
           const previousConfirmed = _.fromPairs(previous.map(t => [t.termId, t.confirmedValue ?? '']));

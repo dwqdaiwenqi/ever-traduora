@@ -53,7 +53,7 @@ export default class TranslationController {
       relations: ['locale'],
     });
 
-    // 每个语言有多少条翻译处于"待开发确认"（运营填写的值和已生效的值不一致）
+    // 每个语言有多少条翻译处于"待确认"（运营填写的值和已生效的值不一致）
     const pendingCounts: { [projectLocaleId: string]: number } = {};
     if (locales.length > 0) {
       const rows = await this.translationRepo
@@ -189,7 +189,7 @@ export default class TranslationController {
   ) {
     const user = this.auth.getRequestUserOrClient(req);
     const membership = await this.auth.authorizeProjectAction(user, activityId, ProjectAction.EditTranslation);
-    // 开发（admin）自己填写的内容直接生效；运营（editor）填写的内容进入待开发确认
+    // 开发（admin）自己填写的内容直接生效；运营（editor）填写的内容进入待确认
     const autoConfirm = membership.role === ProjectRole.Admin;
 
     try {

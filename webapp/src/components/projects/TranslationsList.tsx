@@ -120,7 +120,6 @@ export default function TranslationsList() {
         <div>
           <div style={{ fontWeight: 500 }}>
             {val}
-            {!isFilled(record.id) && <Tag color="warning" bordered={false} style={{ marginLeft: 8 }}>未填写</Tag>}
           </div>
           <ContextView context={record.context} activityId={currentProject!.id} style={{ color: 'var(--tr-text-tertiary)', fontSize: 12 }} />
         </div>
@@ -142,9 +141,14 @@ export default function TranslationsList() {
             onSave={v => handleUpdate(record.id, v)}
             readOnly={readOnly}
           />
+          {!isPendingConfirmation(translationMap[record.id]) && !isFilled(record.id) && (
+            <div style={{ marginTop: 4, fontSize: 12 }}>
+              <Tag bordered={false} style={{ margin: 0 }}>待填写</Tag>
+            </div>
+          )}
           {isPendingConfirmation(translationMap[record.id]) && (
             <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-              <Tag color="orange" bordered={false} style={{ margin: 0 }}>待开发确认</Tag>
+              <Tag color="orange" bordered={false} style={{ margin: 0 }}>待确认</Tag>
               <span style={{ color: 'var(--tr-text-tertiary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 线上当前：{translationMap[record.id]?.confirmedValue || '（无，使用兜底文案）'}
               </span>

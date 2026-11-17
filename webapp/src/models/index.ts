@@ -68,7 +68,7 @@ export interface Locale {
 export interface ProjectLocale {
   id: string;
   locale: Locale;
-  /** 待开发确认的翻译条数 */
+  /** 待确认的翻译条数 */
   pendingCount?: number;
 }
 
@@ -82,7 +82,7 @@ export interface Translation {
   termId: string;
   /** 运营填写的最新值 */
   value: string;
-  /** 开发已确认、对外接口返回的值；和 value 不一致即为待开发确认 */
+  /** 开发已确认、对外接口返回的值；和 value 不一致即为待确认 */
   confirmedValue?: string;
 }
 
