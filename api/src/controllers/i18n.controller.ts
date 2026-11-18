@@ -1,5 +1,5 @@
-import { Controller, Get, Header, HttpStatus, NotFoundException, Param, Req, Res } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Header, HttpStatus, NotFoundException, Param, Query, Req, Res } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash } from 'crypto';
 import { Repository } from 'typeorm';
@@ -22,10 +22,17 @@ export class I18nController {
   @Get(':localeCode')
   @Header('Cache-Control', 'no-cache')
   @ApiOperation({ summary: 'Get the confirmed (effective) translations of a locale as flat JSON' })
+  @ApiQuery({ name: 'includeEmpty', required: false, description: 'true: 返回全部 key，没确认或没填的值是空字符串；默认只返回已确认的 key' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success' })
   @ApiResponse({ status: HttpStatus.NOT_MODIFIED, description: 'Not modified' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Activity or locale not found' })
-  async get(@Req() req, @Res() res, @Param('activityId') activityId: string, @Param('localeCode') localeCode: string) {
+  async get(
+    @Req() req,
+    @Res() res,
+    @Param('activityId') activityId: string,
+    @Param('localeCode') localeCode: string,
+    @Query('includeEmpty') includeEmpty?: string,
+  ) {
     const projectLocale = await this.projectLocaleRepo.findOne({
       where: { project: { id: activityId }, locale: { code: localeCode } },
     });
@@ -33,7 +40,11 @@ export class I18nController {
       throw new NotFoundException('activity locale not found');
     }
 
-    const content = await this.versions.buildEffectiveContent(this.projectLocaleRepo.manager, projectLocale.id);
+    const manager = this.projectLocaleRepo.manager;
+    const content =
+      includeEmpty === 'true' || includeEmpty === '1'
+        ? await this.versions.buildEffectiveContentWithAllKeys(manager, activityId, projectLocale.id)
+        : await this.versions.buildEffectiveContent(manager, projectLocale.id);
     const body = JSON.stringify(content);
     // 应用全局关闭了 express 的 etag，这里自己算，前端带 If-None-Match 时返回 304
     const etag = `"${createHash('sha1').update(body).digest('hex')}"`;
